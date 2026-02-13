@@ -8,19 +8,27 @@
     <script src="https://unpkg.com/@tonconnect/ui@latest/dist/tonconnect-ui.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
     <style>
-        body { font-family: 'Inter', sans-serif; background-color: #ffffff; color: #1d1d1f; overflow-x: hidden; padding-bottom: 80px; }
+        body { font-family: 'Inter', sans-serif; background-color: #ffffff; color: #1d1d1f; overflow-x: hidden; padding-bottom: 90px; /* Alt menü için boşluk */ }
         .glass { background: rgba(255, 255, 255, 0.8); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); }
-        .tab-content { display: none; }
+        .tab-content { display: none; animation: fadeIn 0.3s ease; }
         .tab-content.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
         .terminal-text { font-family: 'Courier New', Courier, monospace; font-size: 11px; color: #10b981; }
         .logo-box { background: black; width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; }
-        #ton-connect-button button { background-color: black !important; color: white !important; border-radius: 99px !important; }
+        #ton-connect-button button { background-color: black !important; color: white !important; border-radius: 99px !important; padding: 6px 12px !important; font-size: 12px !important; }
+        /* Geri bildirim animasyonları */
+        .feedback-correct { background-color: #22c55e !important; color: white !important; position: relative; pointer-events: none; }
+        .feedback-correct::after { content: '✅'; position: absolute; right: 10px; }
+        .feedback-wrong { background-color: #ef4444 !important; color: white !important; position: relative; pointer-events: none; }
+        .feedback-wrong::after { content: '❌'; position: absolute; right: 10px; }
+        /* Mobil uyumlu alt menü */
+        .pb-safe { padding-bottom: env(safe-area-inset-bottom); }
     </style>
 </head>
 <body class="antialiased">
 
     <nav class="fixed top-0 w-full z-50 glass border-b border-gray-100">
-        <div class="max-w-6xl mx-auto px-6 py-4 flex justify-between items-center">
+        <div class="max-w-6xl mx-auto px-6 py-3 flex justify-between items-center">
             <div class="flex items-center space-x-2">
                 <div class="logo-box">N</div>
                 <div class="text-lg font-semibold tracking-tighter italic">NEXUS <span class="text-gray-400 font-light">INTEL</span></div>
@@ -34,14 +42,14 @@
             <div class="bg-gray-50 rounded-[40px] p-8 text-center border border-gray-100 shadow-sm mb-6">
                 <p id="device-model" class="text-xs font-bold text-blue-600 uppercase tracking-widest mb-2 text-gray-400">CIHAZ ANALIZ EDILIYOR...</p>
                 <h2 class="text-5xl font-semibold tracking-tighter mb-2" id="rewardCounter">0.0000</h2>
-                <p class="text-gray-400 text-sm">Biriken NI Points</p>
+                <p class="text-gray-400 text-sm font-medium">Biriken NI Points</p>
                 
                 <div class="mt-8">
                     <button onclick="toggleMining()" id="mineBtn" class="w-full bg-black text-white py-5 rounded-3xl font-bold text-lg shadow-xl active:scale-95 transition-all">Ağı Ateşle</button>
                 </div>
             </div>
 
-            <div id="terminal-box" class="bg-black rounded-3xl p-6 h-40 overflow-hidden hidden">
+            <div id="terminal-box" class="bg-black rounded-3xl p-6 h-40 overflow-hidden hidden shadow-inner transition-all">
                 <div id="terminal-logs" class="terminal-text leading-tight"></div>
             </div>
         </div>
@@ -49,89 +57,111 @@
 
     <main id="tab-tasks" class="tab-content pt-24 px-6">
         <div class="max-w-md mx-auto">
-            <h2 class="text-3xl font-semibold mb-6 tracking-tight text-center">Vera Network <br><span class="text-gray-400">Eğitim Merkezi</span></h2>
+            <h2 class="text-3xl font-semibold mb-2 tracking-tight text-center">Vera Eğitim Merkezi</h2>
+            <p class="text-center text-gray-500 text-sm mb-6">AI ile gerçekliği ayırt etmeyi öğrenin. Her işlem +50 Puan.</p>
             
-            <div class="bg-white border border-gray-100 rounded-[32px] p-6 shadow-sm mb-6">
-                <img id="task-image" src="https://picsum.photos/400/300" class="w-full h-48 object-cover rounded-2xl mb-6 bg-gray-100">
-                <h3 class="font-semibold mb-2">Görsel Doğrulama</h3>
-                <p class="text-sm text-gray-500 mb-6">Bu görsel yapay zeka tarafından mı üretildi? (Hızlı doğrulama x10 kazandırır)</p>
-                <div class="grid grid-cols-2 gap-4">
-                    <button onclick="nextTask()" class="bg-gray-100 py-4 rounded-2xl font-medium">Yapay Zeka</button>
-                    <button onclick="nextTask()" class="bg-black text-white py-4 rounded-2xl font-medium">Gerçek</button>
+            <div class="bg-white border border-gray-100 rounded-[32px] p-6 shadow-sm mb-6 relative transition-all" id="task-container">
+                <div class="absolute top-4 right-4 bg-black text-white text-xs px-3 py-1 rounded-full font-bold">GÖREV #<span id="task-id">101</span></div>
+                <div class="w-full h-56 rounded-2xl mb-6 bg-gray-100 overflow-hidden shadow-sm relative">
+                     <img id="task-image" src="https://picsum.photos/400/300" class="w-full h-full object-cover transition-opacity duration-300" onload="this.style.opacity=1" onerror="this.src='https://via.placeholder.com/400x300?text=Görsel+Yüklenemedi'">
+                     <div id="image-loader" class="absolute inset-0 flex items-center justify-center bg-gray-100 z-10" style="display: none;">
+                         <svg class="animate-spin h-8 w-8 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                     </div>
+                </div>
+                
+                <h3 class="font-semibold mb-2 text-lg">Bu görsel sence nedir?</h3>
+                <p class="text-sm text-gray-500 mb-6 leading-relaxed">Detaylara, ışıklandırmaya ve dokulara dikkat et. Hızlı karar ver.</p>
+                <div class="grid grid-cols-2 gap-4" id="task-buttons">
+                    <button onclick="submitTask(this, 'ai')" class="task-btn bg-gray-50 border border-gray-200 py-4 rounded-2xl font-medium transition-all active:scale-95 hover:bg-gray-100">Yapay Zeka (AI)</button>
+                    <button onclick="submitTask(this, 'real')" class="task-btn bg-gray-50 border border-gray-200 py-4 rounded-2xl font-medium transition-all active:scale-95 hover:bg-gray-100">Gerçek Fotoğraf</button>
                 </div>
             </div>
         </div>
     </main>
 
     <main id="tab-core" class="tab-content pt-24 px-6">
-        <div class="max-w-md mx-auto space-y-4">
-            <div class="p-6 bg-[#f5f5f7] rounded-3xl">
-                <h3 class="font-semibold mb-4">Donanım Optimizasyonu</h3>
-                <div class="flex justify-between items-center py-3 border-b border-gray-200">
-                    <span class="text-sm">Arka Plan Madenciliği</span>
-                    <span class="text-xs bg-green-100 text-green-700 px-2 py-1 rounded-md font-bold">AÇIK</span>
+        <div class="max-w-md mx-auto space-y-6">
+            <div class="p-6 bg-[#f5f5f7] rounded-3xl border border-gray-100 shadow-sm">
+                <h3 class="font-semibold mb-4 text-lg">Donanım Optimizasyonu</h3>
+                <div class="flex justify-between items-center py-4 border-b border-gray-200">
+                    <div class="flex flex-col">
+                        <span class="text-sm font-medium">Arka Plan İzni</span>
+                        <span class="text-xs text-gray-500">Uygulama kapalıyken çalışır</span>
+                    </div>
+                    <span class="text-xs bg-green-100 text-green-700 px-3 py-1 rounded-full font-bold">AKTİF</span>
                 </div>
-                <div class="flex justify-between items-center py-3">
-                    <span class="text-sm">Yüksek Verimlilik (Pil)</span>
-                    <button class="text-xs text-blue-600 font-bold">AYARLA</button>
+                <div class="flex justify-between items-center py-4">
+                    <div class="flex flex-col">
+                        <span class="text-sm font-medium">Pil Kısıtlaması</span>
+                        <span class="text-xs text-gray-500">Yüksek performans için kaldırın</span>
+                    </div>
+                    <button onclick="alert('Lütfen telefon ayarlarından Nexus için pil optimizasyonunu kapatın.')" class="text-xs text-white bg-black px-4 py-2 rounded-full font-bold active:scale-95 transition-transform">AYARLA</button>
                 </div>
             </div>
 
-            <div class="p-6 border border-gray-100 rounded-3xl">
-                <h3 class="font-semibold mb-2">Ön Satış (Early Pilot)</h3>
-                <p class="text-xs text-gray-500 mb-4">10.000 NI = 1 TON</p>
-                <button onclick="buyTokens()" class="w-full bg-blue-600 text-white py-4 rounded-2xl font-bold shadow-lg">Paketi Satın Al</button>
+            <div class="p-6 border border-gray-200 rounded-3xl shadow-sm bg-white">
+                <h3 class="font-semibold mb-1 text-lg">Ön Satış Paketi</h3>
+                <p class="text-sm text-gray-500 mb-6">Erken erişim fırsatı. Yatırım tavsiyesi değildir.</p>
+                <div class="flex justify-between items-center mb-6 bg-blue-50 p-5 rounded-2xl">
+                    <span class="text-2xl font-bold text-blue-900">10,000 NI</span>
+                    <span class="text-2xl font-bold text-blue-600">= 1 TON</span>
+                </div>
+                <button onclick="buyTokens()" class="w-full bg-blue-600 text-white py-4 rounded-2xl font-bold shadow-lg hover:bg-blue-700 transition-all active:scale-95">Cüzdanla Satın Al</button>
             </div>
         </div>
     </main>
 
-    <div class="fixed bottom-0 w-full glass border-t border-gray-100 px-8 py-4 flex justify-around items-center z-50">
-        <button onclick="switchTab('pilot')" class="flex flex-col items-center space-y-1">
+    <div class="fixed bottom-0 w-full glass border-t border-gray-100 px-6 py-3 flex justify-around items-center z-50 pb-safe shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)]">
+        <button onclick="switchTab(this, 'pilot')" class="nav-btn flex flex-col items-center space-y-1 text-black transition-colors duration-200">
             <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
-            <span class="text-[10px] font-bold">PİLOT</span>
+            <span class="text-[10px] font-bold tracking-tight">PİLOT</span>
         </button>
-        <button onclick="switchTab('tasks')" class="flex flex-col items-center space-y-1 text-gray-400">
+        <button onclick="switchTab(this, 'tasks')" class="nav-btn flex flex-col items-center space-y-1 text-gray-400 transition-colors duration-200">
             <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
-            <span class="text-[10px] font-bold">GÖREVLER</span>
+            <span class="text-[10px] font-bold tracking-tight">GÖREVLER</span>
         </button>
-        <button onclick="switchTab('core')" class="flex flex-col items-center space-y-1 text-gray-400">
+        <button onclick="switchTab(this, 'core')" class="nav-btn flex flex-col items-center space-y-1 text-gray-400 transition-colors duration-200">
             <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"/></svg>
-            <span class="text-[10px] font-bold">CORE</span>
+            <span class="text-[10px] font-bold tracking-tight">CORE</span>
         </button>
     </div>
 
     <script>
-        // --- ADMIN AYARLARI ---
+        // --- AYARLAR ---
         const ADMIN_WALLET = "UQA6kwFHkH3c9GcYxLsrL9aw_CfyLJkmU-nAatQk-IY5bC68";
-        
-        // Puan ve Cihaz Yönetimi
         let rewards = parseFloat(localStorage.getItem('ni_points')) || 0;
         let isMining = false;
         let interval;
+        let taskId = 101;
+        let isTaskLoading = false;
 
-        // Sayfa Yüklendiğinde
         window.onload = () => {
-            document.getElementById('rewardCounter').innerText = rewards.toFixed(4);
+            document.getElementById('rewardCounter').innerText = rewards.toFixed(2);
             detectDevice();
         };
 
+        // Cihaz Tanıma (Basitleştirilmiş)
         function detectDevice() {
-            const ua = navigator.userAgent;
+            const ua = navigator.userAgent || navigator.vendor || window.opera;
             let model = "STANDART DÜĞÜM";
-            if (ua.indexOf("Android") > -1) model = "ANDROID PİLOT NODE";
-            if (ua.indexOf("iPhone") > -1) model = "IPHONE AI CORE";
+            if (/android/i.test(ua)) {
+                model = "ANDROID PILOT NODE";
+            } else if (/iPad|iPhone|iPod/.test(ua) && !window.MSStream) {
+                model = "IPHONE AI CORE";
+            }
             document.getElementById('device-model').innerText = model;
         }
 
-        // Sekme Değiştirme
-        function switchTab(tabId) {
+        // Sekme Yönetimi
+        function switchTab(btn, tabId) {
             document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
             document.getElementById('tab-' + tabId).classList.add('active');
-            // Menü renklerini değiştir
-            document.querySelectorAll('nav button').forEach(b => b.classList.add('text-gray-400'));
+            document.querySelectorAll('.nav-btn').forEach(b => b.classList.replace('text-black', 'text-gray-400'));
+            btn.classList.replace('text-gray-400', 'text-black');
+            window.scrollTo(0, 0); // Sekme değişiminde yukarı kaydır
         }
 
-        // Madencilik & Terminal
+        // Madencilik Simülasyonu
         function toggleMining() {
             const btn = document.getElementById('mineBtn');
             const term = document.getElementById('terminal-box');
@@ -143,49 +173,108 @@
             } else {
                 isMining = false;
                 btn.innerText = "AĞI ATEŞLE"; btn.classList.replace('bg-red-500', 'bg-black');
+                term.classList.add('hidden');
                 clearInterval(interval);
             }
         }
 
         function mineStep() {
-            rewards += 0.0014;
-            document.getElementById('rewardCounter').innerText = rewards.toFixed(4);
-            localStorage.setItem('ni_points', rewards.toString());
+            rewards += 0.01; // Pasif hız
+            updateRewards();
             
-            // Terminal Log Simülasyonu
             const logs = document.getElementById('terminal-logs');
             const lines = [
-                `> NPU_LOAD: ${(Math.random()*15 + 5).toFixed(2)}%`,
-                `> SYNCING_BLOCK: ${Math.floor(Math.random()*900000)}`,
-                `> VALIDATING_TASK_ID: Nexus_${Math.floor(Math.random()*100)}`
+                `> [CPU] Processing Block #${Math.floor(Math.random()*99999)}`,
+                `> [NPU] AI Model Sync: ${(Math.random()*100).toFixed(1)}%`,
+                `> [NET] Latency: ${Math.floor(Math.random()*50)}ms`,
+                `> [VERA] Validating Task Hash: 0x${Math.random().toString(16).substr(2,8)}`,
+                `> [SYS] Optimization: Active`,
+                `> [NODE] Peers Connected: ${Math.floor(Math.random()*15)+5}`
             ];
-            logs.innerHTML += lines[Math.floor(Math.random()*lines.length)] + "<br>";
-            if (logs.innerHTML.split("<br>").length > 8) logs.innerHTML = "";
+            logs.innerHTML = lines[Math.floor(Math.random()*lines.length)] + "<br>" + logs.innerHTML;
+            if (logs.innerHTML.split("<br>").length > 8) logs.innerHTML = logs.innerHTML.split("<br>").slice(0,8).join("<br>");
         }
 
-        // Vera Görevleri
-        function nextTask() {
-            rewards += 0.05; // Manuel iş bonusu
-            document.getElementById('rewardCounter').innerText = rewards.toFixed(4);
-            document.getElementById('task-image').src = "https://picsum.photos/400/300?random=" + Math.random();
+        // Vera Görev Mantığı (Geri Bildirimli & Yükleme Efektli)
+        function submitTask(btn, type) {
+            if (isTaskLoading) return;
+            isTaskLoading = true;
+            
+            const buttons = document.querySelectorAll('.task-btn');
+            buttons.forEach(b => b.style.pointerEvents = 'none'); // Butonları kilitle
+
+            // Simüle edilmiş doğru/yanlış (Rastgele)
+            const isCorrect = Math.random() > 0.5;
+            const feedbackClass = isCorrect ? 'feedback-correct' : 'feedback-wrong';
+            
+            // Butona geri bildirim uygula
+            btn.classList.add(feedbackClass);
+            btn.classList.remove('bg-gray-50', 'border-gray-200');
+            
+            // Puan ver (Her türlü)
+            rewards += 50;
+            updateRewards();
+
+            // 1.2 saniye sonra yeni göreve geç
+            setTimeout(() => {
+                btn.classList.remove(feedbackClass);
+                btn.classList.add('bg-gray-50', 'border-gray-200');
+                loadNextTask();
+            }, 1200);
         }
 
-        // TON Cüzdan ve Satın Alma
+        function loadNextTask() {
+            const img = document.getElementById('task-image');
+            const loader = document.getElementById('image-loader');
+            
+            loader.style.display = 'flex';
+            img.style.opacity = '0';
+            
+            taskId++;
+            document.getElementById('task-id').innerText = taskId;
+
+            // Yeni görsel yüklenince
+            img.onload = () => {
+                loader.style.display = 'none';
+                img.style.opacity = '1';
+                document.querySelectorAll('.task-btn').forEach(b => b.style.pointerEvents = 'auto'); // Butonları aç
+                isTaskLoading = false;
+            };
+            
+            // Görsel hatası olursa
+            img.onerror = () => {
+                 loader.style.display = 'none';
+                 img.style.opacity = '1';
+                 document.querySelectorAll('.task-btn').forEach(b => b.style.pointerEvents = 'auto');
+                 isTaskLoading = false;
+                 // Hata durumunda tekrar dene veya başka bir işlem yap
+            };
+
+            // Cache'i önlemek için rastgele parametre
+            img.src = "https://picsum.photos/400/300?random=" + Math.random() + "&t=" + new Date().getTime();
+        }
+
+        function updateRewards() {
+            document.getElementById('rewardCounter').innerText = rewards.toFixed(2);
+            localStorage.setItem('ni_points', rewards.toString());
+        }
+
+        // TON Cüzdan
         const tonConnectUI = new TON_CONNECT_UI.TonConnectUI({
             manifestUrl: 'https://nexusintelligencelabs.github.io/nexusintelligence.github.io/tonconnect-manifest.json',
             buttonRootId: 'ton-connect-button'
         });
 
         async function buyTokens() {
-            if (!tonConnectUI.connected) { alert("Lütfen önce cüzdanınızı bağlayın!"); return; }
+            if (!tonConnectUI.connected) { alert("Lütfen önce sağ üstten cüzdanınızı bağlayın."); return; }
             const transaction = {
                 validUntil: Math.floor(Date.now() / 1000) + 60,
                 messages: [{ address: ADMIN_WALLET, amount: "1000000000" }] // 1 TON
             };
             try {
                 await tonConnectUI.sendTransaction(transaction);
-                alert("Ödeme Alındı! Tokenlarınız cüzdanınıza tanımlanacaktır.");
-            } catch (e) { alert("İşlem reddedildi."); }
+                alert("Ödeme Başarılı! Transfer onaylanınca tokenlarınız tanımlanacaktır.");
+            } catch (e) { alert("Ödeme iptal edildi veya hata oluştu. Lütfen tekrar deneyin."); }
         }
     </script>
 </body>

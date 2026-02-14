@@ -3,339 +3,376 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Nexus Intelligence | Pro Pilot Console</title>
+    <title>Nexus Intelligence | Neural Console</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/@tonconnect/ui@latest/dist/tonconnect-ui.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&family=Orbitron:wght@400;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&family=Share+Tech+Mono&display=swap" rel="stylesheet">
     <style>
-        body { font-family: 'Inter', sans-serif; background: #fbfbfd; color: #1d1d1f; -webkit-font-smoothing: antialiased; }
-        .nexus-font { font-family: 'Orbitron', sans-serif; }
-        .apple-card { background: #ffffff; border-radius: 28px; box-shadow: 0 8px 30px rgba(0,0,0,0.04); border: 1px solid rgba(0,0,0,0.02); }
+        body { font-family: 'Inter', sans-serif; background: #050505; color: white; overflow-x: hidden; }
+        .mono-font { font-family: 'Share Tech Mono', monospace; }
+        .glass-panel { background: rgba(20, 20, 20, 0.8); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 24px; }
         .tab-content { display: none; }
-        .tab-content.active { display: block !important; animation: slideUp 0.5s ease; }
-        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-        .nav-active { color: #0071e3; font-weight: 800; border-top: 2px solid #0071e3; }
-        .correct-btn { background-color: #34c759 !important; color: white !important; }
-        .wrong-btn { background-color: #ff3b30 !important; color: white !important; }
-        .log-text { font-size: 8px; font-family: monospace; color: #0071e3; opacity: 0.7; }
+        .tab-content.active { display: block !important; animation: fadeIn 0.4s ease; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        
+        /* MATRIX BACKGROUND EFFECT */
+        .matrix-bg {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1;
+            background: radial-gradient(circle at center, #111 0%, #000 100%);
+            overflow: hidden;
+        }
+        .code-rain {
+            position: absolute; top: -100%; color: #0071e3; font-family: 'Share Tech Mono', monospace;
+            font-size: 10px; opacity: 0.3; writing-mode: vertical-rl; text-orientation: upright;
+            animation: rain 10s linear infinite;
+        }
+        @keyframes rain { 0% { top: -100%; } 100% { top: 100%; } }
+
+        .nav-btn { opacity: 0.5; transition: 0.3s; }
+        .nav-active { opacity: 1; color: #0071e3; transform: scale(1.1); }
+        .correct-btn { background: #10b981 !important; color: black !important; border: none !important; }
+        .wrong-btn { background: #ef4444 !important; color: white !important; border: none !important; }
         #ton-connect-button { min-width: 140px; }
-        .ni-coin { display: inline-block; width: 14px; height: 14px; background: #0071e3; color: white; border-radius: 50%; text-align: center; font-size: 9px; line-height: 14px; font-weight: 900; margin-right: 4px; }
     </style>
 </head>
 <body class="pb-32">
 
-    <nav class="fixed top-0 w-full z-50 bg-white/70 backdrop-blur-xl border-b border-gray-100 px-6 py-4 flex justify-between items-center">
+    <div class="matrix-bg" id="matrixContainer">
+        </div>
+
+    <nav class="fixed top-0 w-full z-50 glass-panel border-b border-white/5 px-6 py-4 flex justify-between items-center rounded-none">
         <div class="flex flex-col">
-            <span class="text-xl font-black nexus-font italic tracking-tighter uppercase"><span class="text-blue-600">NEXUS</span> INTEL</span>
-            <span id="device-info" class="text-[9px] font-bold text-gray-400 uppercase tracking-widest">SYSTEM INITIALIZING...</span>
+            <span class="text-xl font-black italic tracking-widest text-white">NEXUS <span class="text-blue-500">INTEL</span></span>
+            <span id="device-info" class="text-[9px] font-bold text-gray-500 uppercase tracking-widest mono-font">SYSTEM BOOTING...</span>
         </div>
         <div id="ton-connect-button"></div>
     </nav>
 
-    <main id="tab-pilot" class="tab-content active pt-24 px-6 max-w-md mx-auto">
-        <div class="apple-card p-10 mb-6 text-center">
-            <p class="text-[10px] text-gray-400 font-bold mb-1 uppercase tracking-widest">Confirmed $NI Balance</p>
-            <h2 class="text-6xl font-black text-gray-900 tracking-tighter mb-10 flex justify-center items-center">
-                <span class="ni-coin text-3xl w-10 h-10 leading-10">N</span> <span id="mainBal">0.00</span>
+    <main id="tab-pilot" class="tab-content active pt-28 px-6 max-w-md mx-auto">
+        <div class="glass-panel p-8 mb-6 text-center relative overflow-hidden">
+            <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-blue-500 to-transparent opacity-50"></div>
+            <p class="text-[10px] text-gray-400 font-bold mb-2 uppercase tracking-widest">Total Confirmed Balance</p>
+            <h2 class="text-5xl font-black text-white tracking-tighter mb-8 flex justify-center items-center gap-2">
+                <span class="text-blue-500 text-3xl">◈</span> <span id="mainBal">0.00</span>
             </h2>
             
-            <div class="bg-gray-50 rounded-3xl p-6 border border-gray-100">
+            <div class="bg-white/5 rounded-2xl p-6 border border-white/10">
                 <div class="flex justify-between items-end mb-2">
-                    <span class="text-[10px] font-bold text-gray-500 uppercase">Mining Pool</span>
-                    <span class="text-[11px] font-black text-blue-600" id="poolTxt">0.00 / 50.00 $NI</span>
+                    <span class="text-[10px] font-bold text-gray-400 uppercase mono-font">MINING BUFFER (SAVE)</span>
+                    <span class="text-xs font-bold text-blue-400 mono-font" id="poolTxt">0.00 / 50.00</span>
                 </div>
-                <div class="w-full bg-gray-200 h-2 rounded-full overflow-hidden mb-5">
-                    <div id="poolBar" class="h-full bg-blue-600 w-0 transition-all duration-500"></div>
+                <div class="w-full bg-gray-800 h-2 rounded-full overflow-hidden mb-4">
+                    <div id="poolBar" class="h-full bg-blue-600 w-0 transition-all duration-500 shadow-[0_0_15px_#2563eb]"></div>
                 </div>
-                <button id="claimBtn" disabled onclick="claimTokens()" class="w-full py-4 rounded-2xl font-black text-[10px] bg-gray-200 text-gray-400 uppercase tracking-widest">Claim to Wallet (Min 50)</button>
+                <button id="claimBtn" disabled onclick="claimTokens()" class="w-full py-3 rounded-xl font-bold text-[10px] bg-white/10 text-gray-500 uppercase tracking-widest hover:bg-blue-600 hover:text-white transition-all">SEAL TO WALLET (MIN 50)</button>
             </div>
         </div>
 
-        <div class="relative mb-8">
-            <button onclick="toggleMining()" id="mineBtn" class="w-full bg-gray-900 text-white py-6 rounded-[28px] font-bold text-lg shadow-2xl active:scale-95 transition-all flex justify-center items-center gap-3">
-                <span id="mineIcon">🚀</span> <span id="mineText">FIRE THE NETWORK</span>
-            </button>
-            <div id="miningLogs" class="absolute -bottom-10 left-0 w-full text-center overflow-hidden h-6"></div>
-        </div>
+        <button onclick="toggleMining()" id="mineBtn" class="w-full bg-blue-600 hover:bg-blue-500 text-white py-6 rounded-2xl font-black text-lg shadow-[0_0_30px_rgba(37,99,235,0.3)] mb-8 active:scale-95 transition-all flex justify-center items-center gap-3 border border-white/10">
+            <span class="animate-pulse">⚡</span> <span id="mineText">INITIALIZE VERA ENGINE</span>
+        </button>
 
         <div class="grid grid-cols-2 gap-4">
-            <div class="apple-card p-5 text-center">
-                <p class="text-[9px] text-gray-400 font-bold uppercase mb-1">Node Multiplier</p>
-                <p class="text-xl font-black text-blue-600" id="uiMult">x1.00</p>
+            <div class="glass-panel p-4 text-center">
+                <p class="text-[9px] text-gray-500 font-bold uppercase mb-1">Node Speed</p>
+                <p class="text-xl font-black text-blue-400 mono-font" id="uiMult">x1.00</p>
             </div>
-            <div class="apple-card p-5 text-center">
-                <p class="text-[9px] text-gray-400 font-bold uppercase mb-1">Trained Data</p>
-                <p class="text-xl font-black text-gray-900" id="uiCor">0</p>
+            <div class="glass-panel p-4 text-center">
+                <p class="text-[9px] text-gray-500 font-bold uppercase mb-1">Valid Data</p>
+                <p class="text-xl font-black text-white mono-font" id="uiCor">0</p>
             </div>
         </div>
     </main>
 
-    <main id="tab-tasks" class="tab-content pt-24 px-6 max-w-md mx-auto">
-        <div id="task-intro" class="apple-card p-10 text-center">
-            <div class="w-20 h-20 bg-blue-50 rounded-full flex items-center justify-center mx-auto mb-6 text-3xl">🧠</div>
-            <h2 class="text-3xl font-black mb-4 tracking-tighter">Vera AI Training</h2>
-            <p class="text-gray-500 text-sm mb-10 leading-relaxed">Analyze images to train the Nexus Supercomputer. Only correct answers grant +0.5 $NI.</p>
-            <button onclick="startTraining()" class="w-full bg-blue-600 text-white py-5 rounded-2xl font-black shadow-lg">START TRAINING</button>
+    <main id="tab-tasks" class="tab-content pt-28 px-6 max-w-md mx-auto">
+        <div id="task-intro" class="glass-panel p-10 text-center">
+            <div class="w-16 h-16 border-2 border-blue-500 rounded-full flex items-center justify-center mx-auto mb-6 text-2xl shadow-[0_0_20px_rgba(37,99,235,0.4)]">👁️</div>
+            <h2 class="text-2xl font-black mb-4 uppercase tracking-tight text-white">Neural Training</h2>
+            <p class="text-gray-400 text-xs mb-8 leading-relaxed font-mono">Complete a batch of 10 images. Rewards are calculated at the end of the session based on accuracy.</p>
+            <button onclick="startTraining()" class="w-full bg-white text-black py-4 rounded-xl font-black shadow-lg uppercase tracking-widest hover:bg-gray-200">START BATCH</button>
         </div>
 
         <div id="task-area" class="hidden">
             <div class="flex justify-between items-center mb-4 px-2">
-                <span class="text-xs font-black text-blue-600 uppercase">Training Vera Engine</span>
-                <span id="taskStep" class="text-xs font-black bg-gray-100 px-3 py-1 rounded-full text-gray-900">1 / 10</span>
+                <span class="text-[10px] font-bold text-blue-500 uppercase animate-pulse">● LIVE FEED</span>
+                <span id="taskStep" class="text-xs font-bold bg-white/10 px-3 py-1 rounded text-white mono-font">1 / 10</span>
             </div>
-            <div class="apple-card p-4 relative overflow-hidden">
-                <div id="task-loader" class="hidden absolute inset-0 bg-white/95 z-20 flex items-center justify-center flex-col">
-                    <div class="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mb-4"></div>
-                    <p class="text-[10px] font-black tracking-widest text-gray-400 uppercase">Analyzing Data Nodes...</p>
+            <div class="glass-panel p-4 relative overflow-hidden">
+                <div id="task-loader" class="hidden absolute inset-0 bg-black/90 z-20 flex items-center justify-center flex-col">
+                    <div class="text-blue-500 font-mono text-xs mb-2">UPLOADING NEURAL DATA...</div>
+                    <div class="w-32 h-1 bg-gray-800 rounded overflow-hidden">
+                        <div class="h-full bg-blue-500 animate-[width_5s_linear_forwards]" style="width:0%"></div>
+                    </div>
                 </div>
-                <img id="qImg" src="https://picsum.photos/400/300" class="w-full h-72 object-cover rounded-[24px] mb-6">
+                
+                <img id="qImg" src="https://picsum.photos/400/300" class="w-full h-64 object-cover rounded-xl mb-6 border border-white/10">
                 <div class="grid grid-cols-2 gap-4">
-                    <button id="btnAI" onclick="checkTask(true, this)" class="py-5 bg-gray-100 rounded-2xl font-black text-xs uppercase transition-all">AI Generated</button>
-                    <button id="btnReal" onclick="checkTask(false, this)" class="py-5 bg-gray-100 rounded-2xl font-black text-xs uppercase transition-all">Real Photo</button>
+                    <button id="btnAI" onclick="checkTask(true, this)" class="py-4 bg-white/5 border border-white/10 rounded-xl font-bold text-[10px] text-white uppercase hover:bg-white/10">AI GENERATED</button>
+                    <button id="btnReal" onclick="checkTask(false, this)" class="py-4 bg-white/5 border border-white/10 rounded-xl font-bold text-[10px] text-white uppercase hover:bg-white/10">REAL PHOTO</button>
                 </div>
             </div>
         </div>
 
-        <div id="task-finish" class="hidden apple-card p-10 text-center">
-            <div class="text-6xl mb-6">🏆</div>
-            <h2 class="text-3xl font-black mb-2 tracking-tighter">Mission Accomplished!</h2>
-            <p class="text-gray-500 text-sm mb-8">Data set sealed. $NI tokens added to your pool.</p>
-            <button onclick="resetTraining()" class="w-full bg-black text-white py-5 rounded-2xl font-black shadow-lg">BACK TO CONSOLE</button>
+        <div id="task-finish" class="hidden glass-panel p-10 text-center">
+            <div class="text-6xl mb-4">🏆</div>
+            <h2 class="text-2xl font-black mb-2 text-white">BATCH COMPLETE</h2>
+            <p class="text-gray-400 text-xs mb-6 mono-font">Analysis: <span id="batchResult" class="text-blue-400">0</span> Correct</p>
+            <div class="bg-blue-600/20 p-4 rounded-xl border border-blue-500/30 mb-6">
+                <p class="text-[10px] text-blue-300 uppercase">Reward Earned</p>
+                <p class="text-2xl font-black text-white" id="batchReward">0.00 $NI</p>
+            </div>
+            <button onclick="resetTraining()" class="w-full bg-blue-600 text-white py-4 rounded-xl font-black uppercase">CLAIM & RETURN</button>
         </div>
     </main>
 
-    <main id="tab-market" class="tab-content pt-24 px-6 max-w-md mx-auto">
-        <div class="apple-card p-6 mb-6">
-            <h3 class="text-xs font-black text-blue-600 mb-4 uppercase tracking-widest">Pilot Inventory</h3>
-            <div class="flex justify-between items-center bg-gray-50 p-5 rounded-2xl border border-gray-100">
-                <span class="text-xs font-bold text-gray-500">Purchased $NI</span>
-                <span class="text-2xl font-black text-gray-900" id="invBought">0</span>
+    <main id="tab-market" class="tab-content pt-28 px-6 max-w-md mx-auto">
+        <div class="glass-panel p-6 mb-6">
+            <h3 class="text-xs font-bold text-blue-400 mb-4 uppercase tracking-widest border-b border-white/10 pb-2">Quantum Calculator</h3>
+            <input type="number" id="buyAmt" placeholder="Enter TON Amount (e.g. 0.5)" class="w-full bg-black/50 border border-white/20 p-4 rounded-xl outline-none font-bold text-white mb-4 mono-font focus:border-blue-500 transition-colors">
+            <div class="flex justify-between items-center bg-blue-900/20 p-4 rounded-xl border border-blue-500/20 mb-4">
+                <span class="text-[10px] text-blue-300 uppercase">You Receive:</span>
+                <span class="text-xl font-black text-white mono-font" id="calcResult">0 $NI</span>
+            </div>
+            <button onclick="buyToken()" class="w-full bg-white text-black py-4 rounded-xl font-black uppercase text-xs hover:bg-gray-200">PURCHASE TOKENS</button>
+        </div>
+
+        <div class="glass-panel p-1 mb-6 bg-gradient-to-br from-yellow-500/20 to-orange-500/20 border-yellow-500/30">
+            <div class="bg-black/80 p-6 rounded-[20px]">
+                <div class="flex justify-between items-start mb-4">
+                    <h3 class="text-xl font-black text-white italic">ELITE NODE NFT</h3>
+                    <span class="bg-yellow-500 text-black text-[9px] px-2 py-1 rounded font-bold uppercase">Legendary</span>
+                </div>
+                <p class="text-[10px] text-gray-400 mb-6 leading-relaxed"> Owning this NFT designates you as a Priority Node. Grants permanent <span class="text-white font-bold">x1.50 Speed Boost</span> and Airdrop whitelisting.</p>
+                <button onclick="buyNFT()" class="w-full bg-gradient-to-r from-yellow-600 to-orange-600 text-white py-3 rounded-xl font-bold text-xs uppercase shadow-lg">MINT FOR 100 TON</button>
             </div>
         </div>
-
-        <div class="apple-card p-8 mb-6">
-            <h3 class="font-black text-lg mb-2">Token Launchpad</h3>
-            <p class="text-xs text-gray-400 mb-6 font-semibold">Rate: 1 TON = 10,000 $NI</p>
-            <input type="number" id="buyAmt" placeholder="TON Amount" class="w-full bg-gray-50 border-gray-100 p-5 rounded-2xl outline-none font-bold text-gray-900 mb-4 focus:ring-2 ring-blue-500/20">
-            <button onclick="buyToken()" class="w-full bg-blue-600 text-white py-5 rounded-2xl font-black shadow-lg uppercase text-xs">Reserve $NI Tokens</button>
+        
+        <div class="glass-panel p-6">
+             <p class="text-[10px] font-bold text-gray-500 uppercase mb-3">Node Referral Link</p>
+             <div class="flex gap-2">
+                 <input id="refLink" readonly value="Connect Wallet..." class="bg-black/50 border border-white/10 rounded-lg px-4 py-3 text-[10px] flex-1 outline-none text-gray-400 mono-font">
+                 <button onclick="copyRef()" class="bg-white/10 text-white font-bold px-4 rounded-lg text-[10px] hover:bg-white/20">COPY</button>
+             </div>
         </div>
+    </main>
 
-        <div class="apple-card p-6">
-            <p class="text-[10px] font-bold text-gray-400 uppercase mb-3">Your Referral Link</p>
-            <div class="flex gap-2">
-                <input id="refLink" readonly value="Connect wallet..." class="bg-gray-50 border-none rounded-xl px-4 py-3 text-[10px] flex-1 outline-none font-mono">
-                <button onclick="copyRef()" class="bg-black text-white font-black px-4 rounded-xl text-[10px]">COPY</button>
+    <main id="tab-whitepaper" class="tab-content pt-28 px-6 max-w-md mx-auto pb-10">
+        <h1 class="text-3xl font-black text-white mb-6 tracking-tighter uppercase italic">The Nexus Protocol</h1>
+        <div class="glass-panel p-8 space-y-8 text-xs text-gray-400 leading-relaxed font-mono">
+            <div class="border-l-2 border-blue-500 pl-4">
+                <strong class="text-white block mb-1 uppercase">NexusintelligenceTeam</strong>
+                We are architects of the decentralized AI future.
+            </div>
+            <div>
+                <strong class="text-white block mb-1 uppercase">The Vera Engine</strong>
+                A distributed supercomputer powered by millions of mobile nodes. Your device validates visual data to train our core Neural Network.
+            </div>
+            <div>
+                <strong class="text-white block mb-1 uppercase">$NI Tokenomics</strong>
+                Rate: 1 TON = 10,000 $NI.<br>Used for: Governance, Compute Power, NFT Minting.
             </div>
         </div>
     </main>
 
-    <main id="tab-whitepaper" class="tab-content pt-24 px-6 max-w-md mx-auto pb-10">
-        <h1 class="text-4xl font-black nexus-font mb-6 tracking-tighter uppercase italic">Whitepaper</h1>
-        <div class="apple-card p-8 space-y-8 text-sm text-gray-500 leading-relaxed overflow-y-auto max-h-[500px]">
-            <section>
-                <h4 class="font-black text-gray-900 uppercase text-xs mb-2">01. Our Mission</h4>
-                <p>NexusIntelligenceLabs is building the world's first decentralized supercomputer architecture. We utilize the idle processing power of mobile devices to train advanced AI models.</p>
-            </section>
-            <section>
-                <h4 class="font-black text-gray-900 uppercase text-xs mb-2">02. Vera Supercomputer Engine</h4>
-                <p>The Vera Engine is our core AI training protocol. Pilots (Users) provide human-validation data that acts as the "eyes" of the supercomputer, allowing it to distinguish between synthetic and organic data sets.</p>
-            </section>
-            <section>
-                <h4 class="font-black text-gray-900 uppercase text-xs mb-2">03. $NI Tokenomics</h4>
-                <p>The $NI Token is the fuel of our ecosystem. <br>• 1 TON = 10,000 $NI during early reservation. <br>• $NI is used for node upgrades, NFT minting, and future AI governance (DAO).</p>
-            </section>
-            <section>
-                <h4 class="font-black text-gray-900 uppercase text-xs mb-2">04. NFT Achievement System</h4>
-                <p>Elite NFTs are not just art; they represent "Priority Processing Nodes." Owners receive permanent multiplier boosts (x1.05 to x2.00) and exclusive airdrop rights.</p>
-            </section>
-            <section class="border-t pt-6">
-                <h4 class="font-black text-gray-900 uppercase text-xs mb-2 italic">NexusintelligenceTeam Credentials</h4>
-                <p>Developed and maintained by the <strong>NexusintelligenceTeam</strong>. Focused on decentralized AI infrastructure and high-performance Web3 applications.</p>
-            </section>
-        </div>
-    </main>
-
-    <div class="fixed bottom-0 w-full bg-white/80 backdrop-blur-2xl border-t border-gray-100 flex justify-around py-6 z-50">
-        <button onclick="switchTab('pilot', this)" class="nav-btn flex flex-col items-center gap-1 nav-active">
-            <span class="text-xl">🚀</span><span class="text-[9px] uppercase font-bold tracking-widest">Console</span>
-        </button>
-        <button onclick="switchTab('tasks', this)" class="nav-btn flex flex-col items-center gap-1 text-gray-400">
-            <span class="text-xl">🧠</span><span class="text-[9px] uppercase font-bold tracking-widest">Training</span>
-        </button>
-        <button onclick="switchTab('market', this)" class="nav-btn flex flex-col items-center gap-1 text-gray-400">
-            <span class="text-xl">💎</span><span class="text-[9px] uppercase font-bold tracking-widest">Market</span>
-        </button>
-        <button onclick="switchTab('whitepaper', this)" class="nav-btn flex flex-col items-center gap-1 text-gray-400">
-            <span class="text-xl">📄</span><span class="text-[9px] uppercase font-bold tracking-widest">Vision</span>
-        </button>
+    <div class="fixed bottom-0 w-full glass-panel border-t border-white/5 flex justify-around py-6 z-50 rounded-none bg-black/90">
+        <button onclick="switchTab('pilot', this)" class="nav-btn nav-active flex flex-col items-center gap-1"><span class="text-xl">🚀</span></button>
+        <button onclick="switchTab('tasks', this)" class="nav-btn flex flex-col items-center gap-1"><span class="text-xl">🧠</span></button>
+        <button onclick="switchTab('market', this)" class="nav-btn flex flex-col items-center gap-1"><span class="text-xl">💎</span></button>
+        <button onclick="switchTab('whitepaper', this)" class="nav-btn flex flex-col items-center gap-1"><span class="text-xl">📄</span></button>
     </div>
 
     <script>
-        // 🏛️ SUPABASE & ADMIN CONFIG
+        // CONFIG
         const SB_URL = "https://gdpiehrnpeiauhmaoumi.supabase.co";
         const SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdkcGllaHJucGVpYXVobWFvdW1pIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEwMDk4MjcsImV4cCI6MjA4NjU4NTgyN30.iJHq9gnoPtBLaRuByLOV8VjesBL9qp1rQs1d4_fYJXM";
         const sb = supabase.createClient(SB_URL, SB_KEY);
         const ADMIN_WALLET = "UQA6kwFHkH3c9GcYxLsrL9aw_CfyLJkmU-nAatQk-IY5bC68";
 
-        let pilot = { w: null, main: 0, pool: 0, mult: 1.0, cor: 0, b: 0, ip: "0.0.0.0" };
+        let p = { w: null, main: 0, pool: 0, mult: 1.0, cor: 0, ip: "0.0.0.0" };
         let mineTimer = null;
+        
+        // Task Variables
         let tStep = 1;
         let cAns = true;
+        let batchScore = 0; // Temp score for the batch
 
-        const miningQuotes = [
-            "Analyzing Neural Pathways...",
-            "Syncing Data Nodes...",
-            "Processing Vera Engine Log...",
-            "Optimizing AI Core...",
-            "Sealing Data Blocks...",
-            "Nexus Network Online..."
-        ];
-
-        // 📱 INITIALIZATION
+        // 📱 INITIALIZATION & MATRIX RAIN
         window.onload = async () => {
             const ua = navigator.userAgent;
-            const device = /iPhone|iPad|iPod/.test(ua) ? "iPhone Pilot Node" : /Android/.test(ua) ? "Android Pilot Node" : "Nexus Console";
-            document.getElementById('device-info').innerText = device + " | SYSTEM STABLE";
+            const dev = /iPhone|iPad|iPod/.test(ua) ? "IPHONE NODE" : /Android/.test(ua) ? "ANDROID NODE" : "WEB CONSOLE";
+            document.getElementById('device-info').innerText = dev + " | CONNECTED";
             
             try {
                 const res = await fetch('https://api.ipify.org?format=json');
                 const data = await res.json();
-                pilot.ip = data.ip;
-            } catch(e) { console.log("IP detection offline"); }
+                p.ip = data.ip;
+            } catch(e) {}
+            
+            initMatrix();
         };
 
-        function switchTab(t, btn) {
-            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-            document.querySelectorAll('.nav-btn').forEach(b => b.classList.replace('nav-active', 'text-gray-400'));
-            document.getElementById('tab-' + t).classList.add('active');
-            btn.classList.replace('text-gray-400', 'nav-active');
+        function initMatrix() {
+            const container = document.getElementById('matrixContainer');
+            for(let i=0; i<10; i++) {
+                let d = document.createElement('div');
+                d.className = 'code-rain';
+                d.style.left = Math.random()*100 + '%';
+                d.style.animationDuration = (Math.random()*5 + 5) + 's';
+                d.innerText = '01101001 01101110 01110100 01100101 01101100 00100000 01100100 01100001 01110100 01100001';
+                container.appendChild(d);
+            }
         }
 
-        const tonConnectUI = new TON_CONNECT_UI.TonConnectUI({
+        // TABS
+        function switchTab(t, btn) {
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('nav-active'));
+            document.getElementById('tab-' + t).classList.add('active');
+            btn.classList.add('nav-active');
+        }
+
+        // WALLET & DATA LOADING (PERSISTENCE FIX)
+        const tonUI = new TON_CONNECT_UI.TonConnectUI({
             manifestUrl: 'https://nexusintelligencelabs.github.io/nexusintelligence.github.io/tonconnect-manifest.json',
             buttonRootId: 'ton-connect-button'
         });
 
-        tonConnectUI.onStatusChange(async w => {
+        tonUI.onStatusChange(async w => {
             if (w) { 
-                pilot.w = w.account.address; 
-                document.getElementById('refLink').value = window.location.origin + "/?ref=" + pilot.w;
-                loadData(); 
+                p.w = w.account.address; 
+                document.getElementById('refLink').value = window.location.origin + "/?ref=" + p.w;
+                
+                // LOAD DATA FROM DB (INCLUDING SAVED POOL)
+                const { data } = await sb.from('pilots').select('*').eq('wallet_address', p.w).single();
+                if (data) {
+                    p.main = data.total_ni; 
+                    p.mult = data.multiplier; 
+                    p.cor = data.correct_images;
+                    p.pool = data.mining_pool || 0; // RECALL SAVED POOL
+                    updateUI();
+                }
+            } else {
+                // RESET IF DISCONNECTED
+                p = { w: null, main: 0, pool: 0, mult: 1.0, cor: 0, ip: p.ip };
+                updateUI();
             }
         });
 
-        async function loadData() {
-            const { data } = await sb.from('pilots').select('*').eq('wallet_address', pilot.w).single();
-            if (data) {
-                pilot.main = data.total_ni; pilot.mult = data.multiplier; pilot.cor = data.correct_images;
-                updateUI();
-            }
-            const { data: ord } = await sb.from('orders').select('received_ni').eq('wallet_address', pilot.w);
-            if(ord) {
-                pilot.b = ord.reduce((s, i) => s + (i.received_ni || 0), 0);
-                document.getElementById('invBought').innerText = pilot.b.toLocaleString();
-            }
-        }
-
+        // UI UPDATE
         function updateUI() {
-            document.getElementById('mainBal').innerText = pilot.main.toFixed(2);
-            document.getElementById('poolTxt').innerText = `${pilot.pool.toFixed(2)} / 50.00 $NI`;
-            document.getElementById('uiMult').innerText = `x${pilot.mult.toFixed(2)}`;
-            document.getElementById('uiCor').innerText = pilot.cor;
+            document.getElementById('mainBal').innerText = p.main.toFixed(2);
+            document.getElementById('poolTxt').innerText = `${p.pool.toFixed(2)} / 50.00`;
+            document.getElementById('uiMult').innerText = `x${p.mult.toFixed(2)}`;
+            document.getElementById('uiCor').innerText = p.cor;
             
-            let prog = (pilot.pool / 50) * 100;
+            let prog = (p.pool / 50) * 100;
             document.getElementById('poolBar').style.width = Math.min(prog, 100) + "%";
             
-            if (pilot.pool >= 50) {
+            if (p.pool >= 50) {
                 const c = document.getElementById('claimBtn');
-                c.disabled = false;
-                c.classList.replace('bg-gray-200', 'bg-blue-600');
-                c.classList.replace('text-gray-400', 'text-white');
+                c.disabled = false; c.classList.replace('bg-white/10', 'bg-blue-600'); c.classList.replace('text-gray-500', 'text-white');
             }
         }
 
-        // 🚀 MINING LOGIC
+        // MINING (AUTO SAVE EVERY 5 SECONDS)
         function toggleMining() {
             const b = document.getElementById('mineBtn');
-            const l = document.getElementById('miningLogs');
+            const txt = document.getElementById('mineText');
             if (!mineTimer) {
-                b.innerHTML = "<span>⏹️</span> <span>HALT NETWORK</span>";
-                b.classList.replace('bg-gray-900', 'bg-red-600');
-                mineTimer = setInterval(() => {
-                    pilot.pool += (0.01 * pilot.mult);
-                    l.innerHTML = `<p class="log-text">${miningQuotes[Math.floor(Math.random() * miningQuotes.length)]}</p>`;
-                    updateUI();
+                txt.innerText = "VERA ENGINE ACTIVE"; b.classList.replace('bg-blue-600', 'bg-red-600');
+                // Create more matrix rain
+                initMatrix(); 
+                
+                mineTimer = setInterval(() => { 
+                    p.pool += (0.01 * p.mult); 
+                    updateUI(); 
+                    if(Math.floor(p.pool*100)%500 === 0) save(); // Auto-save occasionally
                 }, 1000);
             } else {
-                b.innerHTML = "<span>🚀</span> <span>FIRE THE NETWORK</span>";
-                b.classList.replace('bg-red-600', 'bg-gray-900');
-                l.innerHTML = "";
+                txt.innerText = "INITIALIZE VERA ENGINE"; b.classList.replace('bg-red-600', 'bg-blue-600');
                 clearInterval(mineTimer); mineTimer = null;
-                save();
+                save(); // Save on stop
             }
         }
 
         async function claimTokens() {
-            if (pilot.pool < 50) return;
-            pilot.main += pilot.pool; pilot.pool = 0; updateUI(); save();
-            alert("Network Claim Successful! $NI Tokens Sealed.");
+            if (p.pool < 50) return;
+            p.main += p.pool; 
+            p.pool = 0; 
+            updateUI(); 
+            save(); // Save immediately
+            alert("Funds Secured on Blockchain.");
         }
 
         async function save() {
-            if (!pilot.w) return;
+            if (!p.w) return;
+            // SAVES POOL TO DB SO IT PERSISTS ON RELOAD
             await sb.from('pilots').upsert({ 
-                wallet_address: pilot.w, 
-                total_ni: pilot.main, 
-                correct_images: pilot.cor, 
-                multiplier: pilot.mult,
-                ip_address: pilot.ip
+                wallet_address: p.w, 
+                total_ni: p.main, 
+                correct_images: p.cor, 
+                multiplier: p.mult,
+                ip_address: p.ip,
+                mining_pool: p.pool // KEY FIX
             });
         }
 
-        // 🧠 TRAINING LOGIC (10 STEPS / 5S DELAY)
+        // TRAINING (BATCH LOGIC + 5S DELAY)
         function startTraining() {
             document.getElementById('task-intro').classList.add('hidden');
             document.getElementById('task-area').classList.remove('hidden');
-            tStep = 1; nextQ();
+            tStep = 1; batchScore = 0; nextQ();
         }
 
         function nextQ() {
-            if (tStep > 10) { finishTasks(); return; }
+            if (tStep > 10) { finishBatch(); return; }
             document.getElementById('taskStep').innerText = `${tStep} / 10`;
             document.getElementById('task-loader').classList.add('hidden');
             cAns = Math.random() > 0.5;
             document.getElementById('qImg').src = `https://picsum.photos/400/300?sig=${Math.random()}`;
-            document.getElementById('btnAI').className = "py-5 bg-gray-100 rounded-2xl font-black text-xs uppercase";
-            document.getElementById('btnReal').className = "py-5 bg-gray-100 rounded-2xl font-black text-xs uppercase";
+            
+            // Reset buttons
+            ['btnAI', 'btnReal'].forEach(id => {
+                let btn = document.getElementById(id);
+                btn.disabled = false;
+                btn.className = "py-4 bg-white/5 border border-white/10 rounded-xl font-bold text-[10px] text-white uppercase hover:bg-white/10";
+            });
         }
 
         function checkTask(val, btn) {
-            // Lock buttons
             document.getElementById('btnAI').disabled = true;
             document.getElementById('btnReal').disabled = true;
 
             if (val === cAns) {
-                pilot.main += 0.5; pilot.cor++;
+                batchScore++; // Increment temp score
                 btn.classList.add('correct-btn');
             } else {
                 btn.classList.add('wrong-btn');
             }
 
-            // 5 SECOND ANALYZING DELAY
+            // 5 SECOND DELAY
             document.getElementById('task-loader').classList.remove('hidden');
             setTimeout(() => {
-                document.getElementById('btnAI').disabled = false;
-                document.getElementById('btnReal').disabled = false;
                 tStep++; nextQ();
             }, 5000);
         }
 
-        function finishTasks() {
+        function finishBatch() {
             document.getElementById('task-area').classList.add('hidden');
             document.getElementById('task-finish').classList.remove('hidden');
-            confetti({ particleCount: 200, spread: 80, origin: { y: 0.6 } });
+            
+            // CALCULATE TOTAL REWARD (0.5 per correct)
+            const reward = batchScore * 0.5;
+            document.getElementById('batchResult').innerText = batchScore;
+            document.getElementById('batchReward').innerText = reward.toFixed(2) + " $NI";
+            
+            // COMMIT TO MAIN BALANCE
+            p.main += reward;
+            p.cor += batchScore;
+            
+            confetti({ particleCount: 200, spread: 80, origin: { y: 0.6 }, colors: ['#0071e3', '#ffffff'] });
             save();
         }
 
@@ -345,31 +382,48 @@
             updateUI();
         }
 
-        // 💎 MARKET LOGIC
+        // MARKET CALCULATOR & BUY
+        document.getElementById('buyAmt').addEventListener('input', (e) => {
+            const val = parseFloat(e.target.value) || 0;
+            document.getElementById('calcResult').innerText = `≈ ${(val * 10000).toLocaleString()} $NI`;
+        });
+
         async function buyToken() {
             const a = document.getElementById('buyAmt').value;
-            if(!a || a <= 0 || !pilot.w) return alert("System Error: Check amount/wallet.");
+            if(!a || a <= 0 || !p.w) return alert("Wallet or Amount Error.");
             try {
-                await tonConnectUI.sendTransaction({
+                await tonUI.sendTransaction({
                     validUntil: Math.floor(Date.now()/1000)+60,
                     messages: [{ address: ADMIN_WALLET, amount: (a * 1000000000).toString() }]
                 });
                 await sb.from('orders').insert({ 
-                    wallet_address: pilot.w, 
-                    item_type: 'COIN', 
-                    amount_ton: parseFloat(a), 
-                    received_ni: a * 10000 
+                    wallet_address: p.w, item_type: 'COIN', amount_ton: parseFloat(a), received_ni: a * 10000 
                 });
-                alert("Launchpad Reservation Confirmed!");
-                loadData();
-            } catch(e) { alert("Transaction Terminated by Pilot."); }
+                alert("Tokens Secured."); loadData();
+            } catch(e) { alert("Cancelled."); }
         }
 
+        async function buyNFT() {
+            if(!p.w) return alert("Connect Wallet First.");
+            try {
+                await tonUI.sendTransaction({
+                    validUntil: Math.floor(Date.now()/1000)+60,
+                    messages: [{ address: ADMIN_WALLET, amount: (100 * 1000000000).toString() }]
+                });
+                // Update Multiplier
+                p.mult = 1.5;
+                await sb.from('pilots').update({ multiplier: 1.5 }).eq('wallet_address', p.w);
+                await sb.from('orders').insert({ 
+                    wallet_address: p.w, item_type: 'NFT', amount_ton: 100, received_ni: 0 
+                });
+                alert("Elite NFT Acquired! Speed Boost Active.");
+                updateUI();
+            } catch(e) { alert("Cancelled."); }
+        }
+        
         function copyRef() {
-            const copyText = document.getElementById("refLink");
-            copyText.select();
-            navigator.clipboard.writeText(copyText.value);
-            alert("Referral Link Locked to Clipboard!");
+            navigator.clipboard.writeText(document.getElementById("refLink").value);
+            alert("Link Copied.");
         }
     </script>
 </body>

@@ -1,398 +1,305 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="tr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Nexus Intelligence | Architect Console</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://unpkg.com/@tonconnect/ui@latest/dist/tonconnect-ui.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nexus Intelligence - Pilot Terminal</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tonconnect/ui@latest/dist/tonconnect-ui.min.js"></script>
     <style>
-        body { font-family: 'Inter', sans-serif; background: #000; color: white; overflow-x: hidden; }
-        .mono-font { font-family: 'Share Tech Mono', monospace; }
-        .glass-panel { background: rgba(15, 15, 15, 0.9); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 20px; }
-        .tab-content { display: none; }
-        .tab-content.active { display: block !important; animation: fadeIn 0.4s ease; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-        
-        /* MATRIX RAIN */
-        .matrix-bg { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; pointer-events: none; opacity: 0.2; }
-        .rain-col { position: absolute; top: -100%; color: #00ff41; font-family: monospace; font-size: 12px; writing-mode: vertical-rl; text-orientation: upright; animation: drop 4s linear infinite; }
-        @keyframes drop { 0% { top: -100%; opacity: 0; } 50% { opacity: 1; } 100% { top: 100%; opacity: 0; } }
+        /* 🎨 GRİ VE MODERN TEMA */
+        :root {
+            --bg-color: #1f2937; /* Modern Slate Gri */
+            --card-bg: #374151; /* Daha açık gri */
+            --accent-blue: #00d4ff; /* Neon Mavi */
+            --text-color: #e5e7eb;
+            --success: #10b981;
+        }
 
-        .nav-btn { opacity: 0.4; transition: 0.3s; transform: scale(0.9); }
-        .nav-active { opacity: 1; color: #3b82f6; transform: scale(1.1); text-shadow: 0 0 10px rgba(59, 130, 246, 0.5); }
-        .correct-btn { background: #10b981 !important; color: black !important; }
-        .wrong-btn { background: #ef4444 !important; color: white !important; }
-        #ton-connect-button { min-width: 140px; }
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        #pilot-header {
+            width: 100%;
+            text-align: center;
+            padding: 15px;
+            background: var(--card-bg);
+            border-radius: 12px;
+            border: 1px solid var(--accent-blue);
+            margin-bottom: 20px;
+        }
+
+        .balance-card {
+            font-size: 24px;
+            font-weight: bold;
+            color: var(--accent-blue);
+            margin: 10px 0;
+        }
+
+        /* 🧠 AI TRAINING MINING ALANI */
+        #mining-section {
+            width: 100%;
+            background: #111827; /* Terminal siyahı */
+            padding: 20px;
+            border-radius: 12px;
+            border-left: 4px solid var(--accent-blue);
+            height: 150px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .training-log {
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 12px;
+            color: var(--success);
+            opacity: 0.8;
+        }
+
+        .progress-container {
+            width: 100%;
+            background: #4b5563;
+            height: 8px;
+            border-radius: 4px;
+            margin-top: 10px;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: var(--accent-blue);
+            width: 0%;
+            transition: width 0.5s;
+            box-shadow: 0 0 10px var(--accent-blue);
+        }
+
+        /* 🏆 NFT VE BAŞARIMLAR */
+        .achievements {
+            width: 100%;
+            margin-top: 20px;
+        }
+
+        .achievement-item {
+            background: var(--card-bg);
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+        }
+
+        .label { font-size: 12px; color: #9ca3af; }
+
+        /* BUTONLAR */
+        .btn {
+            background: var(--accent-blue);
+            color: #000;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            margin: 10px 0;
+            width: 100%;
+        }
+
+        #ton-connect-button { margin-bottom: 20px; }
+        
+        /* TEST TOKEN ALANI */
+        .debug-panel {
+            margin-top: 30px;
+            padding: 10px;
+            border: 1px dashed #6b7280;
+            font-size: 11px;
+            opacity: 0.6;
+        }
     </style>
 </head>
-<body class="pb-32">
+<body>
 
-    <div id="matrix" class="matrix-bg"></div>
+    <div id="ton-connect-button"></div>
 
-    <nav class="fixed top-0 w-full z-50 glass-panel border-b border-white/5 px-6 py-4 flex justify-between items-center rounded-none shadow-2xl">
-        <div class="flex flex-col">
-            <span class="text-xl font-black italic tracking-widest text-white uppercase">NEXUS <span class="text-blue-500">ARCHITECT</span></span>
-            <span id="device-info" class="text-[9px] font-bold text-gray-500 uppercase tracking-widest mono-font">SYSTEM CHECK...</span>
+    <div id="pilot-header">
+        <div class="label">PİLOT KİMLİĞİ</div>
+        <div id="pilot-id">Bağlantı Bekleniyor...</div>
+        <div class="balance-card"><span id="balance">0.00</span> $NI</div>
+    </div>
+
+    <div id="mining-section">
+        <div id="log-text" class="training-log">Vera Engine: Idle...</div>
+        <div class="progress-container">
+            <div id="mining-progress" class="progress-bar"></div>
         </div>
-        <div id="ton-connect-button"></div>
-    </nav>
-
-    <main id="tab-pilot" class="tab-content active pt-28 px-6 max-w-md mx-auto">
-        <div class="glass-panel p-8 mb-6 text-center relative overflow-hidden border-t-2 border-blue-600">
-            <p class="text-[10px] text-gray-400 font-bold mb-2 uppercase tracking-widest">Confirmed Balance</p>
-            <h2 class="text-5xl font-black text-white tracking-tighter mb-8 flex justify-center items-center gap-2">
-                <span class="text-blue-500 text-3xl animate-pulse">◈</span> <span id="mainBal">0.00</span>
-            </h2>
-            
-            <div class="bg-white/5 rounded-2xl p-6 border border-white/5">
-                <div class="flex justify-between items-end mb-2">
-                    <span class="text-[10px] font-bold text-gray-400 uppercase mono-font">MINING BUFFER (SAVE)</span>
-                    <span class="text-xs font-bold text-blue-400 mono-font" id="poolTxt">0.00 / 50.00</span>
-                </div>
-                <div class="w-full bg-gray-800 h-2 rounded-full overflow-hidden mb-4 shadow-inner">
-                    <div id="poolBar" class="h-full bg-blue-600 w-0 transition-all duration-300 shadow-[0_0_15px_#2563eb]"></div>
-                </div>
-                <button id="claimBtn" disabled onclick="claimTokens()" class="w-full py-3 rounded-xl font-bold text-[10px] bg-white/5 text-gray-600 uppercase tracking-widest transition-all">SEAL TO WALLET (MIN 50)</button>
-            </div>
+        <div id="mining-stats" style="font-size: 10px; margin-top: 5px; color: var(--accent-blue);">
+            Hash Rate: 0.0 h/s
         </div>
+    </div>
 
-        <button onclick="toggleMining()" id="mineBtn" class="w-full bg-blue-600 hover:bg-blue-500 text-white py-6 rounded-2xl font-black text-lg shadow-[0_0_40px_rgba(37,99,235,0.2)] mb-8 active:scale-95 transition-all flex justify-center items-center gap-3 border border-white/10 group">
-            <span class="group-hover:rotate-180 transition-transform duration-500">❄️</span> <span id="mineText">INITIALIZE VERA ENGINE</span>
-        </button>
+    <button class="btn" onclick="startQuiz()">TEST ÇÖZÜMÜNE BAŞLA</button>
 
-        <div class="grid grid-cols-2 gap-4">
-            <div class="glass-panel p-4 text-center">
-                <p class="text-[9px] text-gray-500 font-bold uppercase mb-1">Total Multiplier</p>
-                <p class="text-xl font-black text-green-400 mono-font" id="uiMult">x1.00</p>
-            </div>
-            <div class="glass-panel p-4 text-center">
-                <p class="text-[9px] text-gray-500 font-bold uppercase mb-1">Validated Data</p>
-                <p class="text-xl font-black text-white mono-font" id="uiCor">0</p>
-            </div>
+    <div class="achievements">
+        <div class="achievement-item">
+            <div class="label">NFT GÖREVİ: 5000 TEST</div>
+            <div id="test-counter">0 / 5000</div>
+            <div class="progress-container"><div id="test-progress" class="progress-bar"></div></div>
         </div>
-    </main>
-
-    <main id="tab-tasks" class="tab-content pt-28 px-6 max-w-md mx-auto">
-        <div id="task-intro" class="glass-panel p-10 text-center">
-            <div class="w-16 h-16 border-2 border-blue-500 rounded-full flex items-center justify-center mx-auto mb-6 text-2xl shadow-[0_0_20px_rgba(37,99,235,0.4)]">👁️</div>
-            <h2 class="text-2xl font-black mb-4 uppercase tracking-tight text-white">Neural Training</h2>
-            <p class="text-gray-400 text-xs mb-8 leading-relaxed font-mono">Rewards are ONLY distributed after completing a batch of 10 images. Incomplete batches are lost.</p>
-            <button onclick="startTraining()" class="w-full bg-white text-black py-4 rounded-xl font-black shadow-lg uppercase tracking-widest hover:bg-gray-200">START BATCH (10)</button>
+        <div class="achievement-item">
+            <div class="label">SADAKAT: 1 YIL MADENCİLİK</div>
+            <div id="loyalty-days">Kayıt Yok</div>
+            <div class="progress-container"><div id="loyalty-progress" class="progress-bar"></div></div>
         </div>
+    </div>
 
-        <div id="task-area" class="hidden">
-            <div class="flex justify-between items-center mb-4 px-2">
-                <span class="text-[10px] font-bold text-blue-500 uppercase animate-pulse">● LIVE FEED</span>
-                <span id="taskStep" class="text-xs font-bold bg-white/10 px-3 py-1 rounded text-white mono-font">1 / 10</span>
-            </div>
-            <div class="glass-panel p-4 relative overflow-hidden">
-                <div id="task-loader" class="hidden absolute inset-0 bg-black/95 z-20 flex items-center justify-center flex-col">
-                    <div class="text-blue-500 font-mono text-xs mb-2 uppercase">Uploading Neural Data...</div>
-                    <div class="w-32 h-1 bg-gray-800 rounded overflow-hidden"><div class="h-full bg-blue-500 animate-[width_5s_linear_forwards]" style="width:0%"></div></div>
-                </div>
-                <img id="qImg" src="https://picsum.photos/400/300" class="w-full h-64 object-cover rounded-xl mb-6 border border-white/10">
-                <div class="grid grid-cols-2 gap-4">
-                    <button id="btnAI" onclick="checkTask(true, this)" class="py-4 bg-white/5 border border-white/10 rounded-xl font-bold text-[10px] text-white uppercase hover:bg-white/10">AI GENERATED</button>
-                    <button id="btnReal" onclick="checkTask(false, this)" class="py-4 bg-white/5 border border-white/10 rounded-xl font-bold text-[10px] text-white uppercase hover:bg-white/10">REAL PHOTO</button>
-                </div>
-            </div>
-        </div>
-
-        <div id="task-finish" class="hidden glass-panel p-10 text-center">
-            <div class="text-6xl mb-4">🏆</div>
-            <h2 class="text-2xl font-black mb-2 text-white">BATCH SEALED</h2>
-            <p class="text-gray-400 text-xs mb-6 mono-font">Analysis: <span id="batchResult" class="text-blue-400">0</span> / 10 Correct</p>
-            <div class="bg-green-900/20 p-4 rounded-xl border border-green-500/30 mb-6">
-                <p class="text-[10px] text-green-300 uppercase">Total Reward</p>
-                <p class="text-3xl font-black text-white" id="batchReward">0.00 $NI</p>
-            </div>
-            <button onclick="resetTraining()" class="w-full bg-green-600 text-white py-4 rounded-xl font-black uppercase">CLAIM & RETURN</button>
-        </div>
-    </main>
-
-    <main id="tab-market" class="tab-content pt-28 px-6 max-w-md mx-auto">
-        <div class="glass-panel p-1 mb-6 bg-gradient-to-br from-yellow-500/20 to-orange-500/20 border-yellow-500/30">
-            <div class="bg-black/90 p-6 rounded-[19px]">
-                <div class="flex justify-between items-start mb-4">
-                    <h3 class="text-xl font-black text-white italic">ELITE NODE NFT</h3>
-                    <span class="bg-yellow-500 text-black text-[9px] px-2 py-1 rounded font-bold uppercase">Legendary</span>
-                </div>
-                <ul class="text-[10px] text-gray-400 mb-6 space-y-2 font-mono">
-                    <li>• <span class="text-white font-bold">+5% Lifetime Speed (x0.05)</span></li>
-                    <li>• Auto-Whitelist for Airdrop</li>
-                    <li>• Exclusive "Gold Node" Badge</li>
-                </ul>
-                <button onclick="buyNFT()" class="w-full bg-gradient-to-r from-yellow-600 to-orange-600 text-white py-3 rounded-xl font-bold text-xs uppercase shadow-lg hover:brightness-110">MINT FOR 100 TON</button>
-            </div>
-        </div>
-
-        <div class="glass-panel p-6 mb-6">
-            <h3 class="text-xs font-bold text-blue-400 mb-4 uppercase tracking-widest border-b border-white/10 pb-2">Quantum Calculator</h3>
-            <input type="number" id="buyAmt" placeholder="TON Amount (e.g. 0.5)" class="w-full bg-black/50 border border-white/20 p-4 rounded-xl outline-none font-bold text-white mb-4 mono-font focus:border-blue-500 transition-colors">
-            <div class="flex justify-between items-center bg-blue-900/20 p-4 rounded-xl border border-blue-500/20 mb-4">
-                <span class="text-[10px] text-blue-300 uppercase">You Receive:</span>
-                <span class="text-xl font-black text-white mono-font" id="calcResult">0 $NI</span>
-            </div>
-            <button onclick="buyToken()" class="w-full bg-white text-black py-4 rounded-xl font-black uppercase text-xs hover:bg-gray-200">PURCHASE TOKENS</button>
-        </div>
-
-        <div class="glass-panel p-6">
-             <p class="text-[10px] font-bold text-gray-500 uppercase mb-3">Referral Link (+1% Speed per User)</p>
-             <div class="flex gap-2">
-                 <input id="refLink" readonly value="Connect Wallet..." class="bg-black/50 border border-white/10 rounded-lg px-4 py-3 text-[10px] flex-1 outline-none text-gray-400 mono-font">
-                 <button onclick="copyRef()" class="bg-white/10 text-white font-bold px-4 rounded-lg text-[10px] hover:bg-white/20">COPY</button>
-             </div>
-        </div>
-    </main>
-
-    <main id="tab-leaderboard" class="tab-content pt-28 px-6 max-w-md mx-auto">
-        <h1 class="text-3xl font-black text-white mb-6 uppercase italic">Top 100 Nodes</h1>
-        <div class="glass-panel p-4 overflow-hidden">
-            <div class="flex justify-between text-[9px] font-bold text-gray-500 uppercase mb-4 px-2">
-                <span>Rank / Wallet</span>
-                <span>Total Mined</span>
-            </div>
-            <div id="leaderboardList" class="space-y-2 h-[400px] overflow-y-auto pr-2">
-                <div class="text-center text-xs text-gray-500 py-10">Loading Data Nodes...</div>
-            </div>
-        </div>
-    </main>
-
-    <div class="fixed bottom-0 w-full glass-panel border-t border-white/5 flex justify-around py-6 z-50 rounded-none bg-black/95">
-        <button onclick="switchTab('pilot', this)" class="nav-btn nav-active flex flex-col items-center gap-1"><span class="text-xl">🚀</span></button>
-        <button onclick="switchTab('tasks', this)" class="nav-btn flex flex-col items-center gap-1"><span class="text-xl">🧠</span></button>
-        <button onclick="switchTab('market', this)" class="nav-btn flex flex-col items-center gap-1"><span class="text-xl">💎</span></button>
-        <button onclick="switchTab('leaderboard', this)" class="nav-btn flex flex-col items-center gap-1"><span class="text-xl">🏆</span></button>
+    <div class="debug-panel">
+        <p>Geliştirici Modu: Cüzdana bakiye eklemek için kullan.</p>
+        <button onclick="addTestToken()">100 TEST TOKEN AL</button>
     </div>
 
     <script>
-        const SB_URL = "https://gdpiehrnpeiauhmaoumi.supabase.co";
-        const SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdkcGllaHJucGVpYXVobWFvdW1pIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEwMDk4MjcsImV4cCI6MjA4NjU4NTgyN30.iJHq9gnoPtBLaRuByLOV8VjesBL9qp1rQs1d4_fYJXM";
-        const sb = supabase.createClient(SB_URL, SB_KEY);
-        const ADMIN_WALLET = "UQA6kwFHkH3c9GcYxLsrL9aw_CfyLJkmU-nAatQk-IY5bC68";
-
-        // GLOBAL STATE
-        let p = { w: null, main: 0, pool: 0, mult: 1.0, cor: 0, ip: "0.0.0.0" };
-        let mineTimer = null;
-        let tStep = 1, cAns = true, batchScore = 0;
-
-        // INITIALIZATION
-        window.onload = async () => {
-            const ua = navigator.userAgent;
-            const dev = /iPhone|iPad|iPod/.test(ua) ? "IPHONE NODE" : /Android/.test(ua) ? "ANDROID NODE" : "WEB CONSOLE";
-            document.getElementById('device-info').innerText = dev + " | CONNECTED";
-            
-            // Generate Matrix Rain
-            const m = document.getElementById('matrix');
-            for(let i=0; i<15; i++) {
-                let s = document.createElement('div');
-                s.className = 'rain-col';
-                s.style.left = Math.random()*100+'%';
-                s.style.animationDuration = Math.random()*2+2+'s';
-                s.innerText = '101010101010';
-                m.appendChild(s);
-            }
-
-            try {
-                const res = await fetch('https://api.ipify.org?format=json');
-                const data = await res.json();
-                p.ip = data.ip;
-            } catch(e) {}
-            
-            // Check Local Storage for offline mining
-            const saved = localStorage.getItem('nexus_pool');
-            if(saved) p.pool = parseFloat(saved);
-            updateUI();
-        };
-
-        function switchTab(t, btn) {
-            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('nav-active'));
-            document.getElementById('tab-' + t).classList.add('active');
-            btn.classList.add('nav-active');
-            if(t === 'leaderboard') loadLeaderboard();
-        }
-
-        // WALLET LOGIC (SMART SYNC FIX)
-        const tonUI = new TON_CONNECT_UI.TonConnectUI({
+        const tonConnectUI = new TONConnectUI.TonConnectUI({
             manifestUrl: 'https://nexusintelligencelabs.github.io/nexusintelligence.github.io/tonconnect-manifest.json',
             buttonRootId: 'ton-connect-button'
         });
 
-        tonUI.onStatusChange(async w => {
-            if (w) { 
-                p.w = w.account.address; 
-                document.getElementById('refLink').value = window.location.origin + "/?ref=" + p.w;
-                checkReferral(); // Process incoming referral
-                
-                // LOAD DATA BUT KEEP LOCAL POOL
-                const { data } = await sb.from('pilots').select('*').eq('wallet_address', p.w).single();
-                if (data) {
-                    p.main = data.total_ni; 
-                    p.mult = data.multiplier; 
-                    p.cor = data.correct_images;
-                    // MERGE DB POOL WITH LOCAL POOL (CRITICAL FIX)
-                    p.pool = (data.mining_pool || 0) + (parseFloat(localStorage.getItem('nexus_pool') || 0));
-                    localStorage.setItem('nexus_pool', 0); // Clear local after merge
-                    updateUI();
-                    save(); // Save merged state immediately
-                }
-            }
-        });
+        let currentWallet = null;
+        let userData = { balance: 0, tests: 0, miningStart: null };
+        let quizPool = 0; // Test sırasında biriken toplu puan
 
-        async function checkReferral() {
-            const urlParams = new URLSearchParams(window.location.search);
-            const ref = urlParams.get('ref');
-            if (ref && ref !== p.w) {
-                // Save referral logic here (Simplified: just store referrer)
-                await sb.from('pilots').update({ referrer: ref }).eq('wallet_address', p.w);
-                // In a real backend, you would trigger a function to update the referrer's multiplier
-            }
-        }
+        const logs = [
+            "Neural Path Optimizing...",
+            "Training Image Batch #A-42...",
+            "Vera Core Syncing...",
+            "Data Packet Validated...",
+            "AI Model Weight Updating..."
+        ];
 
-        // UPDATE UI
-        function updateUI() {
-            document.getElementById('mainBal').innerText = p.main.toFixed(2);
-            document.getElementById('poolTxt').innerText = `${p.pool.toFixed(2)} / 50.00`;
-            document.getElementById('uiMult').innerText = `x${p.mult.toFixed(2)}`;
-            document.getElementById('uiCor').innerText = p.cor;
-            let prog = (p.pool / 50) * 100;
-            document.getElementById('poolBar').style.width = Math.min(prog, 100) + "%";
-            if (p.pool >= 50) {
-                const c = document.getElementById('claimBtn');
-                c.disabled = false; c.classList.replace('bg-white/5', 'bg-blue-600'); c.classList.replace('text-gray-600', 'text-white');
-            }
-        }
-
-        // MINING (AUTO-SAVE)
-        function toggleMining() {
-            const b = document.getElementById('mineBtn');
-            const txt = document.getElementById('mineText');
-            if (!mineTimer) {
-                txt.innerText = "VERA ENGINE ACTIVE"; b.classList.replace('bg-blue-600', 'bg-red-600');
-                mineTimer = setInterval(() => { 
-                    p.pool += (0.01 * p.mult); 
-                    localStorage.setItem('nexus_pool', p.pool); // Backup to browser
-                    updateUI(); 
-                    if(Math.floor(Date.now()/1000)%5 === 0) save(); // Cloud save every 5s
-                }, 1000);
+        // CÜZDAN BAĞLANTISINI TAKİP ET
+        tonConnectUI.onStatusChange(wallet => {
+            if (wallet) {
+                currentWallet = wallet.account.address;
+                loadUserData();
             } else {
-                txt.innerText = "INITIALIZE VERA ENGINE"; b.classList.replace('bg-red-600', 'bg-blue-600');
-                clearInterval(mineTimer); mineTimer = null; save();
+                currentWallet = null;
+                resetUI();
             }
-        }
-
-        async function save() {
-            if (!p.w) return;
-            await sb.from('pilots').upsert({ 
-                wallet_address: p.w, total_ni: p.main, correct_images: p.cor, multiplier: p.mult, ip_address: p.ip, mining_pool: p.pool 
-            });
-        }
-
-        async function claimTokens() {
-            if (p.pool < 50) return;
-            p.main += p.pool; p.pool = 0; localStorage.setItem('nexus_pool', 0);
-            updateUI(); save();
-            alert("Funds Secured.");
-        }
-
-        // BATCH TRAINING (STRICT)
-        function startTraining() {
-            document.getElementById('task-intro').classList.add('hidden');
-            document.getElementById('task-area').classList.remove('hidden');
-            tStep = 1; batchScore = 0; nextQ();
-        }
-
-        function nextQ() {
-            if (tStep > 10) { finishBatch(); return; }
-            document.getElementById('taskStep').innerText = `${tStep} / 10`;
-            document.getElementById('task-loader').classList.add('hidden');
-            cAns = Math.random() > 0.5;
-            document.getElementById('qImg').src = `https://picsum.photos/400/300?sig=${Math.random()}`;
-            document.getElementById('btnAI').disabled = false; document.getElementById('btnReal').disabled = false;
-        }
-
-        function checkTask(val, btn) {
-            document.getElementById('btnAI').disabled = true; document.getElementById('btnReal').disabled = true;
-            if (val === cAns) { batchScore++; btn.classList.add('correct-btn'); } 
-            else { btn.classList.add('wrong-btn'); }
-            
-            document.getElementById('task-loader').classList.remove('hidden');
-            setTimeout(() => { 
-                btn.classList.remove('correct-btn', 'wrong-btn');
-                tStep++; nextQ(); 
-            }, 5000); // 5S Delay
-        }
-
-        function finishBatch() {
-            document.getElementById('task-area').classList.add('hidden');
-            document.getElementById('task-finish').classList.remove('hidden');
-            const reward = batchScore * 0.5; // Calc reward only here
-            document.getElementById('batchResult').innerText = `${batchScore} / 10`;
-            document.getElementById('batchReward').innerText = reward.toFixed(2) + " $NI";
-            p.main += reward; p.cor += batchScore;
-            confetti({ particleCount: 200, spread: 80, origin: { y: 0.6 } });
-            save();
-        }
-
-        function resetTraining() {
-            document.getElementById('task-finish').classList.add('hidden');
-            document.getElementById('task-intro').classList.remove('hidden');
-            updateUI();
-        }
-
-        // MARKET & NFT
-        document.getElementById('buyAmt').addEventListener('input', (e) => {
-            document.getElementById('calcResult').innerText = `≈ ${(parseFloat(e.target.value||0) * 10000).toLocaleString()} $NI`;
         });
 
-        async function buyToken() {
-            const a = document.getElementById('buyAmt').value; if(!a || !p.w) return;
-            try {
-                await tonUI.sendTransaction({ validUntil: Math.floor(Date.now()/1000)+60, messages: [{ address: ADMIN_WALLET, amount: (a * 1e9).toString() }] });
-                await sb.from('orders').insert({ wallet_address: p.w, item_type: 'COIN', amount_ton: parseFloat(a), received_ni: a * 10000 });
-                alert("Success!");
-            } catch(e) { alert("Cancelled."); }
+        function generatePilotID(address) {
+            return "PILOT-" + address.substring(2, 6).toUpperCase() + "-" + address.substring(address.length - 4).toUpperCase();
         }
 
-        async function buyNFT() {
-            if(!p.w) return alert("Connect Wallet!");
-            try {
-                await tonUI.sendTransaction({ validUntil: Math.floor(Date.now()/1000)+60, messages: [{ address: ADMIN_WALLET, amount: (100 * 1e9).toString() }] });
-                p.mult += 0.05; // 5% Boost
-                await sb.from('pilots').update({ multiplier: p.mult }).eq('wallet_address', p.w);
-                await sb.from('orders').insert({ wallet_address: p.w, item_type: 'NFT', amount_ton: 100, received_ni: 0 });
-                alert("Elite NFT Minted! Speed Increased."); updateUI();
-            } catch(e) { alert("Cancelled."); }
+        function loadUserData() {
+            const saved = localStorage.getItem('nexus_user_' + currentWallet);
+            if (saved) {
+                userData = JSON.parse(saved);
+            } else {
+                userData = { 
+                    balance: 0, 
+                    tests: 0, 
+                    miningStart: Date.now(),
+                    pilotID: generatePilotID(currentWallet)
+                };
+                saveData();
+            }
+            updateUI();
+            startMiningAnimation();
         }
 
-        // LEADERBOARD
-        async function loadLeaderboard() {
-            const list = document.getElementById('leaderboardList');
-            list.innerHTML = '<div class="text-center text-xs text-gray-500">Loading...</div>';
-            const { data } = await sb.from('pilots').select('wallet_address, total_ni').order('total_ni', { ascending: false }).limit(100);
-            list.innerHTML = '';
-            if(data) {
-                data.forEach((u, i) => {
-                    const row = document.createElement('div');
-                    row.className = "flex justify-between items-center bg-white/5 p-3 rounded-lg border border-white/5";
-                    row.innerHTML = `
-                        <div class="flex items-center gap-3">
-                            <span class="text-xs font-bold text-blue-500 w-6">#${i+1}</span>
-                            <span class="text-[10px] text-gray-400 font-mono">${u.wallet_address.slice(0,4)}...${u.wallet_address.slice(-4)}</span>
-                        </div>
-                        <span class="text-xs font-bold text-white">${u.total_ni.toFixed(2)} $NI</span>
-                    `;
-                    list.appendChild(row);
-                });
+        function saveData() {
+            if (currentWallet) {
+                localStorage.setItem('nexus_user_' + currentWallet, JSON.stringify(userData));
             }
         }
-        
-        function copyRef() { navigator.clipboard.writeText(document.getElementById("refLink").value); alert("Referral Copied!"); }
+
+        function updateUI() {
+            document.getElementById('pilot-id').innerText = userData.pilotID || "Bilinmiyor";
+            document.getElementById('balance').innerText = userData.balance.toFixed(2);
+            document.getElementById('test-counter').innerText = `${userData.tests} / 5000`;
+            
+            // NFT Progress
+            let testPerc = (userData.tests / 5000) * 100;
+            document.getElementById('test-progress').style.width = testPerc + "%";
+
+            // Sadakat süresi (Gün hesaplama)
+            if (userData.miningStart) {
+                let days = Math.floor((Date.now() - userData.miningStart) / (1000 * 60 * 60 * 24));
+                document.getElementById('loyalty-days').innerText = days + " GÜN AKTİF";
+                let loyaltyPerc = (days / 365) * 100;
+                document.getElementById('loyalty-progress').style.width = loyaltyPerc + "%";
+            }
+        }
+
+        function resetUI() {
+            document.getElementById('pilot-id').innerText = "Bağlantı Bekleniyor...";
+            document.getElementById('balance').innerText = "0.00";
+            document.getElementById('mining-progress').style.width = "0%";
+            document.getElementById('log-text').innerText = "Vera Engine: Offline";
+        }
+
+        // MINING ANİMASYONU (AI EĞİTİMİ HİSSİ)
+        function startMiningAnimation() {
+            setInterval(() => {
+                if (!currentWallet) return;
+                
+                // Animasyon
+                let randomLog = logs[Math.floor(Math.random() * logs.length)];
+                document.getElementById('log-text').innerText = randomLog;
+                
+                // Bar dolumu (Temsili AI paketi eğitimi)
+                let progress = 0;
+                let bar = document.getElementById('mining-progress');
+                let interval = setInterval(() => {
+                    progress += 5;
+                    bar.style.width = progress + "%";
+                    if (progress >= 100) {
+                        clearInterval(interval);
+                        // Paket bittiğinde bakiye ekle
+                        userData.balance += 0.05;
+                        updateUI();
+                        saveData();
+                    }
+                }, 200);
+            }, 5000);
+        }
+
+        // TEST SİSTEMİ (TOPLU EKLEME MANTIĞI)
+        function startQuiz() {
+            if (!currentWallet) return alert("Önce cüzdan bağla pilot!");
+            
+            // Simülasyon: 5 soruluk test
+            let correct = confirm("Görseldeki AI hatasını buldun mu? (Tamam = Evet)");
+            if (correct) {
+                quizPool += 10; // Havuza ekle
+                userData.tests += 1; // Sayaca ekle
+                alert("Doğru! 10 $NI Havuza eklendi. Test sonunda bakiyene geçecek.");
+                
+                // Testin bittiğini varsayalım
+                finishQuiz();
+            }
+        }
+
+        function finishQuiz() {
+            userData.balance += quizPool; // Havuzu boşalt, bakiyeye ekle
+            quizPool = 0;
+            updateUI();
+            saveData();
+            alert("Görev Tamamlandı! Tüm ödüller cüzdanına tanımlandı.");
+        }
+
+        // TEST TOKEN ALMA (DENEME İÇİN)
+        function addTestToken() {
+            if (!currentWallet) return alert("Bağlantı yok.");
+            userData.balance += 100;
+            updateUI();
+            saveData();
+            alert("100 Test Token cüzdana gönderildi!");
+        }
     </script>
 </body>
 </html>

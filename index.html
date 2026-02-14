@@ -3,59 +3,60 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Nexus Intelligence | Pilot Console</title>
+    <title>Nexus Intelligence | Pilot</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/@tonconnect/ui@latest/dist/tonconnect-ui.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
     <style>
-        body { font-family: 'Inter', sans-serif; background: #fbfbfd; color: #1d1d1f; -webkit-font-smoothing: antialiased; }
-        .apple-card { background: #ffffff; border-radius: 28px; box-shadow: 0 8px 30px rgba(0,0,0,0.04); border: 1px solid rgba(0,0,0,0.02); }
+        body { font-family: 'Inter', sans-serif; background: #fbfbfd; color: #1d1d1f; }
+        .apple-card { background: #ffffff; border-radius: 24px; box-shadow: 0 4px 20px rgba(0,0,0,0.04); border: 1px solid #f2f2f7; }
         .tab-content { display: none; }
-        .tab-content.active { display: block !important; animation: slideUp 0.4s ease-out; }
-        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-        .nav-active { color: #0071e3; }
-        .mining-bar { transition: width 0.5s cubic-bezier(0.23, 1, 0.32, 1); }
+        .tab-content.active { display: block !important; animation: fadeIn 0.4s ease; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .nav-btn { color: #8e8e93; font-weight: 600; transition: 0.3s; }
+        .nav-active { color: #0071e3; font-weight: 800; border-top: 2px solid #0071e3; }
+        .correct-ans { background-color: #34c759 !important; color: white !important; }
+        .wrong-ans { background-color: #ff3b30 !important; color: white !important; }
         #ton-connect-button { min-width: 140px; }
     </style>
 </head>
 <body class="pb-28">
 
-    <nav class="fixed top-0 w-full z-50 bg-white/70 backdrop-blur-xl border-b border-gray-100 px-6 py-4 flex justify-between items-center">
+    <nav class="fixed top-0 w-full z-50 bg-white/80 backdrop-blur-md border-b border-gray-100 px-6 py-4 flex justify-between items-center">
         <div class="flex flex-col">
-            <span class="text-xl font-extrabold tracking-tighter italic">NEXUS <span class="text-blue-600">INTEL</span></span>
-            <span id="device-tag" class="text-[9px] font-bold text-gray-400 uppercase tracking-widest">Sistem Hazırlanıyor...</span>
+            <span class="text-xl font-black italic tracking-tighter">NEXUS <span class="text-blue-600">INTEL</span></span>
+            <span id="device-tag" class="text-[9px] font-bold text-gray-400 uppercase tracking-widest">ANALYZING DEVICE...</span>
         </div>
         <div id="ton-connect-button"></div>
     </nav>
 
     <main id="tab-pilot" class="tab-content active pt-24 px-6 max-w-md mx-auto">
-        <div class="apple-card p-10 mb-6 text-center">
-            <p class="text-[10px] text-gray-400 font-bold mb-1 uppercase tracking-widest">Onaylanmış NI Bakiyesi</p>
-            <h2 class="text-6xl font-black text-gray-900 tracking-tighter mb-10" id="mainBal">0.00</h2>
+        <div class="apple-card p-8 mb-6 text-center">
+            <p class="text-[10px] text-gray-400 font-bold mb-1 uppercase tracking-widest text-center">Kullanılabilir Bakiye</p>
+            <h2 class="text-5xl font-black text-gray-900 tracking-tighter mb-8" id="mainBal">0.00</h2>
             
             <div class="bg-gray-50 rounded-3xl p-6 border border-gray-100">
-                <div class="flex justify-between items-end mb-2 px-1">
-                    <span class="text-[10px] font-bold text-gray-500 uppercase">Havuz Verisi</span>
-                    <span class="text-[11px] font-black text-blue-600" id="poolTxt">0.00 / 50.00 NI</span>
+                <div class="flex justify-between items-end mb-2">
+                    <span class="text-[10px] font-bold text-gray-500 uppercase">Havuz (Claim)</span>
+                    <span class="text-xs font-black text-gray-900" id="poolTxt">0.00 / 50.00</span>
                 </div>
-                <div class="w-full bg-gray-200 h-2 rounded-full overflow-hidden mb-5">
-                    <div id="poolBar" class="mining-bar h-full bg-blue-600 w-0 shadow-[0_0_10px_rgba(37,99,235,0.4)]"></div>
+                <div class="w-full bg-gray-200 h-1.5 rounded-full overflow-hidden mb-4">
+                    <div id="poolBar" class="h-full bg-blue-600 w-0 transition-all duration-500"></div>
                 </div>
-                <button id="claimBtn" disabled onclick="claimTokens()" class="w-full py-4 rounded-2xl font-black text-[10px] bg-gray-200 text-gray-400 transition-all uppercase tracking-widest">Bakiyeye Kilitle (Min 50)</button>
+                <button id="claimBtn" disabled onclick="claimToMain()" class="w-full py-3 rounded-2xl font-black text-[10px] bg-gray-200 text-gray-400 uppercase tracking-widest">Bakiyeye Kilitle</button>
             </div>
         </div>
 
-        <button onclick="toggleMining()" id="mineBtn" class="w-full bg-gray-900 text-white py-6 rounded-[28px] font-bold text-lg shadow-2xl mb-8 active:scale-95 transition-all flex justify-center items-center gap-3">
-            <span id="mineIcon">🚀</span> <span id="mineText">AĞI ATEŞLE</span>
-        </button>
+        <button onclick="toggleMining()" id="mineBtn" class="w-full bg-black text-white py-5 rounded-[24px] font-black text-lg shadow-xl mb-6 active:scale-95 transition-all">AĞI ATEŞLE</button>
 
         <div class="grid grid-cols-2 gap-4">
-            <div class="apple-card p-5 text-center">
-                <p class="text-[9px] text-gray-400 font-bold uppercase mb-1">Veri Hızı</p>
+            <div class="apple-card p-4 text-center">
+                <p class="text-[9px] text-gray-400 font-bold uppercase mb-1">Hız Çarpanı</p>
                 <p class="text-xl font-black text-blue-600" id="uiMult">x1.00</p>
             </div>
-            <div class="apple-card p-5 text-center">
+            <div class="apple-card p-4 text-center">
                 <p class="text-[9px] text-gray-400 font-bold uppercase mb-1">Eğitilen Veri</p>
                 <p class="text-xl font-black text-gray-900" id="uiCor">0</p>
             </div>
@@ -64,190 +65,213 @@
 
     <main id="tab-tasks" class="tab-content pt-24 px-6 max-w-md mx-auto">
         <div id="task-intro" class="apple-card p-10 text-center">
-            <div class="w-20 h-20 bg-blue-50 rounded-full flex items-center justify-center mx-auto mb-6 text-3xl">🧠</div>
-            <h2 class="text-3xl font-black mb-4 tracking-tighter">Vera Veri Eğitimi</h2>
-            <p class="text-gray-500 text-sm mb-10 leading-relaxed">Nexus Süper Bilgisayarı'nın gözü ol. Resimleri analiz et, her doğru veri için +0.5 NI kazan.</p>
+            <h2 class="text-3xl font-black mb-4 tracking-tighter">AI Eğitim Modülü</h2>
+            <p class="text-gray-500 text-sm mb-8 leading-relaxed">10 resimlik seti tamamla, Vera Süper Bilgisayarı'nı eğit ve ödülü kap.</p>
             <button onclick="startTraining()" class="w-full bg-blue-600 text-white py-5 rounded-2xl font-black shadow-lg">EĞİTİMİ BAŞLAT</button>
         </div>
 
         <div id="task-area" class="hidden">
+            <div class="flex justify-between items-center mb-4 px-2">
+                <span class="text-xs font-black text-blue-600 uppercase">Vera Engine Eğitim</span>
+                <span id="taskStep" class="text-xs font-black bg-gray-100 px-3 py-1 rounded-full text-gray-900">1 / 10</span>
+            </div>
             <div class="apple-card p-4 relative overflow-hidden">
-                <div id="task-loader" class="hidden absolute inset-0 bg-white/95 z-20 flex items-center justify-center flex-col">
-                    <div class="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mb-4"></div>
-                    <p class="text-[10px] font-black tracking-widest text-gray-400">VERİ ANALİZ EDİLİYOR...</p>
-                </div>
-                <img id="qImg" src="https://picsum.photos/400/300" class="w-full h-72 object-cover rounded-[24px] mb-6">
+                <img id="qImg" src="https://picsum.photos/400/300" class="w-full h-64 object-cover rounded-2xl mb-6">
                 <div class="grid grid-cols-2 gap-4">
-                    <button onclick="checkTask(true)" class="py-5 bg-gray-50 border border-gray-100 rounded-2xl font-black text-xs hover:bg-blue-600 hover:text-white transition-all uppercase">AI ÜRETİMİ</button>
-                    <button onclick="checkTask(false)" class="py-5 bg-gray-50 border border-gray-100 rounded-2xl font-black text-xs hover:bg-green-600 hover:text-white transition-all uppercase">GERÇEK FOTO</button>
+                    <button id="btnAI" onclick="checkTask(true, this)" class="py-5 bg-gray-50 border border-gray-100 rounded-2xl font-black text-[11px] uppercase transition-all">AI Üretimi</button>
+                    <button id="btnReal" onclick="checkTask(false, this)" class="py-5 bg-gray-50 border border-gray-100 rounded-2xl font-black text-[11px] uppercase transition-all">Gerçek Foto</button>
                 </div>
             </div>
+        </div>
+
+        <div id="task-finish" class="hidden apple-card p-10 text-center">
+            <div class="text-6xl mb-6">🏆</div>
+            <h2 class="text-3xl font-black mb-2 tracking-tighter text-gray-900">Tebrikler Pilot!</h2>
+            <p class="text-gray-500 text-sm mb-8">10 resimlik veri seti başarıyla mühürlendi. +5.0 NI bakiyene eklendi.</p>
+            <button onclick="resetTraining()" class="w-full bg-black text-white py-5 rounded-2xl font-black shadow-lg">PANEL'E DÖN</button>
         </div>
     </main>
 
     <main id="tab-market" class="tab-content pt-24 px-6 max-w-md mx-auto">
         <div class="apple-card p-6 mb-6">
-            <h3 class="text-xs font-black text-blue-600 mb-4 uppercase tracking-widest">Pilot Envanteri</h3>
+            <h3 class="text-xs font-black text-blue-600 mb-4 uppercase tracking-widest">Envanterim</h3>
             <div class="flex justify-between items-center bg-gray-50 p-5 rounded-2xl border border-gray-100">
                 <span class="text-xs font-bold text-gray-500">Satın Alınan NI</span>
                 <span class="text-2xl font-black text-gray-900" id="invBought">0</span>
             </div>
         </div>
-
-        <div class="apple-card p-8 mb-6">
-            <h3 class="font-black text-lg mb-2">NI Token Lansmanı</h3>
-            <p class="text-xs text-gray-400 mb-6 italic">Ağdaki yerini şimdiden ayır, madencilik dışında portföyünü büyüt.</p>
-            <div class="relative mb-4">
-                <input type="number" id="buyAmt" placeholder="TON Miktarı" class="w-full bg-gray-50 border-gray-100 p-5 rounded-2xl outline-none font-bold text-gray-900 focus:ring-2 ring-blue-500/20">
-                <span class="absolute right-5 top-5 font-black text-gray-300">TON</span>
-            </div>
-            <button onclick="buyToken()" class="w-full bg-blue-600 text-white py-5 rounded-2xl font-black shadow-lg uppercase text-xs tracking-widest">Token Rezerve Et</button>
-        </div>
-
-        <div class="apple-card p-8 bg-gray-900 text-white border-none shadow-xl mb-10">
-            <h3 class="text-xl font-black mb-4 italic">The Vera Vision</h3>
-            <div class="space-y-4 text-[11px] text-gray-400 leading-relaxed font-medium">
-                <p><strong class="text-white">Nexus Intelligence Labs:</strong> Merkeziyetsiz bir süper bilgisayar ağıdır. Apple ve Android cihazların boşta kalan gücünü AI eğitimi için birleştirir.</p>
-                <p><strong class="text-white">Elite NFT:</strong> Ağ üzerindeki düğüm sahipliğidir. Kalıcı çarpan artışı ve yönetim hakları sağlar.</p>
-            </div>
-            <button onclick="alert('NexusIntelligenceLabs: Geleceğin yapay zekasını senin cihazınla eğitiyoruz. Web3 ve AI entegrasyonunun kalbi burası.')" class="w-full bg-white/10 hover:bg-white/20 text-white py-4 rounded-xl mt-6 font-bold text-[10px] uppercase tracking-widest">Tam Whitepaper'ı Oku</button>
+        <div class="apple-card p-8">
+            <h3 class="font-black text-lg mb-2">Yatırım Paneli</h3>
+            <p class="text-xs text-gray-400 mb-6 italic">Projeyi destekle ve NI token rezerve et.</p>
+            <input type="number" id="buyAmt" placeholder="TON Miktarı" class="w-full bg-gray-50 border border-gray-100 p-5 rounded-2xl outline-none font-bold text-gray-900 mb-4">
+            <button onclick="buyToken()" class="w-full bg-blue-600 text-white py-5 rounded-2xl font-black uppercase text-xs">Satın Al</button>
         </div>
     </main>
 
-    <div class="fixed bottom-0 w-full bg-white/80 backdrop-blur-2xl border-t border-gray-100 flex justify-around py-6 z-50">
+    <main id="tab-whitepaper" class="tab-content pt-24 px-6 max-w-md mx-auto pb-10">
+        <h1 class="text-3xl font-black mb-6 tracking-tighter">Whitepaper</h1>
+        <div class="apple-card p-8 space-y-6 text-sm text-gray-500 leading-relaxed">
+            <div class="border-l-4 border-blue-600 pl-4">
+                <h4 class="font-black text-gray-900 uppercase text-xs mb-1">Kurucu: NexusIntelligenceLabs</h4>
+                <p>Web3 ve AI kesişiminde merkeziyetsiz bir süper bilgisayar ağı kuruyoruz.</p>
+            </div>
+            <div class="border-l-4 border-gray-200 pl-4">
+                <h4 class="font-black text-gray-900 uppercase text-xs mb-1">Vera Engine</h4>
+                <p>Pilotların cihazları aracılığıyla AI modellerini eğittiği hibrit bir veri işleme motorudur.</p>
+            </div>
+            <div class="border-l-4 border-gray-200 pl-4">
+                <h4 class="font-black text-gray-900 uppercase text-xs mb-1">Supercomputer Vision</h4>
+                <p>Binlerce iPhone ve Android cihazın işlem gücünü birleştirerek dünyanın en büyük dağıtık zekasını oluşturuyoruz.</p>
+            </div>
+        </div>
+    </main>
+
+    <div class="fixed bottom-0 w-full bg-white/90 backdrop-blur-xl border-t border-gray-100 flex justify-around py-4 z-50">
         <button onclick="switchTab('pilot', this)" class="nav-btn flex flex-col items-center gap-1 nav-active">
-            <span class="text-xl">🚀</span><span class="text-[9px] font-black uppercase">Dashboard</span>
+            <span class="text-xl">🚀</span><span class="text-[9px] uppercase">Panel</span>
         </button>
-        <button onclick="switchTab('tasks', this)" class="nav-btn flex flex-col items-center gap-1 text-gray-400">
-            <span class="text-xl">🧠</span><span class="text-[9px] font-black uppercase">Görev</span>
+        <button onclick="switchTab('tasks', this)" class="nav-btn flex flex-col items-center gap-1">
+            <span class="text-xl">🧠</span><span class="text-[9px] uppercase">Görev</span>
         </button>
-        <button onclick="switchTab('market', this)" class="nav-btn flex flex-col items-center gap-1 text-gray-400">
-            <span class="text-xl">💎</span><span class="text-[9px] font-black uppercase">Market</span>
+        <button onclick="switchTab('market', this)" class="nav-btn flex flex-col items-center gap-1">
+            <span class="text-xl">💎</span><span class="text-[9px] uppercase">Market</span>
+        </button>
+        <button onclick="switchTab('whitepaper', this)" class="nav-btn flex flex-col items-center gap-1">
+            <span class="text-xl">📄</span><span class="text-[9px] uppercase">WP</span>
         </button>
     </div>
 
     <script>
-        // 🏛️ SUPABASE & ADMIN CONFIG
-        const SB_URL = "https://gdpiehrnpeiauhmaoumi.supabase.co";
-        const SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdkcGllaHJucGVpYXVobWFvdW1pIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEwMDk4MjcsImV4cCI6MjA4NjU4NTgyN30.iJHq9gnoPtBLaRuByLOV8VjesBL9qp1rQs1d4_fYJXM";
-        const sb = supabase.createClient(SB_URL, SB_KEY);
-        const ADMIN = "UQA6kwFHkH3c9GcYxLsrL9aw_CfyLJkmU-nAatQk-IY5bC68";
+        const SUPABASE_URL = "https://gdpiehrnpeiauhmaoumi.supabase.co";
+        const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdkcGllaHJucGVpYXVobWFvdW1pIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEwMDk4MjcsImV4cCI6MjA4NjU4NTgyN30.iJHq9gnoPtBLaRuByLOV8VjesBL9qp1rQs1d4_fYJXM";
+        const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-        let pilot = { w: null, main: 0, pool: 0, mult: 1.0, cor: 0, b: 0 };
-        let timer = null;
+        let p = { w: null, main: 0, pool: 0, mult: 1.0, cor: 0, b: 0 };
+        let mineTimer = null;
+        let taskStep = 1;
+        let curAns = true;
 
-        // 📱 CİHAZ TESPİTİ (TAM GERİ GELDİ)
         window.onload = () => {
             const ua = navigator.userAgent;
-            const device = /iPhone|iPad|iPod/.test(ua) ? "iPhone Pilot Node" : /Android/.test(ua) ? "Android Pilot Node" : "Nexus Web Console";
-            document.getElementById('device-tag').innerText = device + " | Online";
+            const dev = /iPhone|iPad|iPod/.test(ua) ? "iPhone Pilot Node" : /Android/.test(ua) ? "Android Pilot Node" : "Nexus Web Console";
+            document.getElementById('device-tag').innerText = dev + " | Online";
         };
 
-        // UI LOGIC
         function switchTab(t, btn) {
             document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-            document.querySelectorAll('.nav-btn').forEach(b => b.classList.replace('nav-active', 'text-gray-400'));
+            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('nav-active'));
             document.getElementById('tab-' + t).classList.add('active');
-            btn.classList.replace('text-gray-400', 'nav-active');
+            btn.classList.add('nav-active');
         }
 
-        // TON CONNECT
-        const tonUI = new TON_CONNECT_UI.TonConnectUI({
+        const tonConnectUI = new TON_CONNECT_UI.TonConnectUI({
             manifestUrl: 'https://nexusintelligencelabs.github.io/nexusintelligence.github.io/tonconnect-manifest.json',
             buttonRootId: 'ton-connect-button'
         });
 
-        tonUI.onStatusChange(async w => {
-            if (w) { pilot.w = w.account.address; loadData(); }
+        tonConnectUI.onStatusChange(async w => {
+            if (w) { p.w = w.account.address; loadData(); }
         });
 
         async function loadData() {
-            const { data } = await sb.from('pilots').select('*').eq('wallet_address', pilot.w).single();
+            const { data } = await sb.from('pilots').select('*').eq('wallet_address', p.w).single();
             if (data) {
-                pilot.main = data.total_ni; pilot.mult = data.multiplier; pilot.cor = data.correct_images;
+                p.main = data.total_ni; p.mult = data.multiplier; p.cor = data.correct_images;
                 updateUI();
             }
-            // Sipariş geçmişi
-            const { data: ord } = await sb.from('orders').select('received_ni').eq('wallet_address', pilot.w);
+            const { data: ord } = await sb.from('orders').select('received_ni').eq('wallet_address', p.w);
             if(ord) {
-                pilot.b = ord.reduce((s, i) => s + (i.received_ni || 0), 0);
-                document.getElementById('invBought').innerText = pilot.b.toLocaleString();
+                p.b = ord.reduce((s, i) => s + (i.received_ni || 0), 0);
+                document.getElementById('invBought').innerText = p.b.toLocaleString();
             }
         }
 
         function updateUI() {
-            document.getElementById('mainBal').innerText = pilot.main.toFixed(2);
-            document.getElementById('poolTxt').innerText = `${pilot.pool.toFixed(2)} / 50.00 NI`;
-            document.getElementById('uiMult').innerText = `x${pilot.mult.toFixed(2)}`;
-            document.getElementById('uiCor').innerText = pilot.cor;
-            
-            let prog = (pilot.pool / 50) * 100;
+            document.getElementById('mainBal').innerText = p.main.toFixed(2);
+            document.getElementById('poolTxt').innerText = `${p.pool.toFixed(2)} / 50.00`;
+            document.getElementById('uiMult').innerText = `x${p.mult.toFixed(2)}`;
+            document.getElementById('uiCor').innerText = p.cor;
+            let prog = (p.pool / 50) * 100;
             document.getElementById('poolBar').style.width = Math.min(prog, 100) + "%";
-            
-            if (pilot.pool >= 50) {
+            if (p.pool >= 50) {
                 const c = document.getElementById('claimBtn');
-                c.disabled = false;
-                c.classList.replace('bg-gray-200', 'bg-blue-600');
-                c.classList.replace('text-gray-400', 'text-white');
+                c.disabled = false; c.classList.replace('bg-gray-200', 'bg-blue-600'); c.classList.replace('text-gray-400', 'text-white');
             }
         }
 
-        // MINING
         function toggleMining() {
-            const b = document.getElementById('mineBtn');
-            const t = document.getElementById('mineText');
-            if (!timer) {
-                t.innerText = "DURDUR"; b.classList.replace('bg-gray-900', 'bg-red-600');
-                timer = setInterval(() => { pilot.pool += (0.01 * pilot.mult); updateUI(); }, 1000);
+            const btn = document.getElementById('mineBtn');
+            if (!mineTimer) {
+                btn.innerText = "DURDUR"; btn.classList.replace('bg-black', 'bg-red-600');
+                mineTimer = setInterval(() => { p.pool += (0.01 * p.mult); updateUI(); }, 1000);
             } else {
-                t.innerText = "AĞI ATEŞLE"; b.classList.replace('bg-red-600', 'bg-gray-900');
-                clearInterval(timer); timer = null;
-                save();
+                btn.innerText = "AĞI ATEŞLE"; btn.classList.replace('bg-red-600', 'bg-black');
+                clearInterval(mineTimer); mineTimer = null; save();
             }
         }
 
-        async function claimTokens() {
-            if (pilot.pool < 50) return;
-            pilot.main += pilot.pool; pilot.pool = 0; updateUI(); save();
-            alert("Hasat Başarılı! 50 NI Ana Bakiyeye Mühürlendi.");
+        async function claimToMain() {
+            if (p.pool < 50) return;
+            p.main += p.pool; p.pool = 0; updateUI(); save();
+            alert("Hasat Başarılı! Bakiyene Eklendi.");
         }
 
         async function save() {
-            if (!pilot.w) return;
-            await sb.from('pilots').upsert({ wallet_address: pilot.w, total_ni: pilot.main, correct_images: pilot.cor, multiplier: pilot.mult });
+            if (!p.w) return;
+            await sb.from('pilots').upsert({ wallet_address: p.w, total_ni: p.main, correct_images: p.cor, multiplier: p.mult });
         }
 
-        // TASKS
-        let curAns = true;
+        // Görevler Mantığı
         function startTraining() {
             document.getElementById('task-intro').classList.add('hidden');
             document.getElementById('task-area').classList.remove('hidden');
-            nextQ();
-        }
-        function nextQ() {
-            document.getElementById('task-loader').classList.add('hidden');
-            curAns = Math.random() > 0.5;
-            document.getElementById('qImg').src = `https://picsum.photos/400/300?sig=${Math.random()}`;
-        }
-        function checkTask(val) {
-            if (val === curAns) { pilot.main += 0.5; pilot.cor++; updateUI(); save(); }
-            document.getElementById('task-loader').classList.remove('hidden');
-            setTimeout(nextQ, 2000);
+            taskStep = 1; nextQ();
         }
 
-        // MARKET
+        function nextQ() {
+            if (taskStep > 10) { finishTasks(); return; }
+            document.getElementById('taskStep').innerText = `${taskStep} / 10`;
+            curAns = Math.random() > 0.5;
+            document.getElementById('qImg').src = `https://picsum.photos/400/300?sig=${Math.random()}`;
+            document.getElementById('btnAI').className = "py-5 bg-gray-50 border border-gray-100 rounded-2xl font-black text-[11px] uppercase transition-all";
+            document.getElementById('btnReal').className = "py-5 bg-gray-50 border border-gray-100 rounded-2xl font-black text-[11px] uppercase transition-all";
+        }
+
+        function checkTask(val, btn) {
+            if (val === curAns) {
+                p.main += 0.5; p.cor++; btn.classList.add('correct-ans');
+            } else {
+                btn.classList.add('wrong-ans');
+            }
+            setTimeout(() => { taskStep++; nextQ(); }, 1000);
+        }
+
+        function finishTasks() {
+            document.getElementById('task-area').classList.add('hidden');
+            document.getElementById('task-finish').classList.remove('hidden');
+            confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } });
+            save();
+        }
+
+        function resetTraining() {
+            document.getElementById('task-finish').classList.add('hidden');
+            document.getElementById('task-intro').classList.remove('hidden');
+            switchTab('pilot', document.querySelector('.nav-btn'));
+            updateUI();
+        }
+
+        // Market
         async function buyToken() {
-            const a = document.getElementById('buyAmt').value;
-            if(!a || a <= 0 || !pilot.w) return alert("Hata! Miktar veya cüzdan eksik.");
+            const amt = document.getElementById('buyAmt').value;
+            if(!amt || amt <= 0 || !p.w) return alert("Hata!");
             try {
-                await tonUI.sendTransaction({
+                await tonConnectUI.sendTransaction({
                     validUntil: Math.floor(Date.now()/1000)+60,
-                    messages: [{ address: ADMIN, amount: (a * 1000000000).toString() }]
+                    messages: [{ address: "UQA6kwFHkH3c9GcYxLsrL9aw_CfyLJkmU-nAatQk-IY5bC68", amount: (amt * 1000000000).toString() }]
                 });
-                await sb.from('orders').insert({ wallet_address: pilot.w, item_type: 'COIN', amount_ton: parseFloat(a), received_ni: a * 10000 });
-                alert("İşlem Başarılı! NI Tokenlar Envanterine Eklendi.");
-                loadData();
-            } catch(e) { alert("İşlem İptal Edildi."); }
+                await sb.from('orders').insert({ wallet_address: p.w, item_type: 'COIN', amount_ton: parseFloat(amt), received_ni: amt * 10000 });
+                alert("İşlem Başarılı!"); loadData();
+            } catch(e) { alert("İptal!"); }
         }
     </script>
 </body>

@@ -2,120 +2,121 @@
 <html lang="tr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nexus Intelligence | Command Center</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Nexus Intelligence | Pilot Command Center</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/@tonconnect/ui@latest/dist/tonconnect-ui.min.js"></script>
     <style>
         body { font-family: 'Inter', sans-serif; background: #ffffff; padding-bottom: 100px; }
-        .glass { background: rgba(255, 255, 255, 0.8); backdrop-filter: blur(20px); }
+        .glass { background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(25px); }
         .tab-content { display: none; }
         .tab-content.active { display: block; }
-        .nft-badge { background: linear-gradient(135deg, #ffd700, #ffa500); color: white; padding: 2px 8px; border-radius: 6px; font-size: 10px; font-weight: 800; }
         .correct-btn { background-color: #22c55e !important; color: white !important; }
         .wrong-btn { background-color: #ef4444 !important; color: white !important; }
+        .mining-active { animation: pulse 2s infinite; }
+        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.7; } 100% { opacity: 1; } }
     </style>
 </head>
 <body class="antialiased text-gray-900">
 
     <nav class="fixed top-0 w-full z-50 glass border-b border-gray-100 px-6 py-4 flex justify-between items-center">
         <div class="flex items-center space-x-2 font-black italic text-xl tracking-tighter">
-            <span class="bg-black text-white px-2 py-0.5 rounded">N</span> NEXUS INTEL
+            <span class="bg-black text-white px-2 py-0.5 rounded shadow-lg">N</span> NEXUS INTEL
         </div>
         <div id="ton-connect-button"></div>
     </nav>
 
     <main id="tab-pilot" class="tab-content active pt-24 px-6 max-w-md mx-auto">
-        <div class="bg-gray-50 rounded-[32px] p-6 mb-6 border border-gray-100">
+        <div class="bg-gray-50 rounded-[40px] p-8 mb-6 border border-gray-100 shadow-sm relative overflow-hidden">
             <div class="flex justify-between items-center mb-4">
-                <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest" id="device-info">Cihaz Aranıyor...</p>
-                <div id="nft-status" class="flex space-x-1"></div>
+                <p id="device-model" class="text-[10px] font-bold text-blue-600 uppercase tracking-widest">ANALİZ EDİLİYOR...</p>
+                <span class="bg-green-100 text-green-700 text-[9px] px-2 py-1 rounded-full font-black">NODE ACTIVE</span>
             </div>
-            <h2 class="text-4xl font-black tracking-tight mb-1" id="totalNI">0.00</h2>
-            <p class="text-xs text-gray-400 font-bold mb-6 italic">TOPLAM NI TOKEN (Genesis Allocation)</p>
+            <h2 class="text-5xl font-black tracking-tighter mb-2" id="liveCounter">0.0000</h2>
+            <p class="text-xs text-gray-400 font-bold mb-8">BIRIKEN NI TOKEN (GENESIS)</p>
             
-            <div class="grid grid-cols-2 gap-3 mb-6">
+            <div class="grid grid-cols-2 gap-4 mb-8">
                 <div class="bg-white p-4 rounded-2xl border border-gray-100">
-                    <p class="text-[9px] font-bold text-blue-600">HIZ ÇARPANI</p>
-                    <p class="text-lg font-black" id="ui-multiplier">x1.00</p>
+                    <p class="text-[9px] font-bold text-gray-400 uppercase">Hız Çarpanı</p>
+                    <p class="text-xl font-black text-blue-600" id="ui-multiplier">x1.00</p>
                 </div>
                 <div class="bg-white p-4 rounded-2xl border border-gray-100">
-                    <p class="text-[9px] font-bold text-green-600">DOĞRU RESİM</p>
-                    <p class="text-lg font-black" id="ui-correct">0 / 50k</p>
+                    <p class="text-[9px] font-bold text-gray-400 uppercase">Doğru Resim</p>
+                    <p class="text-xl font-black" id="ui-correct">0 / 50k</p>
                 </div>
             </div>
-            
-            <button onclick="toggleMining()" id="mineBtn" class="w-full bg-black text-white py-4 rounded-2xl font-black text-lg shadow-xl active:scale-95 transition-all">AĞI ATEŞLE</button>
+            <button onclick="toggleMining()" id="mineBtn" class="w-full bg-black text-white py-5 rounded-[24px] font-black text-lg shadow-xl active:scale-95 transition-all">AĞI ATEŞLE</button>
         </div>
 
-        <div class="bg-blue-600 rounded-3xl p-6 text-white shadow-lg mb-6">
-            <h3 class="font-bold text-sm mb-2">Referans Linkin</h3>
-            <div class="flex bg-white/10 rounded-xl p-2 items-center">
-                <input id="refLink" readonly value="https://nexusintel.io/?ref=user" class="bg-transparent text-xs flex-1 outline-none">
-                <button onclick="copyRef()" class="bg-white text-blue-600 text-[10px] font-bold px-3 py-1 rounded-lg">KOPYALA</button>
+        <div class="bg-white border border-gray-100 rounded-3xl p-6 shadow-sm">
+            <h3 class="font-black text-sm mb-4 flex justify-between">TOP 100 PİLOT <span class="text-blue-600">HEPSİ</span></h3>
+            <div class="space-y-4">
+                <div class="flex justify-between items-center text-sm">
+                    <span class="font-bold">1. NexusAdmin (Siz)</span>
+                    <span class="font-black text-blue-600">0.00 NI</span>
+                </div>
+                <div class="flex justify-between items-center text-sm opacity-50">
+                    <span>2. Pilot_882</span>
+                    <span>12.450 NI</span>
+                </div>
             </div>
-            <p class="text-[9px] mt-2 opacity-80">* Her aktif pilot için +%2.5 kazım hızı kazanırsın.</p>
         </div>
     </main>
 
     <main id="tab-tasks" class="tab-content pt-24 px-6 max-w-md mx-auto">
         <div id="task-intro" class="text-center">
-            <div class="text-5xl mb-4">🧠</div>
-            <h2 class="text-2xl font-black mb-2">Vera Veri Eğitimi</h2>
-            <p class="text-gray-500 text-sm mb-6">10 soruluk testi hatasız bitir, çarpanını ve puanını artır.</p>
-            <button onclick="startTest()" class="bg-black text-white px-10 py-4 rounded-full font-bold shadow-lg">TESTİ BAŞLAT</button>
+            <h2 class="text-3xl font-black mb-4">Vera Veri Eğitimi</h2>
+            <p class="text-gray-500 text-sm mb-8">Her doğru cevap +0.5 NI. Dikkatli cöz, hatalı cevap puan kazandırmaz.</p>
+            <button onclick="startTest()" class="bg-black text-white px-12 py-4 rounded-full font-black shadow-2xl">TESTİ BAŞLAT</button>
         </div>
 
         <div id="task-area" class="hidden">
-            <div class="flex justify-between items-center mb-4 px-2">
-                <span class="text-xs font-bold text-gray-400 uppercase">SORU <span id="qIdx">1</span>/10</span>
-                <span id="feedback-label" class="text-lg font-bold"></span>
+            <div class="flex justify-between items-center mb-4">
+                <span class="text-xs font-black text-gray-400 uppercase">SORU <span id="qIdx">1</span>/10</span>
+                <span id="feedback-label" class="text-xs font-black px-3 py-1 rounded-full"></span>
             </div>
-            <div class="bg-white border-2 border-gray-100 rounded-[32px] overflow-hidden p-4">
-                <img id="qImg" src="https://picsum.photos/400/300" class="w-full h-52 object-cover rounded-2xl mb-4">
-                <div class="grid grid-cols-2 gap-3" id="qBtns">
-                    <button onclick="checkAns(true, this)" class="py-4 bg-gray-100 rounded-2xl font-bold active:scale-95 transition-all">AI Üretimi</button>
-                    <button onclick="checkAns(false, this)" class="py-4 bg-gray-100 rounded-2xl font-bold active:scale-95 transition-all">Gerçek Çekim</button>
+            <div class="bg-white border-2 border-gray-100 rounded-[32px] p-4 relative">
+                <div id="loader-5s" class="hidden absolute inset-0 glass z-10 flex items-center justify-center rounded-[32px]">
+                    <p class="font-black text-blue-600 animate-pulse text-sm uppercase">Veri İşleniyor (5s)...</p>
+                </div>
+                <img id="qImg" src="https://picsum.photos/400/300" class="w-full h-52 object-cover rounded-2xl mb-6">
+                <div class="grid grid-cols-2 gap-4">
+                    <button onclick="checkAns(true, this)" class="task-btn py-5 bg-gray-50 border border-gray-100 rounded-2xl font-black active:scale-95 transition-all">AI</button>
+                    <button onclick="checkAns(false, this)" class="task-btn py-5 bg-gray-50 border border-gray-100 rounded-2xl font-black active:scale-95 transition-all">GERÇEK</button>
                 </div>
             </div>
         </div>
 
         <div id="task-result" class="hidden text-center py-10">
-            <div class="text-7xl mb-4 animate-bounce">🏆</div>
-            <h2 class="text-3xl font-black mb-2">BÖLÜM BİTTİ</h2>
-            <p class="text-gray-500 mb-6">Skorun: <span id="finalScore" class="text-black font-black">0</span> / 10</p>
-            <div class="bg-blue-50 text-blue-700 p-4 rounded-2xl font-bold mb-6">
-                Kazanılan: <span id="ptsEarned">0</span> NI Puan
-            </div>
-            <p id="cd-text" class="text-xs text-red-500 font-bold">Yeni paket 30s içinde hazır olacak...</p>
+            <div class="text-7xl mb-6 animate-bounce">🏆</div>
+            <h2 class="text-3xl font-black mb-2">BÖLÜM TAMAMLANDI</h2>
+            <p class="text-gray-500 mb-8">Skorun: <span id="finalScore" class="text-black font-black">0</span> / 10</p>
+            <button onclick="resetTest()" class="bg-black text-white px-12 py-4 rounded-full font-black">YENİ TEST</button>
         </div>
     </main>
 
     <main id="tab-market" class="tab-content pt-24 px-6 max-w-md mx-auto">
-        <div class="bg-white border border-gray-100 rounded-3xl p-6 shadow-sm mb-6">
-            <h3 class="font-black mb-4">NI Tahsis Merkezi</h3>
-            <input type="number" id="buyInp" placeholder="TON Miktarı" oninput="updateNI()" class="w-full bg-gray-50 p-4 rounded-2xl font-bold mb-2 outline-none border focus:border-blue-500">
-            <p class="text-[10px] font-bold text-gray-400 mb-6">Tahmini Alacağın: <span id="niEst" class="text-black">0</span> NI</p>
-            <button onclick="buyNI()" class="w-full bg-blue-600 text-white py-4 rounded-2xl font-black shadow-lg">SATIN AL</button>
+        <div class="bg-gray-900 text-white rounded-3xl p-6 mb-6 shadow-xl">
+            <h3 class="text-xl font-black italic mb-2">MANIFESTO V1.0</h3>
+            <p class="text-[10px] opacity-70 mb-4 leading-relaxed">Nexus Intelligence: 50 yıllık vizyon, merkeziyetsiz yapay zeka ve işlem gücü ekosistemi.</p>
+            <button onclick="alert('Whitepaper: %40 Madenci, %25 Ekip, %25 Satış, %10 Rezerv. Kurucu: Nexus Intelligence Team.')" class="text-[10px] font-black border border-white/30 px-4 py-2 rounded-full uppercase">Vizyonu Oku</button>
         </div>
 
-        <div class="bg-gradient-to-br from-yellow-400 to-amber-600 rounded-[32px] p-6 text-white relative overflow-hidden">
-            <div class="relative z-10">
-                <p class="text-[10px] font-black opacity-80 uppercase tracking-tighter">SINIRLI 50 ADET</p>
-                <h3 class="text-2xl font-black italic mb-2">ELITE PILOT NFT</h3>
-                <p class="text-xs font-bold mb-6 leading-relaxed">Ömür boyu +%5.0 kazım hızı sağlar. 50 yıllık vizyonun en değerli parçası.</p>
-                <div class="flex justify-between items-center">
-                    <span class="text-2xl font-black">100 TON</span>
-                    <button onclick="buyElite()" class="bg-white text-amber-600 px-6 py-3 rounded-xl font-black text-sm shadow-xl">REZERVE ET</button>
-                </div>
+        <div class="bg-white border border-gray-100 rounded-3xl p-6 shadow-sm mb-6">
+            <h3 class="font-black mb-4">NI Tahsis Merkezi</h3>
+            <input type="number" id="buyInp" placeholder="TON Miktarı" oninput="document.getElementById('niEst').innerText = (this.value * 10000).toLocaleString()" class="w-full bg-gray-50 p-4 rounded-2xl font-bold mb-4 outline-none border focus:border-blue-500">
+            <div class="flex justify-between text-[10px] font-black uppercase text-gray-400 mb-6">
+                <span>Alacağın:</span>
+                <span class="text-black"><span id="niEst">0</span> NI</span>
             </div>
+            <button onclick="buyNI()" class="w-full bg-blue-600 text-white py-4 rounded-2xl font-black shadow-lg">ŞİMDİ SATIN AL</button>
         </div>
     </main>
 
     <div class="fixed bottom-0 w-full glass border-t border-gray-100 flex justify-around py-4 z-50">
-        <button onclick="switchTab('pilot')" class="flex flex-col items-center font-bold text-[10px]"><span class="mb-1 text-lg">🚀</span>PİLOT</button>
-        <button onclick="switchTab('tasks')" class="flex flex-col items-center font-bold text-[10px]"><span class="mb-1 text-lg">🧠</span>GÖREVLER</button>
-        <button onclick="switchTab('market')" class="flex flex-col items-center font-bold text-[10px]"><span class="mb-1 text-lg">💎</span>MARKET</button>
+        <button onclick="switchTab('pilot')" class="flex flex-col items-center font-bold text-[10px]"><span class="mb-1">🚀</span>PİLOT</button>
+        <button onclick="switchTab('tasks')" class="flex flex-col items-center font-bold text-[10px]"><span class="mb-1">🧠</span>GÖREVLER</button>
+        <button onclick="switchTab('market')" class="flex flex-col items-center font-bold text-[10px]"><span class="mb-1">💎</span>MARKET</button>
     </div>
 
     <script>
@@ -123,13 +124,11 @@
         let stats = {
             total: parseFloat(localStorage.getItem('n_total')) || 0,
             correct: parseInt(localStorage.getItem('n_correct')) || 0,
-            multiplier: 1.0,
-            nfts: [],
-            ref: 0
+            multiplier: 1.0
         };
 
         function updateUI() {
-            document.getElementById('totalNI').innerText = stats.total.toFixed(2);
+            document.getElementById('liveCounter').innerText = stats.total.toFixed(4);
             document.getElementById('ui-correct').innerText = `${stats.correct} / 50k`;
             document.getElementById('ui-multiplier').innerText = `x${stats.multiplier.toFixed(2)}`;
             localStorage.setItem('n_total', stats.total);
@@ -141,21 +140,21 @@
             document.getElementById('tab-'+t).classList.add('active');
         }
 
-        // Madencilik
+        // Madencilik Sistemi (TAMİR EDİLDİ)
         let miningInt;
         function toggleMining() {
             const btn = document.getElementById('mineBtn');
-            if(btn.innerText === "AĞI ATEŞLE") {
-                btn.innerText = "DURDUR"; btn.classList.replace('bg-black', 'bg-red-500');
-                miningInt = setInterval(() => { stats.total += (0.001 * stats.multiplier); updateUI(); }, 1000);
+            if(!miningInt) {
+                btn.innerText = "DURDUR"; btn.classList.replace('bg-black', 'bg-red-500'); btn.classList.add('mining-active');
+                miningInt = setInterval(() => { stats.total += (0.0001 * stats.multiplier); updateUI(); }, 1000);
             } else {
-                btn.innerText = "AĞI ATEŞLE"; btn.classList.replace('bg-red-500', 'bg-black');
-                clearInterval(miningInt);
+                btn.innerText = "AĞI ATEŞLE"; btn.classList.replace('bg-red-500', 'bg-black'); btn.classList.remove('mining-active');
+                clearInterval(miningInt); miningInt = null;
             }
         }
 
-        // Vera Task Mekaniği
-        let qIdx = 1, currentScore = 0, isCorrectAns;
+        // Vera Görevleri (5 SN GECİKMELİ)
+        let qIdx = 1, currentScore = 0, correctAns;
         function startTest() {
             document.getElementById('task-intro').classList.add('hidden');
             document.getElementById('task-area').classList.remove('hidden');
@@ -163,50 +162,55 @@
         }
 
         function loadQ() {
-            isCorrectAns = Math.random() > 0.5;
+            correctAns = Math.random() > 0.5;
             document.getElementById('qImg').src = "https://picsum.photos/400/300?r=" + Math.random();
             document.getElementById('qIdx').innerText = qIdx;
             document.getElementById('feedback-label').innerText = "";
             document.querySelectorAll('.task-btn').forEach(b => { b.classList.remove('correct-btn', 'wrong-btn'); b.disabled = false; });
+            document.getElementById('loader-5s').classList.add('hidden');
         }
 
         function checkAns(val, btn) {
+            document.querySelectorAll('.task-btn').forEach(b => b.disabled = true);
             const label = document.getElementById('feedback-label');
-            if(val === isCorrectAns) {
-                btn.classList.add('correct-btn'); label.innerText = "✅ DOĞRU"; currentScore++; stats.correct++;
+            
+            if(val === correctAns) {
+                btn.classList.add('correct-btn'); label.innerText = "✅ DOĞRU (+0.5)"; 
+                currentScore++; stats.correct++; stats.total += 0.5;
             } else {
-                btn.classList.add('wrong-btn'); label.innerText = "❌ YANLIŞ";
+                btn.classList.add('wrong-btn'); label.innerText = "❌ YANLIŞ (+0.0)";
             }
             updateUI();
-            setTimeout(() => {
-                if(qIdx < 10) { qIdx++; loadQ(); }
-                else { finishTest(); }
-            }, 800);
+
+            if(qIdx < 10) {
+                document.getElementById('loader-5s').classList.remove('hidden');
+                setTimeout(() => { qIdx++; loadQ(); }, 5000); // 5 Saniye Bekleme
+            } else {
+                setTimeout(finishTest, 1200);
+            }
         }
 
         function finishTest() {
             document.getElementById('task-area').classList.add('hidden');
             document.getElementById('task-result').classList.remove('hidden');
-            const points = currentScore * 0.5;
             document.getElementById('finalScore').innerText = currentScore;
-            document.getElementById('ptsEarned').innerText = points.toFixed(1);
-            stats.total += points;
-            updateUI();
-
-            let cd = 30;
-            const timer = setInterval(() => {
-                cd--; document.getElementById('cd-text').innerText = `Yeni paket ${cd}s içinde hazır olacak...`;
-                if(cd <= 0) { 
-                    clearInterval(timer); 
-                    document.getElementById('task-result').classList.add('hidden');
-                    document.getElementById('task-intro').classList.remove('hidden');
-                    qIdx = 1; currentScore = 0;
-                }
-            }, 1000);
         }
 
-        function updateNI() { document.getElementById('niEst').innerText = (document.getElementById('buyInp').value * 10000).toLocaleString(); }
-        
+        function resetTest() {
+            qIdx = 1; currentScore = 0;
+            document.getElementById('task-result').classList.add('hidden');
+            document.getElementById('task-intro').classList.remove('hidden');
+        }
+
+        // Cihaz Tanıma
+        window.onload = () => {
+            const ua = navigator.userAgent;
+            const model = ua.includes("Android") ? "ANDROID PILOT NODE" : ua.includes("iPhone") ? "IPHONE AI CORE" : "DESKTOP TERMINAL";
+            document.getElementById('device-model').innerText = model;
+            updateUI();
+        };
+
+        // TON Connect
         const tonConnectUI = new TON_CONNECT_UI.TonConnectUI({
             manifestUrl: 'https://nexusintelligencelabs.github.io/nexusintelligence.github.io/tonconnect-manifest.json',
             buttonRootId: 'ton-connect-button'
@@ -216,10 +220,8 @@
             const val = document.getElementById('buyInp').value;
             if(!val || val <= 0) return;
             const tx = { validUntil: Math.floor(Date.now()/1000)+60, messages: [{ address: ADMIN_WALLET, amount: (val * 1e9).toString() }] };
-            try { await tonConnectUI.sendTransaction(tx); alert("Ödeme Başarılı! NI bakiyeniz kısa sürede yansıyacaktır."); } catch(e) {}
+            try { await tonConnectUI.sendTransaction(tx); alert("İşlem Başarılı!"); } catch(e) { alert("Hata oluştu."); }
         }
-
-        updateUI();
     </script>
 </body>
 </html>

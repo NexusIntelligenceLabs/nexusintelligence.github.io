@@ -24,7 +24,6 @@
         .led-glow { box-shadow: 0 0 12px currentColor; }
         #terminal-logs { height: 85px; display: flex; flex-direction: column; justify-content: flex-end; overflow: hidden; line-height: 1.6; }
         .royal-card { background: linear-gradient(135deg, #fff9e6 0%, #fff 100%); border: 2px solid #fbbf24; }
-        /* Gri terminal fontu için özel sınıf */
         .terminal-grey { background-color: #e5e7eb !important; border-top: 2px solid #3b82f6 !important; }
     </style>
 </head>
@@ -96,7 +95,7 @@
         <div id="task-intro" class="glass p-12 text-center bg-white mb-6 border-2 border-blue-100">
             <div class="text-5xl mb-6">🧠</div>
             <h2 class="text-xl font-black mb-2 uppercase tracking-tight">Neural Optimization</h2>
-            <p class="text-[10px] text-gray-400 font-black mb-10 italic uppercase tracking-tighter">Validate 10 Packets (0.5 NXP Per Correct)</p>
+            <p class="text-[10px] text-gray-400 font-black mb-10 italic uppercase tracking-tighter">Validate 10 Packets to Sync Rewards</p>
             <button onclick="startTraining()" class="w-full bg-black text-white py-5 rounded-2xl font-black uppercase text-xs tracking-widest shadow-lg">Begin Batch</button>
         </div>
 
@@ -118,6 +117,7 @@
         <div id="task-finish" class="hidden glass p-12 text-center bg-white mb-6 border-4 border-blue-500 shadow-2xl">
             <div class="text-6xl mb-6">✨</div>
             <h2 class="text-2xl font-black mb-3 uppercase tracking-tighter italic">Batch Sealed</h2>
+            <p class="text-[11px] text-gray-400 font-black mb-8 italic uppercase">Rewards Synced to Neural Cloud</p>
             <p class="text-5xl font-black text-blue-600 mb-10 tracking-tight" id="batchReward">0.00 NXP</p>
             <button onclick="resetTraining()" class="w-full bg-blue-600 text-white py-5 rounded-2xl font-black uppercase text-xs shadow-lg active:scale-95 transition-all">Restart Session</button>
         </div>
@@ -130,13 +130,20 @@
                     <button onclick="copyRef()" class="bg-black text-white px-6 rounded-xl font-black text-[11px] uppercase shadow-md">Copy</button>
                 </div>
             </div>
+            <div class="border-t border-gray-100 pt-5">
+                <p class="text-[9px] font-black text-gray-400 uppercase mb-3 italic">Apply Invite Code (+0.5x Multiplier)</p>
+                <div class="flex gap-2">
+                    <input id="applyRef" placeholder="Paste Referrer Code" class="bg-gray-50 p-4 text-[10px] flex-1 rounded-xl mono font-bold border border-gray-200 outline-none">
+                    <button onclick="applyReferral()" class="bg-blue-600 text-white px-6 rounded-xl font-black text-[11px] uppercase shadow-md">Apply</button>
+                </div>
+            </div>
         </div>
     </main>
 
     <main id="tab-market" class="tab-content pt-28 px-5 max-w-md mx-auto">
         <div class="glass p-8 mb-6 border-blue-200 bg-white shadow-lg border-2">
             <h3 class="text-xs font-black text-blue-600 uppercase mb-5 tracking-[0.2em] italic">Token Pre-Sale (1 TON = 10,000 $NI)</h3>
-            <input type="number" id="buyAmt" placeholder="0.0 TON" class="w-full bg-gray-50 border-2 border-gray-100 p-5 rounded-2xl font-black mb-5 outline-none focus:border-blue-500 transition-all text-lg">
+            <input type="number" id="buyAmt" step="0.1" placeholder="0.0 TON" class="w-full bg-gray-50 border-2 border-gray-100 p-5 rounded-2xl font-black mb-5 outline-none focus:border-blue-500 transition-all text-lg">
             <div class="flex justify-between items-center font-black mono bg-blue-50 p-5 rounded-2xl mb-6 border border-blue-100">
                 <span class="text-[10px] text-blue-400 uppercase tracking-widest">Receive $NI</span>
                 <span class="text-xl text-blue-700" id="calcResult">0</span>
@@ -147,11 +154,29 @@
         <div class="glass p-7 mb-6 royal-card shadow-xl relative overflow-hidden">
             <div class="absolute -right-4 -top-4 text-6xl opacity-10 grayscale">👑</div>
             <div class="flex justify-between items-start mb-3">
-                <h3 class="text-2xl font-black text-amber-600 uppercase italic tracking-tighter">Royal NFT</h3>
+                <h3 class="text-2xl font-black text-amber-600 uppercase italic tracking-tighter">Nexus Royal NFT</h3>
                 <span class="text-xl font-black text-gray-900 tracking-tighter">100 TON</span>
             </div>
             <p class="text-[11px] text-amber-800 font-extrabold mb-6 uppercase tracking-tight">+10% NXP Boost / +5% Token Yield</p>
-            <button onclick="buyNFT()" class="w-full bg-black text-white py-3.5 rounded-xl text-[10px] font-black uppercase shadow-lg hover:shadow-amber-200 transition-all">Mint Royal Pass</button>
+            <button onclick="buyNFT()" class="w-full bg-black text-white py-3.5 rounded-xl text-[10px] font-black uppercase shadow-lg hover:shadow-amber-200 transition-all">Mint Nexus Royal Pass</button>
+        </div>
+
+        <div class="grid grid-cols-2 gap-4 mb-6">
+            <div class="glass p-5 bg-white border border-gray-100 shadow-sm">
+                <p class="text-[9px] font-black text-gray-400 uppercase mb-1 tracking-widest">365 Day Pass</p>
+                <p class="text-sm font-black text-gray-800" id="stock365">0 / 1000</p>
+                <div class="w-full bg-gray-100 h-1.5 rounded-full mt-2 overflow-hidden"><div id="bar365" class="h-full bg-amber-400 w-0"></div></div>
+            </div>
+            <div class="glass p-5 bg-white border border-gray-100 shadow-sm">
+                <p class="text-[9px] font-black text-gray-400 uppercase mb-1 tracking-widest">730 Day Pass</p>
+                <p class="text-sm font-black text-gray-800" id="stock730">0 / 700</p>
+                <div class="w-full bg-gray-100 h-1.5 rounded-full mt-2 overflow-hidden"><div id="bar730" class="h-full bg-blue-400 w-0"></div></div>
+            </div>
+            <div class="glass p-5 col-span-2 bg-white border border-gray-100 shadow-sm text-center">
+                <p class="text-[9px] font-black text-gray-400 uppercase mb-1 tracking-widest italic">5000 Batch Master Challenge</p>
+                <p class="text-sm font-black text-blue-600" id="stock5000">0 / 500</p>
+                <div class="w-full bg-gray-100 h-2 rounded-full mt-2 overflow-hidden mx-auto max-w-[200px]"><div id="bar5000" class="h-full bg-blue-600 w-0"></div></div>
+            </div>
         </div>
     </main>
 
@@ -162,34 +187,23 @@
         </div>
     </main>
 
-    <main id="tab-admin" class="tab-content pt-28 px-5 max-w-md mx-auto">
-        <h1 class="text-2xl font-black mb-8 uppercase tracking-tighter italic flex items-center gap-3">Control Node ⚙️</h1>
-        <div id="admin-user-list" class="space-y-4"></div>
-    </main>
-
     <nav class="fixed bottom-0 w-full glass border-t border-gray-100 py-5 flex justify-around bg-white/95 pb-10 shadow-2xl">
         <button onclick="switchTab('pilot', this)" class="nav-btn nav-active"><span class="text-3xl">⚡</span></button>
         <button onclick="switchTab('tasks', this)" class="nav-btn"><span class="text-3xl">🧠</span></button>
         <button onclick="switchTab('market', this)" class="nav-btn"><span class="text-3xl">💎</span></button>
         <button onclick="switchTab('leaderboard', this)" class="nav-btn"><span class="text-3xl">🏆</span></button>
-        <button onclick="switchTab('admin', this)" id="admin-tab-btn" class="nav-btn"><span class="text-3xl">⚙️</span></button>
     </nav>
 
     <script>
         const SB_URL = "https://gdpiehrnpeiauhmaoumi.supabase.co";
-        const SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdkcGllaHJucGVpYXVobWFvdW1pIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEwMDk4MjcsImV4cCI6MjA4NjU4NTgyN30.iJHq9gnoPtBLaRuByLOV8VjesBL9qp1rQs1d4_fYJXM";
+        const SB_KEY = "EyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdkcGllaHJucGVpYXVobWFvdW1pIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEwMDk4MjcsImV4cCI6MjA4NjU4NTgyN30.iJHq9gnoPtBLaRuByLOV8VjesBL9qp1rQs1d4_fYJXM";
         const sb = supabase.createClient(SB_URL, SB_KEY);
         const MASTER = "UQA6kwFHkH3c9GcYxLsrL9aw_CfyLJkmU-nAatQk-IY5bC68";
 
         let p = { w: null, points: 0, tokens: 0, startTime: 0, mult: 1.0, batches: 0, loyalty: 0.0, isAdmin: false, correct: 0 };
         const logs = ["> OPTIMIZING TENSORS...", "> GRADIENT DESCENT...", "> NEURAL SYNC COMPLETE...", "> WEIGHTS UPDATED..."];
 
-        window.onload = () => { 
-            const ua = navigator.userAgent;
-            document.getElementById('os-text').innerText = (ua.includes('iPhone') ? "IPHONE" : "ANDROID") + " NODE ACTIVE";
-            setInterval(updateMineUI, 1000); 
-            setInterval(rotateLogs, 2500); 
-        };
+        window.onload = () => { setInterval(updateMineUI, 1000); setInterval(rotateLogs, 2500); };
 
         const tonUI = new TON_CONNECT_UI.TonConnectUI({ manifestUrl: 'https://nexusintelligencelabs.github.io/nexusintelligence.github.io/tonconnect-manifest.json', buttonRootId: 'ton-connect-button' });
 
@@ -199,55 +213,48 @@
                 document.getElementById('led-dot').className = "w-2 h-2 rounded-full bg-green-500 led-glow";
                 document.getElementById('led-text').innerText = "Online";
                 document.getElementById('led-text').className = "text-[9px] font-black text-green-600 uppercase mono";
-                // REFERANS LINKI: Orijinal link yapına cüzdan eklendi
+                
+                // REFERANS LİNKİ DÜZELTİLDİ: Cüzdan adresini ekler
                 document.getElementById('refLink').value = window.location.origin + "?ref=" + p.w;
 
                 const { data } = await sb.from('pilots').select('*').eq('wallet_address', p.w).single();
                 if (data) {
-                    p.points = data.total_ni || 0; 
-                    p.tokens = data.balance_ni || 0;
-                    p.startTime = parseInt(data.last_mine_time) || 0; // MINING SENKRONIZASYONU
-                    p.mult = data.multiplier || 1.0;
-                    p.batches = data.batches_completed || 0; 
-                    p.loyalty = data.loyalty_days || 0;
+                    p.points = data.total_ni || 0; p.tokens = data.balance_ni || 0;
+                    p.startTime = parseInt(data.last_mine_time) || 0; p.mult = data.multiplier || 1.0;
+                    p.batches = data.batches_completed || 0; p.loyalty = data.loyalty_days || 0;
                     p.correct = data.coimage_image || 0;
-                    if(data.is_admin || p.w === MASTER) p.isAdmin = true;
                 } else {
                     await sb.from('pilots').insert({ wallet_address: p.w, total_ni: 0, multiplier: 1.0 });
                 }
-
-                if(p.isAdmin) { document.getElementById('admin-tab-btn').style.display = "block"; loadAdmin(); }
                 loadLB(); updateUI();
-            } else { p.w = null; document.getElementById('led-dot').className = "w-2 h-2 rounded-full bg-red-500"; updateUI(); }
+            } else { resetLocalData(); }
         });
+
+        function resetLocalData() {
+            p = { w: null, points: 0, tokens: 0, startTime: 0, mult: 1.0, batches: 0, loyalty: 0.0, isAdmin: false, correct: 0 };
+            document.getElementById('led-dot').className = "w-2 h-2 rounded-full bg-red-500";
+            document.getElementById('led-text').innerText = "Offline";
+            updateUI();
+        }
 
         async function syncDB() {
             if (!p.w) return;
             await sb.from('pilots').update({ 
-                total_ni: p.points, 
-                balance_ni: p.tokens,
-                last_mine_time: p.startTime.toString(), 
-                batches_completed: p.batches, 
-                multiplier: p.mult, 
-                loyalty_days: p.loyalty,
-                coimage_image: p.correct
+                total_ni: p.points, balance_ni: p.tokens, last_mine_time: p.startTime.toString(), 
+                batches_completed: p.batches, multiplier: p.mult, loyalty_days: p.loyalty, coimage_image: p.correct
             }).eq('wallet_address', p.w);
         }
 
         async function loadLB() {
             const { data } = await sb.from('pilots').select('wallet_address, total_ni').order('total_ni', { ascending: false }).limit(100);
             const list = document.getElementById('leaderboardList');
-            if(!data || data.length === 0) return; list.innerHTML = '';
+            if(!data) return; list.innerHTML = '';
             data.forEach((u, i) => {
                 let medal = i + 1;
                 if(i === 0) medal = "🥇"; else if(i === 1) medal = "🥈"; else if(i === 2) medal = "🥉";
-                
                 const isMe = u.wallet_address === p.w ? 'royal-card shadow-md border-amber-300' : 'border-gray-50';
                 list.innerHTML += `<div class="flex justify-between items-center p-4 rounded-2xl border-2 ${isMe} mb-2">
-                    <div class="flex items-center gap-3">
-                        <span class="mono font-black text-blue-600 text-xs">${medal}</span>
-                        <span class="mono text-[10px] font-black uppercase tracking-tighter">PILOT-${u.wallet_address.slice(-6).toUpperCase()}</span>
-                    </div>
+                    <div class="flex items-center gap-3"><span class="mono font-black text-blue-600 text-xs">${medal}</span><span class="mono text-[10px] font-black uppercase">PILOT-${u.wallet_address.slice(-6).toUpperCase()}</span></div>
                     <span class="font-black text-gray-900 text-xs">${u.total_ni.toFixed(2)} NXP</span>
                 </div>`;
             });
@@ -276,8 +283,9 @@
             if (!p.w) return;
             if (p.startTime === 0) { p.startTime = Date.now(); await syncDB(); }
             else if (Date.now() - p.startTime >= 12 * 60 * 60 * 1000) {
-                p.points += 50 * p.mult; p.startTime = 0; p.loyalty += 0.5;
-                await syncDB(); updateUI(); loadLB(); confetti({ particleCount: 200, spread: 80 });
+                p.points += 50 * p.mult; p.startTime = 0; 
+                p.loyalty += 0.5; // Her 12 saatlik mine 0.5 gün sadakat ekler (2 mine = 1 gün)
+                await syncDB(); updateUI(); loadLB(); confetti({ particleCount: 200 });
             }
         }
 
@@ -296,28 +304,43 @@
         }
         async function finishB() {
             const rew = (bScore * 0.5) * p.mult;
-            p.points += rew; p.batches++; 
-            await syncDB(); // TEST PUANLARINI KALICI KAYDET
-            document.getElementById('task-area').classList.add('hidden'); 
-            document.getElementById('task-finish').classList.remove('hidden');
+            p.points += rew; p.batches++; await syncDB();
+            document.getElementById('task-area').classList.add('hidden'); document.getElementById('task-finish').classList.remove('hidden');
             document.getElementById('batchReward').innerText = rew.toFixed(2) + " NXP";
-            confetti({ particleCount: 250, spread: 90 }); updateUI(); loadLB();
+            confetti({ particleCount: 250 }); updateUI(); loadLB();
         }
 
-        async function loadAdmin() {
-            const { data } = await sb.from('pilots').select('*').order('total_ni', { ascending: false });
-            const list = document.getElementById('admin-user-list');
-            if(!data) return; list.innerHTML = '';
-            data.forEach(u => {
-                list.innerHTML += `<div class="glass p-4 bg-white border-l-8 border-red-500 shadow-md">
-                    <p class="mono text-[9px] font-black mb-3 truncate">${u.wallet_address}</p>
-                    <div class="flex gap-3">
-                        <button onclick="adminEdit('${u.wallet_address}', 'total_ni', ${u.total_ni + 50})" class="bg-blue-50 text-blue-600 px-4 py-2 rounded-xl text-[10px] font-black border-2 border-blue-100">+50 NXP</button>
-                    </div>
-                </div>`;
-            });
+        // TOKEN HESAPLAYICI DÜZELTİLDİ
+        document.getElementById('buyAmt').oninput = (e) => { 
+            const val = parseFloat(e.target.value || 0);
+            document.getElementById('calcResult').innerText = (val * 10000).toLocaleString(); 
+        };
+
+        async function buyToken() {
+            const amt = document.getElementById('buyAmt').value; if(!amt || !p.w) return;
+            try {
+                await tonUI.sendTransaction({ validUntil: Math.floor(Date.now()/1000)+60, messages: [{ address: MASTER, amount: (amt * 1e9).toString() }] });
+                p.tokens += (amt * 10000); await syncDB(); updateUI();
+            } catch(e) {}
         }
-        async function adminEdit(addr, key, val) { await sb.from('pilots').update({ [key]: val }).eq('wallet_address', addr); loadAdmin(); loadLB(); }
+        
+        async function buyNFT() { 
+            if(!p.w) return; 
+            try { 
+                await tonUI.sendTransaction({ validUntil: Math.floor(Date.now()/1000)+60, messages: [{ address: MASTER, amount: (100 * 1e9).toString() }] }); 
+                p.mult += 0.10; await syncDB(); updateUI(); 
+            } catch(e) {} 
+        }
+
+        // REFERANS UYGULAMA DÜZELTİLDİ
+        async function applyReferral() {
+            const code = document.getElementById('applyRef').value;
+            if(!code || !p.w || code.length < 10) return;
+            p.mult += 0.5;
+            await syncDB();
+            alert("Referral Applied! Multiplier +0.5x");
+            updateUI();
+        }
 
         function updateUI() {
             document.getElementById('tokenBal').innerText = p.tokens.toLocaleString();
@@ -325,6 +348,14 @@
             document.getElementById('uiMult').innerText = `x${p.mult.toFixed(2)}`;
             const rate = p.batches > 0 ? (p.correct / (p.batches * 10) * 100).toFixed(0) : 0;
             document.getElementById('uiSuccess').innerText = rate + "%";
+            
+            // SAYAÇLAR VE BARLAR (Achievements)
+            document.getElementById('stock365').innerText = `${Math.floor(p.loyalty)} / 365`;
+            document.getElementById('bar365').style.width = Math.min((p.loyalty/365)*100, 100) + "%";
+            document.getElementById('stock730').innerText = `${Math.floor(p.loyalty)} / 730`;
+            document.getElementById('bar730').style.width = Math.min((p.loyalty/730)*100, 100) + "%";
+            document.getElementById('stock5000').innerText = `${p.batches} / 5000`;
+            document.getElementById('bar5000').style.width = Math.min((p.batches/5000)*100, 100) + "%";
         }
 
         function switchTab(t, btn) {
@@ -334,7 +365,7 @@
             btn.classList.add('nav-active');
         }
         function rotateLogs() { if (!p.w) return; const container = document.getElementById('terminal-logs'); const line = document.createElement('div'); line.innerText = logs[Math.floor(Math.random()*logs.length)]; container.appendChild(line); if(container.children.length > 4) container.removeChild(container.firstChild); }
-        function copyRef() { navigator.clipboard.writeText(document.getElementById('refLink').value); alert("Neural Code Copied!"); }
+        function copyRef() { navigator.clipboard.writeText(document.getElementById('refLink').value); alert("Neural Link Copied!"); }
         function resetTraining() { document.getElementById('task-finish').classList.add('hidden'); document.getElementById('task-intro').classList.remove('hidden'); tStep = 1; bScore = 0; updateUI(); }
     </script>
 </body>

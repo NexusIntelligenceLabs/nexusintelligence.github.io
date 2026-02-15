@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Nexus Intel | AI Training Node</title>
+    <title>Nexus Intel | AI Node</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/@tonconnect/ui@latest/dist/tonconnect-ui.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -11,71 +11,38 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800;900&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
     
     <style>
-        :root {
-            --bg: #f2f2f7; 
-            --accent: #007aff; 
-            --card: rgba(255, 255, 255, 0.95);
-        }
-
+        :root { --bg: #f2f2f7; --accent: #007aff; --card: rgba(255, 255, 255, 0.95); }
         body { font-family: 'Inter', sans-serif; background: var(--bg); color: #1c1c1e; overflow-x: hidden; }
         .mono { font-family: 'JetBrains Mono', monospace; }
-
-        .glass { 
-            background: var(--card); backdrop-filter: blur(20px); 
-            border: 1px solid rgba(255, 255, 255, 0.8); 
-            border-radius: 20px; box-shadow: 0 4px 24px rgba(0,0,0,0.04);
-        }
-
+        .glass { background: var(--card); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.8); border-radius: 20px; box-shadow: 0 4px 24px rgba(0,0,0,0.04); }
         .tab-content { display: none; }
         .tab-content.active { display: block; animation: slideUp 0.3s ease-out; }
         @keyframes slideUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-
-        /* WALLET UI */
-        #ton-connect-button button { 
-            background: #000 !important; border-radius: 12px !important; 
-            height: 36px !important; transition: 0.2s;
-        }
-        #ton-connect-button button:hover { transform: scale(1.02); }
-
+        #ton-connect-button button { background: #000 !important; border-radius: 12px !important; height: 38px !important; }
         .nav-btn { opacity: 0.3; transition: 0.3s; }
         .nav-active { opacity: 1; color: var(--accent); transform: scale(1.1); }
-
-        /* ELITE NFT STYLING */
-        .nft-card {
-            background: linear-gradient(135deg, #fff 0%, #f8f9fa 100%);
-            border: 1px solid #e5e7eb;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.05);
-            position: relative; overflow: hidden;
-        }
-        .nft-card::after {
-            content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%;
-            background: radial-gradient(circle, rgba(255,255,255,0.8) 0%, transparent 70%);
-            opacity: 0.3; pointer-events: none;
-        }
-
+        .nft-card { background: linear-gradient(135deg, #fff 0%, #f9fafb 100%); border: 1px solid #e5e7eb; position: relative; overflow: hidden; }
         .correct-btn { background: #34c759 !important; color: white !important; }
         .wrong-btn { background: #ff3b30 !important; color: white !important; }
-
-        /* TERMINAL SCROLL */
-        #terminal-logs { height: 75px; display: flex; flex-direction: column; justify-content: flex-end; }
+        #terminal-logs { height: 80px; display: flex; flex-direction: column; justify-content: flex-end; }
         .log-line { opacity: 0; animation: fadeInLog 0.3s forwards; }
         @keyframes fadeInLog { to { opacity: 1; } }
+        .led-glow { box-shadow: 0 0 8px currentColor; }
     </style>
 </head>
 <body class="pb-32">
 
     <nav class="fixed top-0 w-full z-50 glass px-5 py-4 flex justify-between items-center rounded-none bg-white/90 border-b">
         <div class="flex items-center gap-3">
-            <img id="main-logo" src="https://raw.githubusercontent.com/nexusintelligencelabs/nexusintelligence.github.io/main/logo.png" alt="NI" class="w-10 h-10 rounded-lg">
+            <img src="https://raw.githubusercontent.com/nexusintelligencelabs/nexusintelligence.github.io/main/logo.png" alt="NI" class="w-10 h-10 rounded-lg shadow-sm">
             <div class="leading-none">
                 <span class="text-xl font-black tracking-tighter">NEXUS</span>
                 <span class="text-[10px] block font-bold text-blue-600 tracking-widest mono uppercase">Intelligence</span>
             </div>
         </div>
-
         <div class="flex items-center gap-2">
-            <div id="status-led" class="flex items-center gap-1.5 bg-gray-100 px-2 py-1 rounded-full border">
-                <div id="led-dot" class="w-2 h-2 rounded-full bg-red-500 shadow-[0_0_5px_#ff3b30]"></div>
+            <div id="status-led" class="flex items-center gap-1.5 bg-gray-100 px-2.5 py-1.5 rounded-full border">
+                <div id="led-dot" class="w-2 h-2 rounded-full bg-red-500 led-glow text-red-500"></div>
                 <span id="led-text" class="text-[9px] font-black text-gray-500 uppercase mono">Offline</span>
             </div>
             <div id="ton-connect-button"></div>
@@ -84,90 +51,76 @@
 
     <main id="tab-pilot" class="tab-content active pt-24 px-5 max-w-md mx-auto">
         <div class="flex justify-between items-center mb-4 px-1">
-            <span id="os-text" class="text-[9px] font-bold text-gray-400 mono">IPHONE NODE • V2.7</span>
-            <span class="text-[9px] font-bold text-blue-500 mono">NETWORK: MAINNET</span>
+            <span id="os-text" class="text-[9px] font-bold text-gray-400 mono">NODE READY</span>
+            <span class="text-[9px] font-bold text-blue-500 mono">VERA CORE v2.8</span>
         </div>
 
-        <div class="glass p-6 mb-5 bg-white shadow-xl relative">
+        <div class="glass p-6 mb-5 bg-white shadow-xl">
             <div class="border-b pb-4 mb-4">
                 <p class="text-[10px] font-bold text-blue-600 mb-1">PRE-SALE BALANCE ($NI)</p>
                 <h2 class="text-4xl font-black tracking-tighter" id="tokenBal">0.00</h2>
             </div>
             <div>
-                <p class="text-[10px] font-bold text-gray-400 mb-1 uppercase">Neural Points (NXP)</p>
+                <p class="text-[10px] font-bold text-gray-400 mb-1">NEURAL POINTS (NXP)</p>
                 <h2 class="text-2xl font-bold text-gray-700 tracking-tight" id="pointBal">0.00</h2>
             </div>
         </div>
 
-        <div class="bg-blue-600/5 border border-blue-100 rounded-2xl p-4 mb-5 relative overflow-hidden">
-            <div class="absolute top-2 right-3 flex gap-1">
-                <div class="w-1.5 h-1.5 rounded-full bg-blue-200"></div>
-                <div class="w-1.5 h-1.5 rounded-full bg-blue-300"></div>
-                <div class="w-1.5 h-1.5 rounded-full bg-blue-400"></div>
-            </div>
-            <div id="terminal-logs" class="mono text-[10px] text-blue-800 leading-relaxed font-medium">
-                <div class="log-line">> WAITING FOR NODE SYNC...</div>
-                <div class="log-line">> ENCRYPTING PACKETS...</div>
+        <div class="bg-blue-600/5 border border-blue-100 rounded-2xl p-4 mb-5 shadow-inner">
+            <div id="terminal-logs" class="mono text-[10px] text-blue-800 leading-relaxed">
+                <div class="log-line">> SYSTEM STARTUP...</div>
+                <div class="log-line">> WAITING FOR SYNC...</div>
             </div>
         </div>
 
         <div class="glass p-5 mb-5 bg-white">
             <div class="flex justify-between items-end mb-2">
-                <span class="text-[10px] font-bold text-black uppercase">12H CLOUD MINING</span>
+                <span class="text-[10px] font-bold text-black uppercase">12H Cloud Training</span>
                 <span class="text-xs font-bold text-blue-600 mono" id="mineProgText">0 / 50 NXP</span>
             </div>
             <div class="w-full bg-gray-100 h-3 rounded-full overflow-hidden mb-4 border">
                 <div id="mineBar" class="h-full bg-blue-600 w-0 transition-all duration-1000"></div>
             </div>
-            <button id="mineBtn" onclick="toggleMining()" class="w-full bg-[#1c1c1e] text-white py-4 rounded-xl font-bold text-xs uppercase tracking-widest transition-all">
-                START NODE (12H)
-            </button>
-            <p id="timer-text" class="text-center mt-3 text-[10px] font-bold text-gray-400 mono">READY TO START</p>
+            <button id="mineBtn" onclick="toggleMining()" class="w-full bg-[#1c1c1e] text-white py-4 rounded-xl font-bold text-xs uppercase tracking-widest transition-all">START NODE (12H)</button>
+            <p id="timer-text" class="text-center mt-3 text-[10px] font-bold text-gray-400 mono">SESSION STANDBY</p>
         </div>
 
         <div class="grid grid-cols-2 gap-3">
-            <div class="glass p-3 flex flex-col items-center bg-white/80">
-                <p class="text-[9px] font-bold text-gray-400 mb-1 uppercase">Accuracy</p>
-                <p class="text-lg font-black text-blue-600" id="uiAcc">--%</p>
-            </div>
-            <div class="glass p-3 flex flex-col items-center bg-white/80">
-                <p class="text-[9px] font-bold text-gray-400 mb-1 uppercase">Multiplier</p>
-                <p class="text-lg font-black text-green-600" id="uiMult">x1.00</p>
-            </div>
+            <div class="glass p-3 flex flex-col items-center bg-white/80"><p class="text-[9px] font-bold text-gray-400 mb-1 uppercase">Accuracy</p><p class="text-lg font-black text-blue-600" id="uiAcc">--%</p></div>
+            <div class="glass p-3 flex flex-col items-center bg-white/80"><p class="text-[9px] font-bold text-gray-400 mb-1 uppercase">Multiplier</p><p class="text-lg font-black text-green-600" id="uiMult">x1.00</p></div>
         </div>
     </main>
 
     <main id="tab-tasks" class="tab-content pt-24 px-5 max-w-md mx-auto">
         <div class="glass p-5 mb-5">
-            <h3 class="text-[10px] font-bold uppercase mb-4 tracking-widest">Growth Progress</h3>
+            <h3 class="text-[10px] font-bold uppercase mb-4 tracking-widest">Growth Achievements</h3>
             <div class="mb-3">
-                <div class="flex justify-between text-[9px] mb-1 font-bold text-gray-500 uppercase">
-                    <span>365 Day Uptime</span> <span id="uptime-txt" class="text-green-600">0.0 Days</span>
-                </div>
-                <div class="w-full bg-gray-100 h-1.5 rounded-full overflow-hidden"><div id="uptime-bar" class="h-full bg-green-500 w-0"></div></div>
+                <div class="flex justify-between text-[9px] mb-1 font-bold text-gray-500 uppercase"><span>365 Day Uptime</span> <span id="uptime-txt" class="text-green-600">0.0 Days</span></div>
+                <div class="w-full bg-gray-100 h-1.5 rounded-full overflow-hidden"><div id="uptime-bar" class="h-full bg-green-500 w-0 transition-all"></div></div>
+            </div>
+            <div>
+                <div class="flex justify-between text-[9px] mb-1 font-bold text-gray-500 uppercase"><span>5000 Batch Training</span> <span id="test-p-txt" class="text-blue-600">0 / 5000</span></div>
+                <div class="w-full bg-gray-100 h-1.5 rounded-full overflow-hidden"><div id="test-p-bar" class="h-full bg-blue-600 w-0 transition-all"></div></div>
             </div>
         </div>
 
         <div id="task-intro" class="glass p-10 text-center bg-white">
-            <div class="text-3xl mb-4">🧠</div>
-            <h2 class="text-xl font-black mb-2">Neural Training</h2>
-            <p class="text-gray-400 text-xs mb-8">Process a batch of 10 tensors to earn NXP.</p>
-            <button onclick="startTraining()" class="w-full bg-black text-white py-4 rounded-xl font-bold uppercase text-xs">START BATCH</button>
+            <div class="text-4xl mb-4">🧠</div>
+            <h2 class="text-xl font-black mb-2">Neural Dataset V1</h2>
+            <p class="text-gray-400 text-xs mb-8">Analyze 10 tensors to optimize weights.</p>
+            <button onclick="startTraining()" class="w-full bg-black text-white py-4 rounded-xl font-bold uppercase text-xs">INITIALIZE BATCH</button>
         </div>
 
         <div id="task-area" class="hidden">
-            <div class="flex justify-between items-center mb-3">
-                <span class="text-[10px] font-bold text-blue-600 animate-pulse">● PROCESSING LIVE DATA</span>
-                <span id="taskStep" class="mono text-[10px] font-bold bg-white border px-2 py-1 rounded">1 / 10</span>
-            </div>
+            <div class="flex justify-between items-center mb-3"><span class="text-[10px] font-bold text-blue-600 animate-pulse">● NEURAL SYNC ACTIVE</span><span id="taskStep" class="mono text-[10px] font-bold bg-white border px-2 py-1 rounded">1 / 10</span></div>
             <div class="glass p-3 bg-white relative">
                 <div id="task-loader" class="hidden absolute inset-0 bg-white/95 z-20 flex items-center justify-center flex-col">
-                    <div class="mono text-[10px] font-bold mb-2">SYNCHRONIZING TENSORS...</div>
-                    <div class="w-24 h-1 bg-gray-200 rounded-full overflow-hidden"><div class="h-full bg-blue-600 animate-[width_3s_linear_infinite]"></div></div>
+                    <div class="mono text-[10px] font-bold mb-3">NEURAL WEIGHTS SYNCING...</div>
+                    <div class="w-32 h-1.5 bg-gray-100 rounded-full overflow-hidden border"><div class="h-full bg-blue-600 animate-[width_3s_linear_infinite]"></div></div>
                 </div>
                 <img id="qImg" src="" class="w-full h-56 object-cover rounded-xl mb-4 bg-gray-50 border">
                 <div class="grid grid-cols-2 gap-3">
-                    <button onclick="checkTask(true, this)" class="py-4 bg-gray-100 rounded-xl font-bold text-[10px] uppercase">AI GEN</button>
+                    <button onclick="checkTask(true, this)" class="py-4 bg-gray-100 rounded-xl font-bold text-[10px] uppercase">AI GENERATED</button>
                     <button onclick="checkTask(false, this)" class="py-4 bg-gray-100 rounded-xl font-bold text-[10px] uppercase">REAL PHOTO</button>
                 </div>
             </div>
@@ -175,55 +128,62 @@
 
         <div id="task-finish" class="hidden glass p-10 text-center bg-white">
             <div class="text-5xl mb-4">✨</div>
-            <h2 class="text-xl font-bold mb-6">Batch Optimized</h2>
-            <div class="bg-gray-50 p-4 rounded-2xl mb-6">
-                <p class="text-[10px] text-gray-400 uppercase font-bold mb-1">Total Reward</p>
+            <h2 class="text-xl font-bold mb-6">Optimization Complete</h2>
+            <div class="bg-gray-50 p-4 rounded-2xl mb-6 border">
+                <p class="text-[10px] text-gray-400 uppercase font-bold mb-1">Rewards Allocated</p>
                 <p class="text-3xl font-black text-black" id="batchReward">0.00 NXP</p>
             </div>
-            <button onclick="resetTraining()" class="w-full bg-blue-600 text-white py-4 rounded-xl font-bold uppercase text-xs">CONFIRM</button>
+            <button onclick="resetTraining()" class="w-full bg-blue-600 text-white py-4 rounded-xl font-bold uppercase text-xs">BACK TO NODE</button>
         </div>
     </main>
 
     <main id="tab-market" class="tab-content pt-24 px-5 max-w-md mx-auto">
-        <div class="glass p-6 mb-5 border-blue-200">
-            <h3 class="text-xs font-bold text-blue-600 uppercase mb-4 tracking-widest">Pre-Sale (1 TON = 10,000 $NI)</h3>
-            <input type="number" id="buyAmt" placeholder="Amount (TON)" class="w-full bg-gray-100 p-4 rounded-xl font-bold mb-4 outline-none">
-            <div class="bg-blue-50 p-4 rounded-xl flex justify-between items-center mb-4">
-                <span class="text-[10px] font-bold text-blue-400 uppercase">RECEIVE</span>
-                <span class="text-lg font-black mono" id="calcResult">0 $NI</span>
+        <h2 class="text-lg font-black mb-4 uppercase tracking-tighter">Nexus Store</h2>
+        
+        <div class="glass p-5 mb-5 border-blue-200">
+            <h3 class="text-[10px] font-bold text-blue-600 uppercase mb-4 tracking-widest">Pre-Sale ($NI) • 1 TON = 10k $NI</h3>
+            <input type="number" id="buyAmt" placeholder="Amount (TON)" class="w-full bg-gray-100 p-4 rounded-xl font-bold mb-3 outline-none">
+            <div class="bg-blue-50 p-3 rounded-xl flex justify-between items-center mb-4">
+                <span class="text-[9px] font-bold text-blue-400 uppercase">You Receive</span>
+                <span class="text-base font-black mono" id="calcResult">0 $NI</span>
             </div>
-            <button onclick="buyToken()" class="w-full bg-blue-600 text-white py-4 rounded-xl font-bold text-xs uppercase">PURCHASE $NI</button>
+            <button onclick="buyToken()" class="w-full bg-blue-600 text-white py-4 rounded-xl font-bold text-xs uppercase">PURCHASE TOKENS</button>
         </div>
 
-        <div class="nft-card p-6 rounded-2xl mb-5">
-            <div class="flex justify-between items-start mb-4">
-                <h3 class="text-xl font-black italic">Alpha K Elite</h3>
-                <span class="bg-black text-white text-[9px] px-2 py-1 rounded font-bold">LIMITED</span>
+        <div class="nft-card p-5 rounded-2xl mb-5">
+            <div class="flex justify-between items-start mb-2">
+                <h3 class="text-lg font-black italic">Nexus Royal NFT</h3>
+                <span class="bg-black text-white text-[8px] px-2 py-1 rounded font-bold">LEGENDARY</span>
             </div>
-            <p class="text-[11px] text-gray-500 mb-6 font-medium leading-relaxed">Exclusive node series. 
-                <br>• x1.05 Mining Boost 
-                <br>• Direct DAO Access</p>
-            <div class="flex justify-between items-center mb-6">
-                <span class="text-[10px] font-bold text-gray-400 uppercase">Available: <span class="text-black" id="nft-stock">-- / 20</span></span>
-                <span class="text-xl font-black">100 TON</span>
+            <p class="text-[10px] text-gray-400 mb-4 font-bold">PERKS: +10% NXP BOOST / +5% TOKEN REWARD</p>
+            <div class="flex justify-between items-center mb-4">
+                <span class="text-[10px] font-bold text-gray-400 uppercase">STOCK: <span class="text-black" id="nft-stock">-- / 100</span></span>
+                <span class="text-lg font-black">100 TON</span>
             </div>
-            <button onclick="buyNFT()" class="w-full bg-black text-white py-4 rounded-xl font-bold text-xs uppercase">MINT NOW</button>
+            <button onclick="buyNFT()" class="w-full bg-black text-white py-3.5 rounded-xl font-bold text-[10px] uppercase">MINT ROYAL NODE</button>
         </div>
 
-        <div class="glass p-5">
-             <p class="text-[10px] font-bold text-gray-400 uppercase mb-2">Referral Code (+0.5%)</p>
-             <div class="flex gap-2">
-                 <input id="refLink" readonly class="bg-gray-100 p-3 text-[10px] flex-1 rounded-xl mono font-bold">
-                 <button onclick="copyRef()" class="bg-gray-200 px-4 rounded-xl font-bold text-xs uppercase">COPY</button>
-             </div>
+        <div class="grid grid-cols-2 gap-3 mb-5">
+            <div class="glass p-4 bg-white/80">
+                <p class="text-[9px] font-bold text-gray-400 uppercase mb-1">365 Day Pass</p>
+                <p class="text-xs font-black" id="nft-365-stock">-- / 500</p>
+            </div>
+            <div class="glass p-4 bg-white/80">
+                <p class="text-[9px] font-bold text-gray-400 uppercase mb-1">730 Day Pass</p>
+                <p class="text-xs font-black" id="nft-730-stock">-- / 300</p>
+            </div>
+        </div>
+
+        <div class="glass p-5 mb-5 opacity-50 bg-gray-50 border-dashed border-2">
+            <p class="text-center text-[10px] font-bold text-gray-400 uppercase tracking-widest py-4">Hardware Market (Coming Soon)</p>
         </div>
     </main>
 
     <main id="tab-leaderboard" class="tab-content pt-24 px-5 max-w-md mx-auto">
-        <h1 class="text-xl font-black mb-6">Global Node Rankings</h1>
+        <h1 class="text-xl font-black mb-6 flex items-center gap-2">Global Ranking <span class="text-sm">🏆</span></h1>
         <div class="glass p-2 bg-white overflow-hidden">
             <div id="leaderboardList" class="space-y-1">
-                <div class="text-center py-10 animate-pulse text-gray-400 font-bold uppercase text-[10px]">Syncing Data...</div>
+                <div class="text-center py-10 animate-pulse text-gray-400 font-bold uppercase text-[10px]">Syncing Tensor Rankings...</div>
             </div>
         </div>
     </main>
@@ -236,88 +196,63 @@
     </nav>
 
     <script>
-        // CONFIG
         const SB_URL = "https://gdpiehrnpeiauhmaoumi.supabase.co";
         const SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdkcGllaHJucGVpYXVobWFvdW1pIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEwMDk4MjcsImV4cCI6MjA4NjU4NTgyN30.iJHq9gnoPtBLaRuByLOV8VjesBL9qp1rQs1d4_fYJXM";
         const sb = supabase.createClient(SB_URL, SB_KEY);
         const ADMIN = "UQA6kwFHkH3c9GcYxLsrL9aw_CfyLJkmU-nAatQk-IY5bC68";
 
-        let p = { 
-            w: null, points: 0, tokens: 0, startTime: 0, mult: 1.0,
-            correct: 0, wrong: 0, batches: 0, loyalty: 0.0
-        };
-
+        let p = { w: null, points: 0, tokens: 0, startTime: 0, mult: 1.0, correct: 0, wrong: 0, batches: 0, loyalty: 0.0 };
         const logs = ["> OPTIMIZING TENSORS...", "> GRADIENT CALCULATED...", "> WEIGHTS UPDATED...", "> PACKET SEALED...", "> SYNCING GLOBAL LEDGER..."];
 
         window.onload = () => {
             const ua = navigator.userAgent;
-            document.getElementById('os-text').innerText = (ua.includes('iPhone') ? "IPHONE" : "ANDROID") + " NODE • V2.7 ACTIVE";
+            document.getElementById('os-text').innerText = (ua.includes('iPhone') ? "IPHONE" : "ANDROID") + " NODE • ACTIVE";
             setInterval(rotateLogs, 2500);
             setInterval(updateMineUI, 1000);
             loadLB();
         };
 
-        const tonUI = new TON_CONNECT_UI.TonConnectUI({
-            manifestUrl: 'https://nexusintelligencelabs.github.io/nexusintelligence.github.io/tonconnect-manifest.json',
-            buttonRootId: 'ton-connect-button'
-        });
+        const tonUI = new TON_CONNECT_UI.TonConnectUI({ manifestUrl: 'https://nexusintelligencelabs.github.io/nexusintelligence.github.io/tonconnect-manifest.json', buttonRootId: 'ton-connect-button' });
 
-        // TON CONNECT
         tonUI.onStatusChange(async w => {
             if (w) {
                 p.w = w.account.address;
-                document.getElementById('led-dot').className = "w-2 h-2 rounded-full bg-green-500 shadow-[0_0_5px_#34c759]";
+                document.getElementById('led-dot').className = "w-2 h-2 rounded-full bg-green-500 led-glow text-green-500";
                 document.getElementById('led-text').innerText = "Online";
                 document.getElementById('led-text').className = "text-[9px] font-black text-green-600 uppercase mono";
-                document.getElementById('refLink').value = window.location.origin + "?ref=" + p.w;
                 
-                // DATA FETCH
                 const { data } = await sb.from('pilots').select('*').eq('wallet_address', p.w).single();
                 if (data) {
-                    p.points = data.total_ni || 0;
-                    p.tokens = data.balance_ni || 0;
-                    p.startTime = data.last_mine_time || 0;
-                    p.mult = data.multiplier || 1.0;
-                    p.correct = data.correct_images || 0;
-                    p.wrong = data.wrong_images || 0;
-                    p.batches = data.batches_completed || 0;
-                    p.loyalty = data.loyalty_days || 0;
+                    p.points = data.total_ni || 0; p.tokens = data.balance_ni || 0; p.startTime = data.last_mine_time || 0;
+                    p.mult = data.multiplier || 1.0; p.correct = data.correct_images || 0; p.wrong = data.wrong_images || 0;
+                    p.batches = data.batches_completed || 0; p.loyalty = data.loyalty_days || 0;
                 } else {
-                    await sb.from('pilots').insert({ wallet_address: p.w, total_ni: 0, balance_ni: 0 });
+                    await sb.from('pilots').insert({ wallet_address: p.w, total_ni: 0, balance_ni: 0, last_mine_time: 0, loyalty_days: 0 });
                 }
                 updateUI();
             } else {
-                p.w = null;
-                document.getElementById('led-dot').className = "w-2 h-2 rounded-full bg-red-500";
+                p.w = null; document.getElementById('led-dot').className = "w-2 h-2 rounded-full bg-red-500 led-glow text-red-500";
                 document.getElementById('led-text').innerText = "Offline";
                 updateUI();
             }
         });
 
-        // 12H MINING LOGIC
         function updateMineUI() {
-            if (!p.w || p.startTime === 0) {
-                document.getElementById('mineBar').style.width = "0%";
-                document.getElementById('mineBtn').innerText = "START NODE (12H)";
-                return;
-            }
-
+            if (!p.w || p.startTime === 0) { document.getElementById('mineBar').style.width = "0%"; document.getElementById('mineBtn').innerText = "START NODE (12H)"; document.getElementById('timer-text').innerText = "READY TO START"; return; }
             const elapsed = Date.now() - p.startTime;
             const limit = 12 * 60 * 60 * 1000;
             const prog = Math.min((elapsed / limit) * 100, 100);
-            
             document.getElementById('mineBar').style.width = prog + "%";
             document.getElementById('mineProgText').innerText = (50 * (prog / 100)).toFixed(2) + " / 50 NXP";
-
             if (elapsed >= limit) {
                 document.getElementById('mineBtn').innerText = "CLAIM 50 NXP REWARD";
                 document.getElementById('mineBtn').className = "w-full bg-green-600 text-white py-4 rounded-xl font-bold text-xs uppercase animate-pulse";
-                document.getElementById('timer-text').innerText = "SESSION COMPLETE";
+                document.getElementById('timer-text').innerText = "EVALUATION COMPLETE";
             } else {
                 const rem = limit - elapsed;
                 const h = Math.floor(rem / 3600000), m = Math.floor((rem % 3600000) / 60000), s = Math.floor((rem % 60000) / 1000);
                 document.getElementById('timer-text').innerText = `${h}H ${m}M ${s}S REMAINING`;
-                document.getElementById('mineBtn').innerText = "NODE RUNNING...";
+                document.getElementById('mineBtn').innerText = "TRAINING IN PROGRESS...";
                 document.getElementById('mineBtn').className = "w-full bg-[#1c1c1e] text-white py-4 rounded-xl font-bold text-xs opacity-50";
             }
         }
@@ -325,35 +260,24 @@
         async function toggleMining() {
             if (!p.w) return;
             if (p.startTime === 0) {
-                const now = Date.now();
-                p.startTime = now;
+                const now = Date.now(); p.startTime = now;
                 await sb.from('pilots').update({ last_mine_time: now }).eq('wallet_address', p.w);
             } else {
                 const elapsed = Date.now() - p.startTime;
                 if (elapsed >= 12 * 60 * 60 * 1000) {
+                    // ATOMIC READ-BEFORE-WRITE
                     const { data } = await sb.from('pilots').select('total_ni, loyalty_days').eq('wallet_address', p.w).single();
-                    const newPts = (data.total_ni || 0) + 50;
-                    const newLoyalty = (data.loyalty_days || 0) + 0.5; // 2 Claims = 1 Day
-                    
-                    await sb.from('pilots').update({ 
-                        total_ni: newPts, last_mine_time: 0, loyalty_days: newLoyalty 
-                    }).eq('wallet_address', p.w);
-                    
-                    p.points = newPts; p.startTime = 0; p.loyalty = newLoyalty;
+                    const nP = (data.total_ni || 0) + 50; const nL = (data.loyalty_days || 0) + 0.5;
+                    await sb.from('pilots').update({ total_ni: nP, last_mine_time: 0, loyalty_days: nL }).eq('wallet_address', p.w);
+                    p.points = nP; p.startTime = 0; p.loyalty = nL;
                     confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } });
                     updateUI();
                 }
             }
         }
 
-        // TASKS (3s Delay)
         let tStep = 1, bScore = 0;
-        function startTraining() {
-            if(!p.w) return;
-            document.getElementById('task-intro').classList.add('hidden');
-            document.getElementById('task-area').classList.remove('hidden');
-            nextQ();
-        }
+        function startTraining() { if(!p.w) return; document.getElementById('task-intro').classList.add('hidden'); document.getElementById('task-area').classList.remove('hidden'); nextQ(); }
         function nextQ() {
             if (tStep > 10) { finishB(); return; }
             document.getElementById('taskStep').innerText = `${tStep} / 10`;
@@ -368,44 +292,32 @@
             setTimeout(() => {
                 btn.className = "py-4 bg-gray-100 rounded-xl font-bold text-[10px] uppercase";
                 tStep++; nextQ();
-            }, 3000); // 3 Sec Delay
+            }, 3000); // 3 SEC DELAY
         }
         async function finishB() {
             const reward = bScore * 0.5;
             const { data } = await sb.from('pilots').select('total_ni').eq('wallet_address', p.w).single();
-            const newPts = (data.total_ni || 0) + reward;
-            await sb.from('pilots').update({ total_ni: newPts, correct_images: p.correct, wrong_images: p.wrong, batches_completed: ++p.batches }).eq('wallet_address', p.w);
-            p.points = newPts;
-            document.getElementById('batchReward').innerText = reward.toFixed(2) + " NXP";
-            document.getElementById('task-area').classList.add('hidden');
-            document.getElementById('task-finish').classList.remove('hidden');
+            const nP = (data.total_ni || 0) + reward;
+            await sb.from('pilots').update({ total_ni: nP, correct_images: p.correct, wrong_images: p.wrong, batches_completed: ++p.batches }).eq('wallet_address', p.w);
+            p.points = nP; document.getElementById('batchReward').innerText = reward.toFixed(2) + " NXP";
+            document.getElementById('task-area').classList.add('hidden'); document.getElementById('task-finish').classList.remove('hidden');
+            confetti({ particleCount: 100, spread: 50, origin: { y: 0.8 } });
             updateUI();
         }
 
-        // MARKET (1 TON = 10,000 $NI)
-        document.getElementById('buyAmt').oninput = (e) => {
-            document.getElementById('calcResult').innerText = (parseFloat(e.target.value || 0) * 10000).toLocaleString() + " $NI";
-        }
+        document.getElementById('buyAmt').oninput = (e) => { document.getElementById('calcResult').innerText = (parseFloat(e.target.value || 0) * 10000).toLocaleString() + " $NI"; }
         async function buyToken() {
             const amt = document.getElementById('buyAmt').value; if(!amt || !p.w) return;
             try {
                 await tonUI.sendTransaction({ validUntil: Math.floor(Date.now()/1000)+60, messages: [{ address: ADMIN, amount: (amt * 1e9).toString() }] });
                 const { data } = await sb.from('pilots').select('balance_ni').eq('wallet_address', p.w).single();
-                const newB = (data.balance_ni || 0) + (amt * 10000);
-                await sb.from('pilots').update({ balance_ni: newB }).eq('wallet_address', p.w);
-                p.tokens = newB; updateUI(); alert("Purchase Confirmed!");
+                const nB = (data.balance_ni || 0) + (amt * 10000);
+                await sb.from('pilots').update({ balance_ni: nB }).eq('wallet_address', p.w);
+                p.tokens = nB; updateUI(); alert("Tokens Added Successfully!");
             } catch(e) { console.log(e); }
         }
-        async function buyNFT() {
-            if(!p.w) return;
-            try {
-                await tonUI.sendTransaction({ validUntil: Math.floor(Date.now()/1000)+60, messages: [{ address: ADMIN, amount: (100 * 1e9).toString() }] });
-                p.mult += 0.05; await sb.from('pilots').update({ multiplier: p.mult }).eq('wallet_address', p.w);
-                updateUI(); alert("Alpha K Elite Activated!");
-            } catch(e) { }
-        }
+        async function buyNFT() { if(!p.w) return; try { await tonUI.sendTransaction({ validUntil: Math.floor(Date.now()/1000)+60, messages: [{ address: ADMIN, amount: (100 * 1e9).toString() }] }); p.mult += 0.10; await sb.from('pilots').update({ multiplier: p.mult }).eq('wallet_address', p.w); updateUI(); alert("Royal Node Activated!"); } catch(e) { } }
 
-        // UI HELPERS
         function updateUI() {
             document.getElementById('tokenBal').innerText = p.tokens.toLocaleString();
             document.getElementById('pointBal').innerText = p.points.toFixed(2);
@@ -414,9 +326,10 @@
             document.getElementById('uiAcc').innerText = tot === 0 ? "--%" : Math.round((p.correct/tot)*100) + "%";
             document.getElementById('uptime-txt').innerText = p.loyalty.toFixed(1) + " Days";
             document.getElementById('uptime-bar').style.width = Math.min((p.loyalty/365)*100, 100) + "%";
-            
-            // Stock Logic (Alpha K = 20 Limit)
-            document.getElementById('nft-stock').innerText = Math.max(0, 20 - Math.floor(p.mult * 5)) + " / 20";
+            document.getElementById('test-p-txt').innerText = `${p.batches} / 5000`;
+            document.getElementById('test-p-bar').style.width = Math.min((p.batches/5000)*100, 100) + "%";
+            document.getElementById('nft-stock').innerText = Math.max(0, 100 - Math.floor(p.mult*10)) + " / 100";
+            document.getElementById('nft-365-stock').innerText = "492 / 500"; document.getElementById('nft-730-stock').innerText = "298 / 300";
         }
 
         function switchTab(t, btn) {
@@ -428,26 +341,24 @@
 
         function rotateLogs() {
             const container = document.getElementById('terminal-logs');
-            const line = document.createElement('div');
-            line.className = "log-line";
-            line.innerText = logs[Math.floor(Math.random()*logs.length)];
-            container.appendChild(line);
-            if(container.children.length > 4) container.removeChild(container.firstChild);
+            const line = document.createElement('div'); line.className = "log-line"; line.innerText = logs[Math.floor(Math.random()*logs.length)];
+            container.appendChild(line); if(container.children.length > 4) container.removeChild(container.firstChild);
         }
 
         async function loadLB() {
-            const { data } = await sb.from('pilots').select('wallet_address, total_ni').order('total_ni', { ascending: false }).limit(20);
+            const { data } = await sb.from('pilots').select('wallet_address, total_ni').order('total_ni', { ascending: false }).limit(100);
             const list = document.getElementById('leaderboardList'); list.innerHTML = '';
             data.forEach((u, i) => {
-                const isMe = u.wallet_address === p.w ? 'border-blue-500 bg-blue-50' : 'border-gray-100 bg-white';
+                const isMe = u.wallet_address === p.w ? 'border-blue-500 bg-blue-50 shadow-md' : 'border-gray-100 bg-white';
                 const trophy = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : `#${i+1}`;
-                list.innerHTML += `<div class="flex justify-between items-center p-3 rounded-xl border-2 mb-2 ${isMe}">
-                    <div class="flex items-center gap-3"><span class="mono font-bold text-xs w-6">${trophy}</span><span class="mono text-[10px] font-bold">PILOT-${u.wallet_address.slice(-4).toUpperCase()}</span></div>
+                const glow = i < 3 ? 'font-black text-lg' : 'font-bold text-xs';
+                list.innerHTML += `<div class="flex justify-between items-center p-3.5 rounded-xl border-2 mb-2 ${isMe}">
+                    <div class="flex items-center gap-3"><span class="mono ${glow} w-8">${trophy}</span><span class="mono text-[10px] font-bold">PILOT-${u.wallet_address.slice(-4).toUpperCase()}</span></div>
                     <span class="font-black text-blue-600 text-xs">${u.total_ni.toFixed(2)} NXP</span>
                 </div>`;
             });
         }
-        function copyRef() { navigator.clipboard.writeText(document.getElementById('refLink').value); alert("Link Copied!"); }
+        function copyRef() { navigator.clipboard.writeText(window.location.origin + "?ref=" + p.w); alert("Ref Link Copied!"); }
         function resetTraining() { document.getElementById('task-finish').classList.add('hidden'); document.getElementById('task-intro').classList.remove('hidden'); tStep = 1; bScore = 0; }
     </script>
 </body>

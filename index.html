@@ -3,198 +3,245 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Nexus Intelligence | Architect Console</title>
+    <title>Nexus Intel | AI Node</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/@tonconnect/ui@latest/dist/tonconnect-ui.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    
     <style>
-        body { font-family: 'Inter', sans-serif; background: #000; color: white; overflow-x: hidden; }
-        .mono-font { font-family: 'Share Tech Mono', monospace; }
-        .glass-panel { background: rgba(15, 15, 15, 0.9); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 20px; }
-        .tab-content { display: none; }
-        .tab-content.active { display: block !important; animation: fadeIn 0.4s ease; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-        
-        /* MATRIX RAIN */
-        .matrix-bg { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; pointer-events: none; opacity: 0.2; }
-        .rain-col { position: absolute; top: -100%; color: #00ff41; font-family: monospace; font-size: 12px; writing-mode: vertical-rl; text-orientation: upright; animation: drop 4s linear infinite; }
-        @keyframes drop { 0% { top: -100%; opacity: 0; } 50% { opacity: 1; } 100% { top: 100%; opacity: 0; } }
+        /* APPLE WHITE THEME */
+        :root {
+            --bg-color: #f5f5f7;
+            --text-main: #1d1d1f;
+            --text-sec: #86868b;
+            --accent: #0071e3; /* Apple Blue */
+            --card-bg: rgba(255, 255, 255, 0.65);
+            --glass-border: rgba(255, 255, 255, 0.4);
+            --shadow: 0 4px 24px rgba(0, 0, 0, 0.04);
+        }
 
-        .nav-btn { opacity: 0.4; transition: 0.3s; transform: scale(0.9); }
-        .nav-active { opacity: 1; color: #3b82f6; transform: scale(1.1); text-shadow: 0 0 10px rgba(59, 130, 246, 0.5); }
-        .correct-btn { background: #10b981 !important; color: black !important; }
-        .wrong-btn { background: #ef4444 !important; color: white !important; }
-        #ton-connect-button { min-width: 140px; }
+        body { 
+            font-family: 'Inter', sans-serif; 
+            background: var(--bg-color); 
+            color: var(--text-main); 
+            overflow-x: hidden; 
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .mono-font { font-family: 'JetBrains Mono', monospace; }
+
+        /* FROSTED GLASS (Buzlu Cam - Beyaz) */
+        .glass-panel { 
+            background: var(--card-bg); 
+            backdrop-filter: blur(20px); 
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border); 
+            border-radius: 24px; 
+            box-shadow: var(--shadow);
+        }
+
+        .tab-content { display: none; }
+        .tab-content.active { display: block !important; animation: fadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* Navigation Icons */
+        .nav-btn { opacity: 0.4; transition: 0.3s; transform: scale(0.95); filter: grayscale(100%); }
+        .nav-active { opacity: 1; color: var(--accent); transform: scale(1.05); filter: grayscale(0%); }
+
+        /* Buttons & Interactions */
+        .btn-ios { 
+            background: var(--text-main); 
+            color: white; 
+            transition: transform 0.1s; 
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        .btn-ios:active { transform: scale(0.96); }
+
+        .correct-btn { background: #34c759 !important; color: white !important; border: none !important; }
+        .wrong-btn { background: #ff3b30 !important; color: white !important; border: none !important; }
+
+        /* Wallet Button Hide Text Trick */
+        #ton-connect-button button { 
+            background: var(--text-main) !important; 
+            border-radius: 50px !important;
+            padding: 8px 16px !important;
+        }
+        #ton-connect-button path { fill: white !important; }
+        /* Cüzdan bağlandığında yazıyı gizleyip ikon bırakmak için CSS trick */
+        div[class*="go1487791752"] { display: none !important; } 
+
+        .stat-label { font-size: 10px; font-weight: 600; color: var(--text-sec); text-transform: uppercase; letter-spacing: 0.5px; }
+        .stat-val { font-size: 18px; font-weight: 700; color: var(--text-main); }
     </style>
 </head>
 <body class="pb-32">
 
-    <div id="matrix" class="matrix-bg"></div>
-
-    <nav class="fixed top-0 w-full z-50 glass-panel border-b border-white/5 px-6 py-4 flex justify-between items-center rounded-none shadow-2xl">
+    <nav class="fixed top-0 w-full z-50 glass-panel border-b border-white/20 px-6 py-4 flex justify-between items-center rounded-none">
         <div class="flex flex-col">
-            <span class="text-xl font-black italic tracking-widest text-white uppercase">NEXUS <span class="text-blue-500">ARCHITECT</span></span>
-            <span id="device-info" class="text-[9px] font-bold text-gray-500 uppercase tracking-widest mono-font">SYSTEM CHECK...</span>
+            <span class="text-lg font-bold tracking-tight text-black">NEXUS <span class="text-blue-600">INTEL</span></span>
+            <span id="device-status" class="text-[9px] font-semibold text-green-600 uppercase tracking-widest mono-font">● SYSTEM ONLINE</span>
         </div>
         <div id="ton-connect-button"></div>
     </nav>
 
-    <main id="tab-pilot" class="tab-content active pt-28 px-6 max-w-md mx-auto">
-        <div class="text-center mb-4">
-            <span id="pilot-id-tag" class="bg-blue-900/30 text-blue-400 border border-blue-500/30 px-4 py-1 rounded-full text-[10px] font-bold tracking-widest uppercase">ID: CONNECT WALLET</span>
+    <main id="tab-pilot" class="tab-content active pt-28 px-5 max-w-md mx-auto">
+        
+        <div class="flex justify-center mb-6">
+            <span id="pilot-id-tag" class="bg-gray-200 text-gray-600 px-4 py-1.5 rounded-full text-[10px] font-bold tracking-widest uppercase shadow-sm">
+                WAITING FOR PILOT...
+            </span>
         </div>
 
-        <div class="glass-panel p-8 mb-6 text-center relative overflow-hidden border-t-2 border-blue-600">
-            <p class="text-[10px] text-gray-400 font-bold mb-2 uppercase tracking-widest">Confirmed Balance</p>
-            <h2 class="text-5xl font-black text-white tracking-tighter mb-8 flex justify-center items-center gap-2">
-                <span class="text-blue-500 text-3xl animate-pulse">◈</span> <span id="mainBal">0.00</span>
+        <div class="glass-panel p-8 mb-6 text-center relative overflow-hidden bg-white/80">
+            <p class="stat-label mb-2">Confirmed Balance</p>
+            <h2 class="text-5xl font-extrabold text-black tracking-tighter mb-8 flex justify-center items-center gap-1">
+                <span id="mainBal">0.00</span> <span class="text-lg text-blue-600 font-bold">$NI</span>
             </h2>
             
-            <div class="bg-white/5 rounded-2xl p-6 border border-white/5">
+            <div class="bg-gray-100/80 rounded-2xl p-5 border border-gray-200">
                 <div class="flex justify-between items-end mb-2">
-                    <span class="text-[10px] font-bold text-gray-400 uppercase mono-font">MINING BUFFER (SAVE)</span>
-                    <span class="text-xs font-bold text-blue-400 mono-font" id="poolTxt">0.00 / 50.00</span>
+                    <span class="text-[10px] font-bold text-gray-400 uppercase mono-font">CACHE BUFFER (UNSAVED)</span>
+                    <span class="text-xs font-bold text-blue-600 mono-font" id="poolTxt">0.00 / 50.00</span>
                 </div>
-                <div class="w-full bg-gray-800 h-2 rounded-full overflow-hidden mb-4 shadow-inner">
-                    <div id="poolBar" class="h-full bg-blue-600 w-0 transition-all duration-300 shadow-[0_0_15px_#2563eb]"></div>
+                <div class="w-full bg-gray-200 h-2 rounded-full overflow-hidden mb-4">
+                    <div id="poolBar" class="h-full bg-blue-600 w-0 transition-all duration-300"></div>
                 </div>
-                <button id="claimBtn" disabled onclick="claimTokens()" class="w-full py-3 rounded-xl font-bold text-[10px] bg-white/5 text-gray-600 uppercase tracking-widest transition-all">SEAL TO WALLET (MIN 50)</button>
+                <button id="claimBtn" disabled onclick="claimTokens()" class="w-full py-3.5 rounded-xl font-bold text-[11px] bg-gray-200 text-gray-400 uppercase tracking-widest transition-all">SEAL TO WALLET (MIN 50)</button>
             </div>
         </div>
 
-        <div id="mining-terminal" class="hidden glass-panel p-3 mb-4 bg-black/80 border-blue-500/20 text-[9px] mono-font text-blue-400 overflow-hidden h-12 flex flex-col justify-center">
-            <div id="log-content" class="animate-pulse">> INITIALIZING VERA CORE...</div>
+        <div id="mining-terminal" class="hidden glass-panel p-4 mb-4 bg-black text-white border-none shadow-xl">
+            <div class="text-[9px] mono-font text-green-400 flex flex-col gap-1 h-12 justify-center">
+                <div id="log-content" class="animate-pulse">> VERA_KERNEL_PANIC: NO_ERROR</div>
+            </div>
         </div>
 
-        <button onclick="toggleMining()" id="mineBtn" class="w-full bg-blue-600 hover:bg-blue-500 text-white py-6 rounded-2xl font-black text-lg shadow-[0_0_40px_rgba(37,99,235,0.2)] mb-8 active:scale-95 transition-all flex justify-center items-center gap-3 border border-white/10 group">
-            <span class="group-hover:rotate-180 transition-transform duration-500">❄️</span> <span id="mineText">INITIALIZE VERA ENGINE</span>
+        <button onclick="toggleMining()" id="mineBtn" class="w-full btn-ios py-5 rounded-2xl font-bold text-lg mb-6 flex justify-center items-center gap-3">
+            <span class="animate-spin-slow">💠</span> <span id="mineText">INITIALIZE VERA ENGINE</span>
         </button>
 
         <div class="grid grid-cols-2 gap-4">
-            <div class="glass-panel p-4 text-center">
-                <p class="text-[9px] text-gray-500 font-bold uppercase mb-1">Total Multiplier</p>
-                <p class="text-xl font-black text-green-400 mono-font" id="uiMult">x1.00</p>
+            <div class="glass-panel p-4 flex flex-col items-center justify-center">
+                <p class="stat-label mb-1">DATA ACCURACY</p>
+                <p class="stat-val text-blue-600" id="uiAcc">-%</p>
             </div>
-            <div class="glass-panel p-4 text-center">
-                <p class="text-[9px] text-gray-500 font-bold uppercase mb-1">Validated Data</p>
-                <p class="text-xl font-black text-white mono-font" id="uiCor">0</p>
+            <div class="glass-panel p-4 flex flex-col items-center justify-center">
+                <p class="stat-label mb-1">TOTAL BATCHES</p>
+                <p class="stat-val" id="uiBatches">0</p>
             </div>
         </div>
     </main>
 
-    <main id="tab-tasks" class="tab-content pt-28 px-6 max-w-md mx-auto">
-        <div class="glass-panel p-5 mb-6 border-l-4 border-blue-500">
-            <h3 class="text-[10px] font-black text-white uppercase mb-4 tracking-widest">NFT Achievement Progress</h3>
+    <main id="tab-tasks" class="tab-content pt-28 px-5 max-w-md mx-auto">
+        
+        <div class="glass-panel p-6 mb-6 bg-white/90">
+            <h3 class="text-[11px] font-bold text-black uppercase mb-5 tracking-widest flex items-center gap-2">
+                <span class="w-2 h-2 rounded-full bg-blue-600"></span> NFT Requirements
+            </h3>
             
-            <div class="mb-4">
-                <div class="flex justify-between text-[9px] mb-1 font-bold"><span>5000 DIAGNOSTICS</span> <span id="test-count">0/5000</span></div>
-                <div class="w-full bg-gray-800 h-1.5 rounded-full overflow-hidden"><div id="test-bar" class="h-full bg-blue-500 w-0 transition-all"></div></div>
+            <div class="mb-5">
+                <div class="flex justify-between text-[10px] mb-2 font-semibold text-gray-500">
+                    <span>5000 COMPLETED BATCHES</span> <span id="test-count" class="text-blue-600">0/5000</span>
+                </div>
+                <div class="w-full bg-gray-200 h-2 rounded-full overflow-hidden"><div id="test-bar" class="h-full bg-blue-600 w-0 transition-all rounded-full"></div></div>
             </div>
 
             <div>
-                <div class="flex justify-between text-[9px] mb-1 font-bold"><span>365 DAYS LOYALTY</span> <span id="loyalty-txt">0 Days</span></div>
-                <div class="w-full bg-gray-800 h-1.5 rounded-full overflow-hidden"><div id="loyalty-bar" class="h-full bg-green-500 w-0 transition-all"></div></div>
+                <div class="flex justify-between text-[10px] mb-2 font-semibold text-gray-500">
+                    <span>365 DAYS ACTIVE</span> <span id="loyalty-txt" class="text-green-600">0 Days</span>
+                </div>
+                <div class="w-full bg-gray-200 h-2 rounded-full overflow-hidden"><div id="loyalty-bar" class="h-full bg-green-500 w-0 transition-all rounded-full"></div></div>
             </div>
         </div>
 
-        <div id="task-intro" class="glass-panel p-10 text-center">
-            <div class="w-16 h-16 border-2 border-blue-500 rounded-full flex items-center justify-center mx-auto mb-6 text-2xl shadow-[0_0_20px_rgba(37,99,235,0.4)]">👁️</div>
-            <h2 class="text-2xl font-black mb-4 uppercase tracking-tight text-white">Neural Training</h2>
-            <p class="text-gray-400 text-xs mb-8 leading-relaxed font-mono">Rewards are ONLY distributed after completing a batch of 10 images. Incomplete batches are lost.</p>
-            <button onclick="startTraining()" class="w-full bg-white text-black py-4 rounded-xl font-black shadow-lg uppercase tracking-widest hover:bg-gray-200">START BATCH (10)</button>
+        <div id="task-intro" class="glass-panel p-10 text-center bg-white">
+            <div class="w-16 h-16 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center mx-auto mb-6 text-3xl shadow-sm">👁️</div>
+            <h2 class="text-2xl font-bold mb-3 text-black tracking-tight">AI Training Batch</h2>
+            <p class="text-gray-500 text-xs mb-8 leading-relaxed font-medium">Analyze 10 images to validate the neural network. Precision is key.</p>
+            <button onclick="startTraining()" class="w-full btn-ios py-4 rounded-xl font-bold uppercase tracking-widest">START BATCH (10)</button>
         </div>
 
         <div id="task-area" class="hidden">
             <div class="flex justify-between items-center mb-4 px-2">
-                <span class="text-[10px] font-bold text-blue-500 uppercase animate-pulse">● LIVE FEED</span>
-                <span id="taskStep" class="text-xs font-bold bg-white/10 px-3 py-1 rounded text-white mono-font">1 / 10</span>
+                <span class="text-[10px] font-bold text-blue-600 uppercase tracking-widest">● LIVE FEED</span>
+                <span id="taskStep" class="text-xs font-bold bg-white border px-3 py-1 rounded-full text-black mono-font shadow-sm">1 / 10</span>
             </div>
-            <div class="glass-panel p-4 relative overflow-hidden">
-                <div id="task-loader" class="hidden absolute inset-0 bg-black/95 z-20 flex items-center justify-center flex-col">
-                    <div class="text-blue-500 font-mono text-xs mb-2 uppercase">Uploading Neural Data...</div>
-                    <div class="w-32 h-1 bg-gray-800 rounded overflow-hidden"><div class="h-full bg-blue-500 animate-[width_5s_linear_forwards]" style="width:0%"></div></div>
+            <div class="glass-panel p-4 relative overflow-hidden bg-white">
+                <div id="task-loader" class="hidden absolute inset-0 bg-white/90 z-20 flex items-center justify-center flex-col backdrop-blur-sm">
+                    <div class="text-black font-bold text-xs mb-3 uppercase tracking-widest">Processing Data...</div>
+                    <div class="w-32 h-1 bg-gray-200 rounded-full overflow-hidden"><div class="h-full bg-black animate-[width_1s_ease_infinite]" style="width:0%"></div></div>
                 </div>
-                <img id="qImg" src="https://picsum.photos/400/300" class="w-full h-64 object-cover rounded-xl mb-6 border border-white/10">
+                <img id="qImg" src="" class="w-full h-64 object-cover rounded-2xl mb-6 shadow-sm bg-gray-100">
                 <div class="grid grid-cols-2 gap-4">
-                    <button id="btnAI" onclick="checkTask(true, this)" class="py-4 bg-white/5 border border-white/10 rounded-xl font-bold text-[10px] text-white uppercase hover:bg-white/10">AI GENERATED</button>
-                    <button id="btnReal" onclick="checkTask(false, this)" class="py-4 bg-white/5 border border-white/10 rounded-xl font-bold text-[10px] text-white uppercase hover:bg-white/10">REAL PHOTO</button>
+                    <button id="btnAI" onclick="checkTask(true, this)" class="py-5 bg-gray-100 rounded-xl font-bold text-[11px] text-gray-700 uppercase hover:bg-gray-200 transition-colors">AI GENERATED</button>
+                    <button id="btnReal" onclick="checkTask(false, this)" class="py-5 bg-gray-100 rounded-xl font-bold text-[11px] text-gray-700 uppercase hover:bg-gray-200 transition-colors">REAL PHOTO</button>
                 </div>
             </div>
         </div>
 
-        <div id="task-finish" class="hidden glass-panel p-10 text-center">
-            <div class="text-6xl mb-4">🏆</div>
-            <h2 class="text-2xl font-black mb-2 text-white">BATCH SEALED</h2>
-            <p class="text-gray-400 text-xs mb-6 mono-font">Analysis: <span id="batchResult" class="text-blue-400">0</span> / 10 Correct</p>
-            <div class="bg-green-900/20 p-4 rounded-xl border border-green-500/30 mb-6">
-                <p class="text-[10px] text-green-300 uppercase">Total Reward</p>
-                <p class="text-3xl font-black text-white" id="batchReward">0.00 $NI</p>
+        <div id="task-finish" class="hidden glass-panel p-10 text-center bg-white">
+            <div class="text-5xl mb-4">✨</div>
+            <h2 class="text-2xl font-bold mb-2 text-black">Batch Complete</h2>
+            <p class="text-gray-500 text-xs mb-6 font-medium">Accuracy Report: <span id="batchResult" class="text-blue-600 font-bold">0</span> / 10</p>
+            
+            <div class="bg-gray-50 p-4 rounded-2xl border border-gray-100 mb-6">
+                <p class="text-[10px] text-gray-400 uppercase font-bold">Reward</p>
+                <p class="text-3xl font-bold text-black" id="batchReward">0.00 $NI</p>
             </div>
-            <button onclick="resetTraining()" class="w-full bg-green-600 text-white py-4 rounded-xl font-black uppercase">CLAIM & RETURN</button>
+            <button onclick="resetTraining()" class="w-full bg-green-500 text-white py-4 rounded-xl font-bold uppercase shadow-lg shadow-green-500/20">SEAL & CLAIM</button>
         </div>
     </main>
 
-    <main id="tab-market" class="tab-content pt-28 px-6 max-w-md mx-auto">
-        <div class="glass-panel p-1 mb-6 bg-gradient-to-br from-yellow-500/20 to-orange-500/20 border-yellow-500/30">
-            <div class="bg-black/90 p-6 rounded-[19px]">
+    <main id="tab-market" class="tab-content pt-28 px-5 max-w-md mx-auto">
+        <div class="glass-panel p-1 mb-6 bg-gradient-to-br from-yellow-100 to-orange-50 border-orange-100">
+            <div class="bg-white/80 p-6 rounded-[22px] backdrop-blur-sm">
                 <div class="flex justify-between items-start mb-4">
-                    <h3 class="text-xl font-black text-white italic">ELITE NODE NFT</h3>
-                    <span class="bg-yellow-500 text-black text-[9px] px-2 py-1 rounded font-bold uppercase">Legendary</span>
+                    <h3 class="text-lg font-bold text-black">Elite Node NFT</h3>
+                    <span class="bg-yellow-400 text-white text-[9px] px-2 py-1 rounded font-bold uppercase">Gold</span>
                 </div>
-                <ul class="text-[10px] text-gray-400 mb-6 space-y-2 font-mono">
-                    <li>• <span class="text-white font-bold">+5% Lifetime Speed (x0.05)</span></li>
-                    <li>• Auto-Whitelist for Airdrop</li>
-                    <li>• Exclusive "Gold Node" Badge</li>
+                <ul class="text-[11px] text-gray-500 mb-6 space-y-2 font-medium">
+                    <li>• +5% Mining Efficiency</li>
+                    <li>• Airdrop Priority</li>
+                    <li>• Gold Profile Badge</li>
                 </ul>
-                <button onclick="buyNFT()" class="w-full bg-gradient-to-r from-yellow-600 to-orange-600 text-white py-3 rounded-xl font-bold text-xs uppercase shadow-lg hover:brightness-110">MINT FOR 100 TON</button>
+                <button onclick="buyNFT()" class="w-full bg-black text-white py-3.5 rounded-xl font-bold text-xs uppercase shadow-md">MINT (100 TON)</button>
             </div>
-        </div>
-
-        <div class="glass-panel p-6 mb-6 border-t-2 border-yellow-500">
-            <h3 class="text-xs font-bold text-yellow-500 mb-2 uppercase tracking-widest">VERA UPGRADE TEST</h3>
-            <p class="text-[9px] text-gray-500 mb-4 font-mono">Transfer 100 $NI from balance to Admin for testing upgrade logic.</p>
-            <button onclick="adminUpgradeTest()" class="w-full bg-white/10 text-white py-3 rounded-xl font-bold text-[10px] uppercase hover:bg-white/20 transition-all border border-white/5">EXECUTE UPGRADE TRANSFER</button>
         </div>
 
         <div class="glass-panel p-6 mb-6">
-            <h3 class="text-xs font-bold text-blue-400 mb-4 uppercase tracking-widest border-b border-white/10 pb-2">Quantum Calculator</h3>
-            <input type="number" id="buyAmt" placeholder="TON Amount (e.g. 0.5)" class="w-full bg-black/50 border border-white/20 p-4 rounded-xl outline-none font-bold text-white mb-4 mono-font focus:border-blue-500 transition-colors">
-            <div class="flex justify-between items-center bg-blue-900/20 p-4 rounded-xl border border-blue-500/20 mb-4">
-                <span class="text-[10px] text-blue-300 uppercase">You Receive:</span>
-                <span class="text-xl font-black text-white mono-font" id="calcResult">0 $NI</span>
-            </div>
-            <button onclick="buyToken()" class="w-full bg-white text-black py-4 rounded-xl font-black uppercase text-xs hover:bg-gray-200">PURCHASE TOKENS</button>
-        </div>
-
-        <div class="glass-panel p-6">
-             <p class="text-[10px] font-bold text-gray-500 uppercase mb-3">Referral Link (+1% Speed per User)</p>
-             <div class="flex gap-2">
-                 <input id="refLink" readonly value="Connect Wallet..." class="bg-black/50 border border-white/10 rounded-lg px-4 py-3 text-[10px] flex-1 outline-none text-gray-400 mono-font">
-                 <button onclick="copyRef()" class="bg-white/10 text-white font-bold px-4 rounded-lg text-[10px] hover:bg-white/20">COPY</button>
-             </div>
+            <h3 class="text-xs font-bold text-black mb-2 uppercase tracking-widest">System Upgrade</h3>
+            <p class="text-[10px] text-gray-500 mb-4">Transfer 100 $NI to Validator Node (Admin) for protocol upgrade.</p>
+            <button onclick="adminUpgradeTest()" class="w-full bg-gray-100 text-black py-3 rounded-xl font-bold text-[10px] uppercase border border-gray-200">EXECUTE TEST TRANSFER</button>
         </div>
     </main>
 
-    <main id="tab-leaderboard" class="tab-content pt-28 px-6 max-w-md mx-auto">
-        <h1 class="text-3xl font-black text-white mb-6 uppercase italic">Top 100 Nodes</h1>
-        <div class="glass-panel p-4 overflow-hidden">
-            <div class="flex justify-between text-[9px] font-bold text-gray-500 uppercase mb-4 px-2">
-                <span>Rank / Pilot ID</span>
-                <span>Total Mined</span>
+    <main id="tab-leaderboard" class="tab-content pt-28 px-5 max-w-md mx-auto">
+        <h1 class="text-2xl font-bold text-black mb-6 tracking-tight">Top Nodes</h1>
+        <div class="glass-panel p-2 overflow-hidden bg-white">
+            <div class="flex justify-between text-[9px] font-bold text-gray-400 uppercase mb-2 px-4 py-2">
+                <span>Pilot ID</span>
+                <span>Mined</span>
             </div>
-            <div id="leaderboardList" class="space-y-2 h-[400px] overflow-y-auto pr-2">
-                <div class="text-center text-xs text-gray-500 py-10">Loading Data Nodes...</div>
-            </div>
+            <div id="leaderboardList" class="space-y-1 h-[400px] overflow-y-auto pr-1">
+                </div>
         </div>
     </main>
 
-    <div class="fixed bottom-0 w-full glass-panel border-t border-white/5 flex justify-around py-6 z-50 rounded-none bg-black/95">
-        <button onclick="switchTab('pilot', this)" class="nav-btn nav-active flex flex-col items-center gap-1"><span class="text-xl">🚀</span></button>
-        <button onclick="switchTab('tasks', this)" class="nav-btn flex flex-col items-center gap-1"><span class="text-xl">🧠</span></button>
-        <button onclick="switchTab('market', this)" class="nav-btn flex flex-col items-center gap-1"><span class="text-xl">💎</span></button>
-        <button onclick="switchTab('leaderboard', this)" class="nav-btn flex flex-col items-center gap-1"><span class="text-xl">🏆</span></button>
+    <div class="fixed bottom-0 w-full glass-panel border-t border-white/40 flex justify-around py-4 z-50 rounded-none bg-white/80 pb-8">
+        <button onclick="switchTab('pilot', this)" class="nav-btn nav-active flex flex-col items-center gap-1">
+            <span class="text-2xl">⚡</span>
+        </button>
+        <button onclick="switchTab('tasks', this)" class="nav-btn flex flex-col items-center gap-1">
+            <span class="text-2xl">🧠</span>
+        </button>
+        <button onclick="switchTab('market', this)" class="nav-btn flex flex-col items-center gap-1">
+            <span class="text-2xl">💎</span>
+        </button>
+        <button onclick="switchTab('leaderboard', this)" class="nav-btn flex flex-col items-center gap-1">
+            <span class="text-2xl">🏆</span>
+        </button>
     </div>
 
     <script>
@@ -203,36 +250,29 @@
         const sb = supabase.createClient(SB_URL, SB_KEY);
         const ADMIN_WALLET = "UQA6kwFHkH3c9GcYxLsrL9aw_CfyLJkmU-nAatQk-IY5bC68";
 
-        // GLOBAL STATE (Madde 1: Cüzdan Hafızası Eklendi)
-        let p = { w: null, main: 0, pool: 0, mult: 1.0, cor: 0, ip: "0.0.0.0", start_date: Date.now() };
+        // --- GLOBAL STATE ---
+        // totalCorrect: Toplam doğru bilinen resim
+        // totalWrong: Toplam yanlış
+        // batches: Tamamlanan 10'lu paket sayısı
+        let p = { 
+            w: null, main: 0, pool: 0, mult: 1.0, 
+            totalCorrect: 0, totalWrong: 0, batches: 0,
+            start_date: Date.now() 
+        };
+        
         let mineTimer = null;
         let tStep = 1, cAns = true, batchScore = 0;
 
         const aiLogs = [
-            "> ANALYZING NEURAL DATA...", "> OPTIMIZING WEIGHTS...", "> VERA CORE SYNCING...", "> DATA PACKET VALIDATED...", "> TRAINING IMAGE #42..."
+            "> SYNCING_NEURAL_WEIGHTS...", "> OPTIMIZING_TENSOR_CORES...", 
+            "> VALIDATING_HASH_BLOCK...", "> UPLOADING_DATA_PACKET..."
         ];
 
-        // INITIALIZATION
+        // --- INITIALIZATION ---
         window.onload = async () => {
-            const ua = navigator.userAgent;
-            const dev = /iPhone|iPad|iPod/.test(ua) ? "IPHONE NODE" : /Android/.test(ua) ? "ANDROID NODE" : "WEB CONSOLE";
-            document.getElementById('device-info').innerText = dev + " | CONNECTED";
-            
-            const m = document.getElementById('matrix');
-            for(let i=0; i<15; i++) {
-                let s = document.createElement('div');
-                s.className = 'rain-col';
-                s.style.left = Math.random()*100+'%';
-                s.style.animationDuration = Math.random()*2+2+'s';
-                s.innerText = '101010101010';
-                m.appendChild(s);
-            }
-
-            try {
-                const res = await fetch('https://api.ipify.org?format=json');
-                const data = await res.json();
-                p.ip = data.ip;
-            } catch(e) {}
+            // Check Local Storage Buffer (Akıllı Hafıza)
+            const savedBuffer = localStorage.getItem('nexus_buffer');
+            if(savedBuffer) p.pool = parseFloat(savedBuffer);
             
             updateUI();
         };
@@ -245,64 +285,86 @@
             if(t === 'leaderboard') loadLeaderboard();
         }
 
+        // --- TON CONNECT & DATA SYNC ---
         const tonUI = new TON_CONNECT_UI.TonConnectUI({
             manifestUrl: 'https://nexusintelligencelabs.github.io/nexusintelligence.github.io/tonconnect-manifest.json',
             buttonRootId: 'ton-connect-button'
         });
 
-        // Madde 1: CÜZDAN BAZLI AKILLI SENKRONİZASYON
+        tonUI.uiOptions = { 
+            twaReturnUrl: 'https://t.me/NexusIntelligenceBot' 
+        };
+
         tonUI.onStatusChange(async w => {
             if (w) { 
                 p.w = w.account.address; 
-                document.getElementById('refLink').value = window.location.origin + "/?ref=" + p.w;
                 
-                // Pilot ID Belirle (Madde 3)
+                // Pilot ID (Anonim)
                 const pilotID = "PILOT-" + p.w.slice(-4).toUpperCase();
-                document.getElementById('pilot-id-tag').innerText = "ID: " + pilotID;
+                document.getElementById('pilot-id-tag').innerText = pilotID + " | ONLINE";
+                document.getElementById('pilot-id-tag').classList.replace('bg-gray-200', 'bg-green-100');
+                document.getElementById('pilot-id-tag').classList.replace('text-gray-600', 'text-green-700');
 
+                // Verileri Çek
                 const { data } = await sb.from('pilots').select('*').eq('wallet_address', p.w).single();
                 if (data) {
-                    p.main = data.total_ni; p.mult = data.multiplier; p.cor = data.correct_images;
-                    p.pool = data.mining_pool || 0;
+                    p.main = data.total_ni; 
+                    p.mult = data.multiplier || 1.0;
+                    p.totalCorrect = data.correct_images || 0;
+                    p.totalWrong = data.wrong_images || 0;
+                    p.batches = data.batches_completed || 0;
                     p.start_date = data.created_at ? new Date(data.created_at).getTime() : Date.now();
-                } else {
-                    // New user init
-                    p.main = 0; p.pool = 0; p.mult = 1.0; p.cor = 0; p.start_date = Date.now();
-                }
+                } 
+                
                 updateUI();
-                save();
             } else {
-                // Madde 1: Cüzdan yoksa her şeyi sıfırla (Reset)
-                p = { w: null, main: 0, pool: 0, mult: 1.0, cor: 0, ip: "0.0.0.0", start_date: Date.now() };
-                document.getElementById('pilot-id-tag').innerText = "ID: CONNECT WALLET";
+                // Çıkış Yapınca Reset
+                p.w = null; 
+                document.getElementById('pilot-id-tag').innerText = "WAITING FOR PILOT...";
+                document.getElementById('pilot-id-tag').classList.replace('bg-green-100', 'bg-gray-200');
+                document.getElementById('pilot-id-tag').classList.replace('text-green-700', 'text-gray-600');
                 clearInterval(mineTimer); mineTimer = null;
                 updateUI();
             }
         });
 
+        // --- UI UPDATE ENGINE ---
         function updateUI() {
             document.getElementById('mainBal').innerText = p.main.toFixed(2);
             document.getElementById('poolTxt').innerText = `${p.pool.toFixed(2)} / 50.00`;
-            document.getElementById('uiMult').innerText = `x${p.mult.toFixed(2)}`;
-            document.getElementById('uiCor').innerText = p.cor;
+            
+            // Accuracy Hesaplama
+            const total = p.totalCorrect + p.totalWrong;
+            const acc = total > 0 ? Math.round((p.totalCorrect / total) * 100) : 0;
+            document.getElementById('uiAcc').innerText = acc + "%";
+            document.getElementById('uiBatches').innerText = p.batches;
+
+            // Buffer Bar
             let prog = (p.pool / 50) * 100;
             document.getElementById('poolBar').style.width = Math.min(prog, 100) + "%";
             
-            // Madde 4: NFT Sayaçlarını Güncelle
-            document.getElementById('test-count').innerText = `${p.cor} / 5000`;
-            document.getElementById('test-bar').style.width = Math.min((p.cor / 5000 * 100), 100) + "%";
+            // NFT Barları (Batches & Days)
+            document.getElementById('test-count').innerText = `${p.batches}/5000`;
+            document.getElementById('test-bar').style.width = Math.min((p.batches / 5000 * 100), 100) + "%";
             
             const days = Math.floor((Date.now() - p.start_date) / (1000 * 60 * 60 * 24));
             document.getElementById('loyalty-txt').innerText = `${days} Days`;
             document.getElementById('loyalty-bar').style.width = Math.min((days / 365 * 100), 100) + "%";
 
+            // Claim Button Logic
+            const c = document.getElementById('claimBtn');
             if (p.pool >= 50) {
-                const c = document.getElementById('claimBtn');
-                c.disabled = false; c.classList.replace('bg-white/5', 'bg-blue-600'); c.classList.replace('text-gray-600', 'text-white');
+                c.disabled = false; 
+                c.classList.remove('bg-gray-200', 'text-gray-400');
+                c.classList.add('bg-blue-600', 'text-white', 'shadow-lg');
+            } else {
+                c.disabled = true;
+                c.classList.add('bg-gray-200', 'text-gray-400');
+                c.classList.remove('bg-blue-600', 'text-white', 'shadow-lg');
             }
         }
 
-        // Madde 5: GÖRSEL MINING & TERMINAL
+        // --- 1. MINING LOGIC (BUFFER MEMORY) ---
         function toggleMining() {
             const b = document.getElementById('mineBtn');
             const txt = document.getElementById('mineText');
@@ -310,37 +372,49 @@
             const logC = document.getElementById('log-content');
 
             if (!mineTimer) {
-                if(!p.w) return alert("Connect Wallet!");
-                txt.innerText = "VERA ENGINE ACTIVE"; b.classList.replace('bg-blue-600', 'bg-red-600');
+                if(!p.w) return alert("Connect Wallet First!");
+                
+                txt.innerText = "ENGINE ACTIVE"; 
+                b.classList.add('bg-black', 'text-white');
                 term.classList.remove('hidden');
+                
                 mineTimer = setInterval(() => { 
                     p.pool += (0.01 * p.mult); 
-                    logC.innerText = aiLogs[Math.floor(Math.random() * aiLogs.length)];
+                    localStorage.setItem('nexus_buffer', p.pool); // LOCAL STORAGE SAVE
+                    
+                    if(Math.random() > 0.7) logC.innerText = aiLogs[Math.floor(Math.random() * aiLogs.length)];
                     updateUI(); 
-                    if(Math.floor(Date.now()/1000)%10 === 0) save(); 
                 }, 1000);
             } else {
-                txt.innerText = "INITIALIZE VERA ENGINE"; b.classList.replace('bg-red-600', 'bg-blue-600');
+                txt.innerText = "INITIALIZE VERA ENGINE"; 
+                b.classList.remove('bg-black', 'text-white');
                 term.classList.add('hidden');
-                clearInterval(mineTimer); mineTimer = null; save();
+                clearInterval(mineTimer); mineTimer = null;
             }
-        }
-
-        async function save() {
-            if (!p.w) return;
-            await sb.from('pilots').upsert({ 
-                wallet_address: p.w, total_ni: p.main, correct_images: p.cor, multiplier: p.mult, ip_address: p.ip, mining_pool: p.pool 
-            });
         }
 
         async function claimTokens() {
             if (p.pool < 50) return;
-            p.main += p.pool; p.pool = 0;
-            updateUI(); save();
-            alert("Funds Secured.");
+            p.main += p.pool; 
+            p.pool = 0; 
+            localStorage.setItem('nexus_buffer', 0); // Buffer temizle
+            updateUI(); 
+            saveData();
+            confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 }, colors: ['#0071e3', '#000000'] });
         }
 
-        // Madde 2: TOPLU ÖDÜL (BATCH TRAINING)
+        async function saveData() {
+            if (!p.w) return;
+            await sb.from('pilots').upsert({ 
+                wallet_address: p.w, 
+                total_ni: p.main, 
+                correct_images: p.totalCorrect,
+                wrong_images: p.totalWrong,
+                batches_completed: p.batches
+            });
+        }
+
+        // --- 2. TRAINING (BATCH SYSTEM) ---
         function startTraining() {
             if(!p.w) return alert("Connect Wallet!");
             document.getElementById('task-intro').classList.add('hidden');
@@ -352,32 +426,48 @@
             if (tStep > 10) { finishBatch(); return; }
             document.getElementById('taskStep').innerText = `${tStep} / 10`;
             document.getElementById('task-loader').classList.add('hidden');
-            cAns = Math.random() > 0.5;
-            document.getElementById('qImg').src = `https://picsum.photos/400/300?sig=${Math.random()}`;
-            document.getElementById('btnAI').disabled = false; document.getElementById('btnReal').disabled = false;
+            
+            cAns = Math.random() > 0.5; // %50 AI, %50 Real
+            const seed = Math.floor(Math.random() * 9999);
+            document.getElementById('qImg').src = `https://picsum.photos/400/300?sig=${seed}`;
+            
+            document.getElementById('btnAI').disabled = false; 
+            document.getElementById('btnReal').disabled = false;
         }
 
         function checkTask(val, btn) {
-            document.getElementById('btnAI').disabled = true; document.getElementById('btnReal').disabled = true;
-            if (val === cAns) { batchScore++; btn.classList.add('correct-btn'); } 
-            else { btn.classList.add('wrong-btn'); }
+            document.getElementById('btnAI').disabled = true; 
+            document.getElementById('btnReal').disabled = true;
+            
+            if (val === cAns) { 
+                batchScore++; 
+                p.totalCorrect++;
+                btn.classList.add('correct-btn'); 
+            } else { 
+                p.totalWrong++;
+                btn.classList.add('wrong-btn'); 
+            }
             
             document.getElementById('task-loader').classList.remove('hidden');
             setTimeout(() => { 
                 btn.classList.remove('correct-btn', 'wrong-btn');
                 tStep++; nextQ(); 
-            }, 5000); 
+            }, 1000); // 1s Hızlı Geçiş
         }
 
         function finishBatch() {
             document.getElementById('task-area').classList.add('hidden');
             document.getElementById('task-finish').classList.remove('hidden');
-            const reward = batchScore * 0.5; // Toplu ödül hesapla
-            document.getElementById('batchResult').innerText = `${batchScore} / 10`;
+            
+            const reward = batchScore * 0.5; // Puan ödülü
+            p.main += reward; 
+            p.batches++; // PAKET SAYISINI ARTIR
+            
+            document.getElementById('batchResult').innerText = `${batchScore}`;
             document.getElementById('batchReward').innerText = reward.toFixed(2) + " $NI";
-            p.main += reward; p.cor += batchScore;
-            confetti({ particleCount: 200, spread: 80, origin: { y: 0.6 } });
-            save();
+            
+            saveData();
+            updateUI();
         }
 
         function resetTraining() {
@@ -386,59 +476,61 @@
             updateUI();
         }
 
-        // Madde: Admin Upgrade Testi
+        // --- 3. MARKET ACTIONS ---
         async function adminUpgradeTest() {
-            if(p.main < 100) return alert("Need 100 $NI!");
-            if(confirm("Test: Transfer 100 $NI to Admin?")) {
+            if(p.main < 100) return alert("Insufficient $NI Balance (Need 100)");
+            if(confirm("SYSTEM WARNING: Transfer 100 $NI to Validator Node for Upgrade?")) {
                 p.main -= 100;
-                await save();
+                await saveData();
                 updateUI();
-                alert("Upgrade Signal Sent to Validator.");
+                alert("Upgrade Signal Broadcasted to Network.");
             }
-        }
-
-        async function buyToken() {
-            const a = document.getElementById('buyAmt').value; if(!a || !p.w) return;
-            try {
-                await tonUI.sendTransaction({ validUntil: Math.floor(Date.now()/1000)+60, messages: [{ address: ADMIN_WALLET, amount: (a * 1e9).toString() }] });
-                alert("Success!");
-            } catch(e) { alert("Cancelled."); }
         }
 
         async function buyNFT() {
             if(!p.w) return alert("Connect Wallet!");
             try {
-                await tonUI.sendTransaction({ validUntil: Math.floor(Date.now()/1000)+60, messages: [{ address: ADMIN_WALLET, amount: (100 * 1e9).toString() }] });
+                await tonUI.sendTransaction({ 
+                    validUntil: Math.floor(Date.now()/1000)+60, 
+                    messages: [{ address: ADMIN_WALLET, amount: (100 * 1e9).toString() }] 
+                });
                 p.mult += 0.05;
-                save(); alert("Elite NFT Minted!"); updateUI();
-            } catch(e) { alert("Cancelled."); }
+                saveData(); alert("Elite Node Activated!"); updateUI();
+            } catch(e) { alert("Transaction Cancelled"); }
         }
 
-        // Madde 3: ANONİM LEADERBOARD
+        // --- 4. LEADERBOARD ---
         async function loadLeaderboard() {
             const list = document.getElementById('leaderboardList');
-            list.innerHTML = '<div class="text-center text-xs text-gray-500">Loading...</div>';
-            const { data } = await sb.from('pilots').select('wallet_address, total_ni').order('total_ni', { ascending: false }).limit(100);
+            list.innerHTML = '<div class="text-center text-xs text-gray-400 py-4">Syncing Nodes...</div>';
+            
+            const { data } = await sb.from('pilots')
+                .select('wallet_address, total_ni')
+                .order('total_ni', { ascending: false })
+                .limit(50);
+                
             list.innerHTML = '';
             if(data) {
                 data.forEach((u, i) => {
-                    // Madde 3: Cüzdan yerine Pilot ID göster
+                    // Admin Gizle
+                    if(u.wallet_address === ADMIN_WALLET) return;
+
                     const pID = "PILOT-" + u.wallet_address.slice(-4).toUpperCase();
+                    const isMe = u.wallet_address === p.w ? "bg-blue-50 border-blue-200" : "bg-white border-gray-100";
+                    
                     const row = document.createElement('div');
-                    row.className = "flex justify-between items-center bg-white/5 p-3 rounded-lg border border-white/5";
+                    row.className = `flex justify-between items-center p-3 rounded-xl border mb-2 ${isMe}`;
                     row.innerHTML = `
                         <div class="flex items-center gap-3">
-                            <span class="text-xs font-bold text-blue-500 w-6">#${i+1}</span>
-                            <span class="text-[10px] text-gray-400 font-mono">${pID}</span>
+                            <span class="text-xs font-bold text-gray-400 w-6">#${i+1}</span>
+                            <span class="text-[11px] font-bold text-black mono-font">${pID}</span>
                         </div>
-                        <span class="text-xs font-bold text-white">${u.total_ni.toFixed(2)} $NI</span>
+                        <span class="text-xs font-bold text-blue-600">${u.total_ni.toFixed(2)} $NI</span>
                     `;
                     list.appendChild(row);
                 });
             }
         }
-        
-        function copyRef() { navigator.clipboard.writeText(document.getElementById("refLink").value); alert("Referral Copied!"); }
     </script>
 </body>
 </html>

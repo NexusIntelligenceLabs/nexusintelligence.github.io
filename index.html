@@ -3,170 +3,217 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Nexus Intel | Core</title>
+    <title>Nexus Intel | Neural Core V30</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/@tonconnect/ui@latest/dist/tonconnect-ui.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&family=JetBrains+Mono:wght@500;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800;900&family=JetBrains+Mono:wght@500;800&display=swap" rel="stylesheet">
     
     <style>
-        :root { --bg: #f2f2f7; --accent: #007aff; }
+        :root { --bg: #f4f4f9; --accent: #007aff; --gold: #FFD700; }
         body { font-family: 'Inter', sans-serif; background: var(--bg); color: #1c1c1e; -webkit-font-smoothing: antialiased; }
         .mono { font-family: 'JetBrains Mono', monospace; }
-        .glass { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.8); border-radius: 24px; box-shadow: 0 4px 30px rgba(0,0,0,0.03); }
+        
+        .glass { 
+            background: rgba(255, 255, 255, 0.98); 
+            backdrop-filter: blur(25px); 
+            border: 1px solid rgba(255, 255, 255, 0.7); 
+            border-radius: 28px; 
+            box-shadow: 0 10px 40px rgba(0,0,0,0.03); 
+        }
+
         .tab-content { display: none; }
-        .tab-content.active { display: block; animation: fadeIn 0.4s ease; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
-        #ton-connect-button button { background: #000 !important; border-radius: 14px !important; }
-        .nav-btn { opacity: 0.3; transition: 0.3s; }
-        .nav-active { opacity: 1; color: var(--accent); transform: scale(1.1); }
-        .led-pulse { box-shadow: 0 0 12px currentColor; animation: pulse 2s infinite; }
-        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
-        .correct-btn { background: #34c759 !important; color: white !important; }
-        .wrong-btn { background: #ff3b30 !important; color: white !important; }
-        #terminal-logs { height: 65px; overflow: hidden; display: flex; flex-direction: column; justify-content: flex-end; }
+        .tab-content.active { display: block; animation: fadeIn 0.5s cubic-bezier(0.4, 0, 0.2, 1); }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
+
+        #ton-connect-button button { background: #000 !important; border-radius: 16px !important; height: 42px !important; transition: 0.3s; }
+        #ton-connect-button button:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(0,0,0,0.2); }
+
+        .nav-btn { opacity: 0.3; transition: 0.4s ease; transform: scale(0.9); }
+        .nav-active { opacity: 1; color: var(--accent); transform: scale(1.15); }
+
+        .led-status { box-shadow: 0 0 15px currentColor; animation: ledPulse 2s infinite; }
+        @keyframes ledPulse { 0%, 100% { opacity: 1; filter: brightness(1.2); } 50% { opacity: 0.6; filter: brightness(0.8); } }
+
+        /* TERMINAL STYLE */
+        #terminal-logs { height: 75px; overflow: hidden; display: flex; flex-direction: column; justify-content: flex-end; }
+        .log-line { animation: logFade 0.4s ease forwards; }
+        @keyframes logFade { from { opacity: 0; transform: translateX(-5px); } to { opacity: 1; transform: translateX(0); } }
+
+        /* ROYAL NFT SHINE */
+        .royal-card {
+            background: linear-gradient(135deg, #fff 0%, #fff9e6 100%);
+            border: 2px solid var(--gold);
+            position: relative;
+            box-shadow: 0 0 25px rgba(255, 215, 0, 0.2);
+        }
+        .royal-card::before {
+            content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%;
+            background: linear-gradient(45deg, transparent, rgba(255,215,0,0.1), transparent);
+            transform: rotate(45deg); animation: shine 4s infinite;
+        }
+        @keyframes shine { 0% { left: -100%; } 100% { left: 100%; } }
+
+        .btn-main { background: #1c1c1e; color: white; transition: 0.2s; box-shadow: 0 8px 20px rgba(0,0,0,0.1); }
+        .btn-main:active { transform: scale(0.96); }
     </style>
 </head>
-<body class="pb-36">
+<body class="pb-40">
 
-    <nav class="fixed top-0 w-full z-50 glass px-6 py-4 flex justify-between items-center rounded-none bg-white/90 border-b">
+    <nav class="fixed top-0 w-full z-50 glass px-6 py-5 flex justify-between items-center rounded-none border-b">
         <div class="flex items-center gap-3">
-            <img src="https://raw.githubusercontent.com/nexusintelligencelabs/nexusintelligence.github.io/main/logo.png" class="w-10 h-10 rounded-xl">
+            <img src="https://raw.githubusercontent.com/nexusintelligencelabs/nexusintelligence.github.io/main/logo.png" class="w-12 h-12 rounded-2xl shadow-lg border-2 border-white">
             <div class="leading-none">
-                <span class="text-xl font-black tracking-tighter uppercase">Nexus</span>
-                <span class="text-[10px] block font-bold text-blue-600 tracking-widest mono uppercase">Intelligence</span>
+                <span class="text-2xl font-black tracking-tighter uppercase">Nexus</span>
+                <span class="text-[11px] block font-bold text-blue-600 tracking-[0.3em] mono uppercase">Intelligence</span>
             </div>
         </div>
         <div class="flex items-center gap-3">
-            <div class="flex items-center gap-2 bg-gray-50 px-3 py-2 rounded-2xl border">
-                <div id="led-dot" class="w-2.5 h-2.5 rounded-full bg-red-500 led-pulse text-red-500"></div>
-                <span id="led-text" class="text-[10px] font-black uppercase mono tracking-tight text-gray-400">Offline</span>
+            <div class="flex items-center gap-2 bg-white/50 px-3 py-2 rounded-2xl border shadow-sm">
+                <div id="led-dot" class="w-3 h-3 rounded-full bg-red-500 led-status text-red-500"></div>
+                <span id="led-text" class="text-[10px] font-black uppercase mono tracking-tighter text-gray-400">Offline</span>
             </div>
             <div id="ton-connect-button"></div>
         </div>
     </nav>
 
-    <main id="tab-pilot" class="tab-content active pt-28 px-5 max-w-md mx-auto">
-        <div class="glass p-7 mb-6 bg-white">
-            <div class="border-b border-gray-100 pb-5 mb-5">
-                <p class="text-[10px] font-black text-blue-600 mb-1 uppercase tracking-widest">Pre-Sale Balance ($NI)</p>
-                <h2 class="text-4xl font-black tracking-tighter" id="tokenBal">0.00</h2>
+    <main id="tab-pilot" class="tab-content active pt-32 px-5 max-w-md mx-auto">
+        <div class="flex justify-between items-center mb-5 px-1">
+            <span id="node-type" class="text-[10px] font-black text-gray-400 mono uppercase tracking-widest">DETECTING DEVICE...</span>
+            <span class="text-[10px] font-bold text-blue-500 mono bg-blue-50 px-2 py-1 rounded-lg">VERA CORE v3.0</span>
+        </div>
+
+        <div class="glass p-8 mb-6 bg-white border-2 border-gray-50">
+            <div class="border-b border-gray-100 pb-6 mb-6">
+                <p class="text-[11px] font-black text-blue-600 mb-2 uppercase tracking-widest">Pre-Sale Balance ($NI)</p>
+                <h2 class="text-5xl font-black tracking-tighter" id="tokenBal">0.00</h2>
             </div>
             <div>
-                <p class="text-[10px] font-black text-gray-400 mb-1 uppercase tracking-widest">Neural Points (NXP)</p>
-                <h2 class="text-2xl font-bold text-gray-800" id="pointBal">0.00</h2>
+                <p class="text-[11px] font-black text-gray-400 mb-2 uppercase tracking-widest">Neural Points (NXP)</p>
+                <h2 class="text-3xl font-bold text-gray-800 tracking-tight" id="pointBal">0.00</h2>
             </div>
         </div>
 
-        <div class="bg-blue-600/[0.03] border border-blue-100 rounded-3xl p-5 mb-6 shadow-inner relative overflow-hidden">
-            <div id="terminal-logs" class="mono text-[10px] text-blue-800/80 leading-relaxed font-bold">
-                <div class="opacity-30">> INITIALIZING VERA CORE...</div>
-                <div class="opacity-60">> AWAITING NETWORK SYNC...</div>
+        <div class="bg-blue-600/[0.04] border border-blue-100 rounded-[32px] p-6 mb-6 shadow-inner">
+            <div id="terminal-logs" class="mono text-[11px] text-blue-900 leading-relaxed font-bold">
+                <div class="opacity-40">> SYSTEM INITIALIZED</div>
+                <div class="opacity-70">> AWAITING NEURAL HANDSHAKE...</div>
             </div>
         </div>
 
-        <div class="glass p-6 mb-6 bg-white border border-gray-100">
-            <div class="flex justify-between items-end mb-3">
-                <span class="text-[11px] font-black text-black uppercase tracking-widest">12H Training Session</span>
-                <span class="text-xs font-bold text-blue-600 mono" id="mineProgText">0 / 50 NXP</span>
+        <div class="glass p-7 mb-6 bg-white border border-gray-100">
+            <div class="flex justify-between items-end mb-4">
+                <span class="text-[12px] font-black text-black uppercase tracking-widest">12H Training Session</span>
+                <span class="text-sm font-bold text-blue-600 mono" id="mineProgText">0 / 50 NXP</span>
             </div>
-            <div class="w-full bg-gray-100 h-3.5 rounded-full overflow-hidden mb-5 border shadow-inner">
+            <div class="w-full bg-gray-100 h-4 rounded-full overflow-hidden mb-6 border shadow-inner">
                 <div id="mineBar" class="h-full bg-blue-600 w-0 transition-all duration-1000"></div>
             </div>
-            <button id="mineBtn" onclick="toggleMining()" class="w-full bg-[#1c1c1e] text-white py-4.5 rounded-2xl font-black text-xs uppercase tracking-[0.2em] transition-all shadow-lg active:scale-95">START NODE</button>
-            <p id="timer-text" class="text-center mt-4 text-[10px] font-bold text-gray-400 mono uppercase tracking-widest">System Standby</p>
+            <button id="mineBtn" onclick="toggleMining()" class="w-full btn-main py-5 rounded-3xl font-black text-xs uppercase tracking-[0.3em] shadow-xl">START NODE (12H)</button>
+            <p id="timer-text" class="text-center mt-5 text-[10px] font-bold text-gray-400 mono uppercase tracking-[0.2em]">Ready for optimization</p>
         </div>
     </main>
 
-    <main id="tab-tasks" class="tab-content pt-28 px-5 max-w-md mx-auto">
+    <main id="tab-tasks" class="tab-content pt-32 px-5 max-w-md mx-auto">
         
-        <div id="task-intro" class="glass p-10 text-center bg-white mb-6 border-blue-100 border-2">
-            <div class="text-4xl mb-5">🧠</div>
-            <h2 class="text-xl font-black mb-2 uppercase tracking-tight">Neural Dataset Training</h2>
-            <p class="text-gray-400 text-[11px] mb-8 font-medium">Verify 10 data packets to optimize neural weights.</p>
-            <button onclick="startTraining()" class="w-full bg-black text-white py-4.5 rounded-2xl font-black uppercase text-xs tracking-widest shadow-xl">INITIALIZE SESSION</button>
+        <div id="task-intro" class="glass p-10 text-center bg-white mb-6 border-blue-200 border-2">
+            <div class="text-5xl mb-6">🧠</div>
+            <h2 class="text-2xl font-black mb-3 tracking-tight">Dataset Training</h2>
+            <p class="text-gray-400 text-xs mb-10 leading-relaxed">Analyze 10 neural packets to optimize global weights and earn NXP.</p>
+            <button onclick="startTraining()" class="w-full bg-black text-white py-5 rounded-3xl font-black uppercase text-xs tracking-[0.2em] shadow-2xl">INITIALIZE BATCH</button>
         </div>
 
         <div id="task-area" class="hidden mb-6">
-            <div class="flex justify-between items-center mb-4"><span class="text-[10px] font-black text-blue-600 animate-pulse tracking-widest uppercase">● Processing Live Stream</span><span id="taskStep" class="mono text-[10px] font-black bg-white border px-3 py-1.5 rounded-xl shadow-sm">1 / 10</span></div>
-            <div class="glass p-4 bg-white relative overflow-hidden border-2 border-gray-100">
-                <div id="task-loader" class="hidden absolute inset-0 bg-white/95 z-20 flex items-center justify-center flex-col p-10 text-center">
-                    <div class="mono text-[10px] font-black mb-4 uppercase text-blue-600">Syncing Weights...</div>
-                    <div class="w-full h-1.5 bg-gray-100 rounded-full overflow-hidden border"><div class="h-full bg-blue-600 animate-[width_3s_linear_infinite]"></div></div>
+            <div class="flex justify-between items-center mb-5">
+                <span class="text-[11px] font-black text-blue-600 animate-pulse uppercase tracking-widest">● LIVE STREAM SYNC</span>
+                <span id="taskStep" class="mono text-[11px] font-black bg-white border px-4 py-2 rounded-2xl shadow-sm">1 / 10</span>
+            </div>
+            <div class="glass p-5 bg-white relative overflow-hidden border-2">
+                <div id="task-loader" class="hidden absolute inset-0 bg-white/98 z-30 flex items-center justify-center flex-col p-12 text-center">
+                    <div class="mono text-[11px] font-black mb-5 uppercase text-blue-600 tracking-widest">Neural Syncing...</div>
+                    <div class="w-full h-2 bg-gray-100 rounded-full overflow-hidden border"><div class="h-full bg-blue-600 animate-[width_3s_linear_infinite]"></div></div>
                 </div>
-                <img id="qImg" src="" class="w-full h-56 object-cover rounded-2xl mb-5 border shadow-sm">
-                <div class="grid grid-cols-2 gap-4">
-                    <button onclick="checkTask(true, this)" class="py-4.5 bg-gray-50 rounded-2xl font-black text-[10px] uppercase tracking-widest border border-gray-200">AI GEN</button>
-                    <button onclick="checkTask(false, this)" class="py-4.5 bg-gray-50 rounded-2xl font-black text-[10px] uppercase tracking-widest border border-gray-200">REAL</button>
+                <img id="qImg" src="" class="w-full h-64 object-cover rounded-3xl mb-6 border shadow-sm bg-gray-50">
+                <div class="grid grid-cols-2 gap-5">
+                    <button onclick="checkTask(true, this)" class="py-5 bg-gray-50 rounded-3xl font-black text-[11px] uppercase tracking-widest border border-gray-200 shadow-sm">AI GEN</button>
+                    <button onclick="checkTask(false, this)" class="py-5 bg-gray-50 rounded-3xl font-black text-[11px] uppercase tracking-widest border border-gray-200 shadow-sm">REAL</button>
                 </div>
             </div>
         </div>
 
-        <div id="task-finish" class="hidden glass p-10 text-center bg-white mb-6">
-            <div class="text-5xl mb-5">✨</div>
-            <h2 class="text-xl font-black mb-2">Dataset Optimized</h2>
-            <p class="text-3xl font-black text-blue-600 mb-8" id="batchReward">0.00 NXP</p>
-            <button onclick="resetTraining()" class="w-full bg-black text-white py-4.5 rounded-2xl font-black uppercase text-xs tracking-widest">SAVE & RETURN</button>
+        <div id="task-finish" class="hidden glass p-12 text-center bg-white mb-6">
+            <div class="text-6xl mb-6">✨</div>
+            <h2 class="text-2xl font-black mb-4 uppercase">Batch Sealed</h2>
+            <div class="bg-blue-50 p-6 rounded-[32px] mb-8 border border-blue-100">
+                <p class="text-[11px] text-blue-400 font-black uppercase mb-1">Rewards</p>
+                <p class="text-4xl font-black text-blue-600" id="batchReward">0.00 NXP</p>
+            </div>
+            <button onclick="resetTraining()" class="w-full btn-main py-5 rounded-3xl font-black uppercase text-xs tracking-widest">CONFIRM & SAVE</button>
         </div>
 
-        <div class="glass p-6 mb-6">
-            <h3 class="text-[11px] font-black uppercase mb-5 tracking-[0.2em] text-gray-400">Global Progress</h3>
-            <div class="space-y-5">
+        <div class="glass p-7 mb-6">
+            <h3 class="text-[11px] font-black uppercase mb-6 tracking-widest text-gray-400">Node Achievements</h3>
+            <div class="space-y-6">
                 <div>
-                    <div class="flex justify-between text-[10px] mb-2 font-black text-gray-600 uppercase"><span>365 Day Node Uptime</span> <span id="uptime-txt" class="text-green-600">0.0 Days</span></div>
-                    <div class="w-full bg-gray-100 h-2 rounded-full overflow-hidden"><div id="uptime-bar" class="h-full bg-green-500 w-0 transition-all"></div></div>
+                    <div class="flex justify-between text-[11px] mb-2 font-black text-gray-600 uppercase"><span>365 Day Uptime</span> <span id="uptime-txt" class="text-green-600">0.0 Days</span></div>
+                    <div class="w-full bg-gray-100 h-2.5 rounded-full overflow-hidden"><div id="uptime-bar" class="h-full bg-green-500 w-0 transition-all"></div></div>
                 </div>
                 <div>
-                    <div class="flex justify-between text-[10px] mb-2 font-black text-gray-600 uppercase"><span>5000 Batch Master</span> <span id="test-p-txt" class="text-blue-600">0 / 5000</span></div>
-                    <div class="w-full bg-gray-100 h-2 rounded-full overflow-hidden"><div id="test-p-bar" class="h-full bg-blue-600 w-0 transition-all"></div></div>
+                    <div class="flex justify-between text-[11px] mb-2 font-black text-gray-600 uppercase"><span>5000 Batch Master</span> <span id="test-p-txt" class="text-blue-600">0 / 5000</span></div>
+                    <div class="w-full bg-gray-100 h-2.5 rounded-full overflow-hidden"><div id="test-p-bar" class="h-full bg-blue-600 w-0 transition-all"></div></div>
                 </div>
             </div>
-            <div class="border-t border-gray-100 pt-6 mt-6">
-                <p class="text-[10px] font-black text-gray-400 uppercase mb-3 tracking-widest">Referral Engine (+0.5% Multiplier)</p>
-                <div class="flex gap-2">
-                    <input id="refLink" readonly class="bg-gray-50 p-3.5 text-[10px] flex-1 rounded-2xl mono font-bold border outline-none">
-                    <button onclick="copyRef()" class="bg-blue-600 text-white px-5 rounded-2xl font-black text-xs uppercase">Copy</button>
+            <div class="border-t border-gray-100 pt-7 mt-7">
+                <p class="text-[11px] font-black text-gray-400 uppercase mb-4 tracking-widest">Referral Engine (+0.5% Multiplier)</p>
+                <div class="flex gap-3">
+                    <input id="refLink" readonly class="bg-gray-50 p-4 text-[11px] flex-1 rounded-2xl mono font-bold border outline-none">
+                    <button onclick="copyRef()" class="bg-blue-600 text-white px-6 rounded-2xl font-black text-xs uppercase shadow-md active:scale-95">Copy</button>
                 </div>
             </div>
         </div>
     </main>
 
-    <main id="tab-market" class="tab-content pt-28 px-5 max-w-md mx-auto">
-        <div class="glass p-7 mb-6 border-blue-200 border-2">
-            <h3 class="text-[11px] font-black text-blue-600 uppercase mb-5 tracking-widest">Pre-Sale Access</h3>
-            <div class="text-[10px] font-bold text-gray-400 mb-4 uppercase">Exchange Rate: 1 TON = 10,000 $NI</div>
-            <input type="number" id="buyAmt" placeholder="TON Amount" class="w-full bg-gray-50 border p-4.5 rounded-2xl font-black mb-5 outline-none focus:border-blue-500 transition-colors">
-            <div class="flex justify-between text-base font-black mono bg-blue-600 text-white p-5 rounded-2xl mb-5 shadow-inner">
-                <span class="text-[10px] opacity-70">RECEIVE:</span>
+    <main id="tab-market" class="tab-content pt-32 px-5 max-w-md mx-auto">
+        <div class="glass p-8 mb-6 border-blue-200 border-2 shadow-xl">
+            <h3 class="text-xs font-black text-blue-600 uppercase mb-6 tracking-widest">Pre-Sale Access (1 TON = 10,000 $NI)</h3>
+            <input type="number" id="buyAmt" placeholder="TON Amount" class="w-full bg-gray-50 border p-5 rounded-3xl font-black mb-6 outline-none focus:border-blue-500 transition-colors">
+            <div class="flex justify-between text-lg font-black mono bg-blue-600 text-white p-6 rounded-[32px] mb-6 shadow-inner">
+                <span class="text-[11px] opacity-70">RECEIVE:</span>
                 <span id="calcResult">0 $NI</span>
             </div>
-            <button onclick="buyToken()" class="w-full bg-black text-white py-4.5 rounded-2xl font-black text-xs uppercase tracking-widest shadow-lg">SWAP FOR $NI</button>
+            <button onclick="buyToken()" class="w-full btn-main py-5 rounded-3xl font-black text-xs uppercase tracking-widest">SWAP FOR $NI</button>
         </div>
 
-        <h3 class="text-[11px] font-black uppercase mb-4 px-1 tracking-widest text-gray-400">Node Upgrades</h3>
-        <div class="glass p-6 mb-4 bg-gradient-to-br from-white to-gray-50 border-gray-100 border-2">
-            <div class="flex justify-between mb-3"><h3 class="text-lg font-black italic">Nexus Royal NFT</h3><span class="text-lg font-black">100 TON</span></div>
-            <p class="text-[10px] font-bold text-gray-500 mb-6 uppercase leading-relaxed tracking-tight">Perks: +10% NXP Production / +5% Token Yield</p>
-            <div class="flex justify-between items-center"><span class="text-[10px] font-black uppercase text-gray-400">Stok: <span id="nft-stock" class="text-black">0 / 100</span></span><button onclick="buyNFT()" class="bg-blue-600 text-white px-8 py-3 rounded-2xl text-[11px] font-black uppercase tracking-widest shadow-md">Mint</button></div>
+        <div class="glass p-7 mb-6 royal-card">
+            <div class="flex justify-between mb-4">
+                <h3 class="text-2xl font-black italic text-gray-800">Nexus Royal</h3>
+                <span class="text-xl font-black text-amber-600">100 TON</span>
+            </div>
+            <p class="text-[11px] font-bold text-amber-700 mb-8 uppercase leading-relaxed tracking-tighter">● +10% NXP Boost<br>● +5% Real Token Reward</p>
+            <div class="flex justify-between items-center">
+                <span class="text-[11px] font-black uppercase text-amber-800/60">Stock: <span id="nft-stock" class="text-black">0 / 100</span></span>
+                <button onclick="buyNFT()" class="bg-amber-500 text-white px-10 py-4 rounded-3xl text-[12px] font-black uppercase tracking-widest shadow-lg shadow-amber-200 active:scale-95">Mint</button>
+            </div>
         </div>
 
         <div class="grid grid-cols-2 gap-4 mb-6">
-            <div class="glass p-5"><p class="text-[9px] font-black text-gray-400 uppercase mb-2">365 Day Pass</p><p class="text-sm font-black" id="nft-365-stock">0 / 500</p></div>
-            <div class="glass p-5"><p class="text-[9px] font-black text-gray-400 uppercase mb-2">730 Day Pass</p><p class="text-sm font-black" id="nft-730-stock">0 / 300</p></div>
+            <div class="glass p-6"><p class="text-[10px] font-black text-gray-400 uppercase mb-2">365 Day Pass</p><p class="text-base font-black" id="nft-365-stock">0 / 500</p></div>
+            <div class="glass p-6"><p class="text-[10px] font-black text-gray-400 uppercase mb-2">730 Day Pass</p><p class="text-base font-black" id="nft-730-stock">0 / 300</p></div>
+            <div class="glass p-6 col-span-2"><p class="text-[10px] font-black text-gray-400 uppercase mb-2">5000 Batch Master</p><p class="text-base font-black" id="nft-test-stock">0 / 2000</p></div>
         </div>
     </main>
 
-    <main id="tab-leaderboard" class="tab-content pt-28 px-5 max-w-md mx-auto">
-        <h1 class="text-xl font-black mb-6 uppercase tracking-tight flex items-center gap-3">Global Rankings <span class="text-lg">🏆</span></h1>
-        <div class="glass p-2 bg-white"><div id="leaderboardList" class="space-y-1"><p class="text-center py-10 mono text-[11px] font-bold text-gray-400">LOADING NETWORK DATA...</p></div></div>
+    <main id="tab-leaderboard" class="tab-content pt-32 px-5 max-w-md mx-auto">
+        <h1 class="text-2xl font-black mb-8 uppercase tracking-tight flex items-center gap-4">Network Rankings <span class="text-xl">🏆</span></h1>
+        <div class="glass p-3 bg-white"><div id="leaderboardList" class="space-y-2"><p class="text-center py-12 mono text-[12px] font-bold text-gray-400 animate-pulse uppercase">Syncing Neural Standings...</p></div></div>
     </main>
 
-    <nav class="fixed bottom-0 w-full glass border-t py-5 flex justify-around rounded-none bg-white/95 pb-10">
-        <button onclick="switchTab('pilot', this)" class="nav-btn nav-active"><span class="text-2xl">⚡</span></button>
-        <button onclick="switchTab('tasks', this)" class="nav-btn"><span class="text-2xl">🧠</span></button>
-        <button onclick="switchTab('market', this)" class="nav-btn"><span class="text-2xl">💎</span></button>
-        <button onclick="switchTab('leaderboard', this)" class="nav-btn"><span class="text-2xl">🏆</span></button>
+    <nav class="fixed bottom-0 w-full glass border-t py-6 flex justify-around rounded-none bg-white/98 pb-12">
+        <button onclick="switchTab('pilot', this)" class="nav-btn nav-active"><span class="text-3xl">⚡</span></button>
+        <button onclick="switchTab('tasks', this)" class="nav-btn"><span class="text-3xl">🧠</span></button>
+        <button onclick="switchTab('market', this)" class="nav-btn"><span class="text-3xl">💎</span></button>
+        <button onclick="switchTab('leaderboard', this)" class="nav-btn"><span class="text-3xl">🏆</span></button>
     </nav>
 
     <script>
@@ -175,12 +222,14 @@
         const sb = supabase.createClient(SB_URL, SB_KEY);
         const ADMIN = "UQA6kwFHkH3c9GcYxLsrL9aw_CfyLJkmU-nAatQk-IY5bC68";
 
-        // Global State (Using raw wallet address for DB safety)
+        // APP STATE
         let p = { w: null, points: 0, tokens: 0, startTime: 0, mult: 1.0, correct: 0, wrong: 0, batches: 0, loyalty: 0.0 };
         const logMsg = ["> OPTIMIZING TENSORS...", "> GRADIENT CALCULATED...", "> WEIGHTS UPDATED...", "> PACKET SEALED...", "> SYNCING GLOBAL LEDGER..."];
 
         window.onload = () => {
-            document.getElementById('os-text').innerText = (navigator.userAgent.includes('iPhone') ? "IPHONE" : "ANDROID") + " NODE v3.0 ACTIVE";
+            const ua = navigator.userAgent;
+            const devText = (ua.includes('iPhone') || ua.includes('iPad')) ? "IPHONE NODE" : (ua.includes('Android') ? "ANDROID NODE" : "WEB NODE");
+            document.getElementById('node-type').innerText = devText + " • ACTIVE";
             setInterval(updateMineUI, 1000);
             setInterval(rotateLogs, 2500);
             loadLB();
@@ -190,47 +239,48 @@
 
         tonUI.onStatusChange(async w => {
             if (w) {
-                p.w = w.account.address; // BU BİZİM GERÇEK ANAHTARIMIZ
-                document.getElementById('led-dot').className = "w-2.5 h-2.5 rounded-full bg-green-500 led-pulse text-green-500";
+                p.w = w.account.address; // HAM ADRES (DB GÜVENLİĞİ İÇİN)
+                document.getElementById('led-dot').className = "w-3 h-3 rounded-full bg-green-500 led-status text-green-500";
                 document.getElementById('led-text').innerText = "Online";
-                document.getElementById('led-text').className = "text-[10px] font-black uppercase mono tracking-tight text-green-600";
+                document.getElementById('led-text').className = "text-[10px] font-black uppercase mono tracking-tighter text-green-600";
                 document.getElementById('refLink').value = window.location.origin + "?ref=" + p.w;
                 
-                // DATA FETCH (CRITICAL: Using exact address match)
-                const { data } = await sb.from('pilots').select('*').eq('wallet_address', p.w).single();
+                // DATA FETCH (CRITICAL: RAW ADDRESS MATCH)
+                const { data, error } = await sb.from('pilots').select('*').eq('wallet_address', p.w).single();
                 if (data) {
                     p.points = data.total_ni || 0; p.tokens = data.balance_ni || 0; p.startTime = data.last_mine_time || 0;
                     p.mult = data.multiplier || 1.0; p.correct = data.correct_images || 0; p.wrong = data.wrong_images || 0;
                     p.batches = data.batches_completed || 0; p.loyalty = data.loyalty_days || 0;
                 } else {
-                    await sb.from('pilots').insert({ wallet_address: p.w, total_ni: 0, balance_ni: 0, last_mine_time: 0, loyalty_days: 0 });
+                    await sb.from('pilots').insert({ wallet_address: p.w, total_ni: 0, balance_ni: 0, multiplier: 1.0, batches_completed: 0, loyalty_days: 0 });
                 }
                 updateUI();
             } else {
-                p.w = null; document.getElementById('led-dot').className = "w-2.5 h-2.5 rounded-full bg-red-500 text-red-500";
+                p.w = null; 
+                document.getElementById('led-dot').className = "w-3 h-3 rounded-full bg-red-500 text-red-500";
                 document.getElementById('led-text').innerText = "Offline";
                 updateUI();
             }
         });
 
-        // 12H MINING (Atomic Update)
+        // 12H MINING (Atomic Sync)
         function updateMineUI() {
-            if (!p.w || p.startTime === 0) { document.getElementById('mineBar').style.width = "0%"; document.getElementById('mineBtn').innerText = "START NODE (12H)"; document.getElementById('timer-text').innerText = "SYSTEM STANDBY"; return; }
+            if (!p.w || p.startTime === 0) { document.getElementById('mineBar').style.width = "0%"; document.getElementById('mineBtn').innerText = "START NODE (12H)"; return; }
             const elapsed = Date.now() - p.startTime;
             const limit = 12 * 60 * 60 * 1000;
             const prog = Math.min((elapsed / limit) * 100, 100);
             document.getElementById('mineBar').style.width = prog + "%";
             document.getElementById('mineProgText').innerText = (50 * (prog / 100)).toFixed(2) + " / 50 NXP";
             if (elapsed >= limit) {
-                document.getElementById('mineBtn').innerText = "CLAIM REWARD";
-                document.getElementById('mineBtn').className = "w-full bg-green-600 text-white py-4.5 rounded-2xl font-black text-xs uppercase animate-pulse shadow-lg";
-                document.getElementById('timer-text').innerText = "OPTIMIZATION COMPLETE";
+                document.getElementById('mineBtn').innerText = "CLAIM 50 NXP REWARD";
+                document.getElementById('mineBtn').className = "w-full bg-green-600 text-white py-5 rounded-3xl font-black text-xs uppercase animate-pulse shadow-lg";
+                document.getElementById('timer-text').innerText = "SESSION OPTIMIZED";
             } else {
                 const rem = limit - elapsed;
                 const h = Math.floor(rem / 3600000), m = Math.floor((rem % 3600000) / 60000), s = Math.floor((rem % 60000) / 1000);
                 document.getElementById('timer-text').innerText = `${h}H ${m}M ${s}S REMAINING`;
-                document.getElementById('mineBtn').innerText = "MINING...";
-                document.getElementById('mineBtn').className = "w-full bg-black opacity-30 text-white py-4.5 rounded-2xl font-black text-xs";
+                document.getElementById('mineBtn').innerText = "MINING IN PROGRESS...";
+                document.getElementById('mineBtn').className = "w-full bg-black opacity-30 text-white py-5 rounded-3xl font-black text-xs";
             }
         }
 
@@ -246,36 +296,42 @@
                     const nP = (data.total_ni || 0) + 50; const nL = (data.loyalty_days || 0) + 0.5;
                     await sb.from('pilots').update({ total_ni: nP, last_mine_time: 0, loyalty_days: nL }).eq('wallet_address', p.w);
                     p.points = nP; p.startTime = 0; p.loyalty = nL;
-                    confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } });
+                    confetti({ particleCount: 200, spread: 80, origin: { y: 0.6 } });
                     updateUI();
                 }
             }
         }
 
-        // TASK (3s Neural Sync Fix)
+        // NEURAL TRAINING (Fixing White Screen & Database Sync)
         let tStep = 1, bScore = 0;
         function startTraining() { if(!p.w) return; document.getElementById('task-intro').classList.add('hidden'); document.getElementById('task-area').classList.remove('hidden'); nextQ(); }
         function nextQ() {
             if (tStep > 10) { finishB(); return; }
             document.getElementById('taskStep').innerText = `${tStep} / 10`;
             document.getElementById('task-loader').classList.add('hidden');
-            document.getElementById('qImg').src = `https://picsum.photos/400/300?sig=${Math.random()}`;
+            document.getElementById('qImg').src = `https://picsum.photos/600/400?sig=${Math.random()}`;
             cAns = Math.random() > 0.5;
         }
         function checkTask(val, btn) {
             btn.classList.add(val === cAns ? 'correct-btn' : 'wrong-btn');
             if(val === cAns) { bScore++; p.correct++; } else { p.wrong++; }
             document.getElementById('task-loader').classList.remove('hidden');
-            setTimeout(() => { btn.className = "py-4.5 bg-gray-50 rounded-2xl font-black text-[10px] uppercase tracking-widest border border-gray-200"; tStep++; nextQ(); }, 3000);
+            setTimeout(() => { btn.className = "py-5 bg-gray-50 rounded-3xl font-black text-[11px] uppercase tracking-widest border border-gray-200"; tStep++; nextQ(); }, 3000);
         }
         async function finishB() {
-            const rew = bScore * 0.5;
-            const { data } = await sb.from('pilots').select('total_ni').eq('wallet_address', p.w).single();
-            const nP = (data.total_ni || 0) + rew;
-            await sb.from('pilots').update({ total_ni: nP, correct_images: p.correct, wrong_images: p.wrong, batches_completed: ++p.batches }).eq('wallet_address', p.w);
-            p.points = nP; document.getElementById('batchReward').innerText = rew.toFixed(2) + " NXP";
-            document.getElementById('task-area').classList.add('hidden'); document.getElementById('task-finish').classList.remove('hidden');
-            confetti({ particleCount: 150, spread: 80, origin: { y: 0.7 } });
+            const reward = bScore * 0.5;
+            // ATOMIC SYNC: ÖNCE OKU, SONRA EKLE (0.50 FIX)
+            const { data } = await sb.from('pilots').select('total_ni, batches_completed').eq('wallet_address', p.w).single();
+            const nP = (data.total_ni || 0) + reward;
+            const nB = (data.batches_completed || 0) + 1;
+            
+            await sb.from('pilots').update({ total_ni: nP, correct_images: p.correct, wrong_images: p.wrong, batches_completed: nB }).eq('wallet_address', p.w);
+            
+            p.points = nP; p.batches = nB;
+            document.getElementById('batchReward').innerText = reward.toFixed(2) + " NXP";
+            document.getElementById('task-area').classList.add('hidden'); 
+            document.getElementById('task-finish').classList.remove('hidden');
+            confetti({ particleCount: 200, spread: 90, origin: { y: 0.8 } });
             updateUI();
         }
 
@@ -288,10 +344,10 @@
                 const { data } = await sb.from('pilots').select('balance_ni').eq('wallet_address', p.w).single();
                 const nB = (data.balance_ni || 0) + (amt * 10000);
                 await sb.from('pilots').update({ balance_ni: nB }).eq('wallet_address', p.w);
-                p.tokens = nB; updateUI(); alert("Success!");
+                p.tokens = nB; updateUI(); alert("Transaction Verified! $NI Added.");
             } catch(e) {}
         }
-        async function buyNFT() { if(!p.w) return; try { await tonUI.sendTransaction({ validUntil: Math.floor(Date.now()/1000)+60, messages: [{ address: ADMIN, amount: (100 * 1e9).toString() }] }); p.mult += 0.10; await sb.from('pilots').update({ multiplier: p.mult }).eq('wallet_address', p.w); updateUI(); } catch(e) {} }
+        async function buyNFT() { if(!p.w) return; try { await tonUI.sendTransaction({ validUntil: Math.floor(Date.now()/1000)+60, messages: [{ address: ADMIN, amount: (100 * 1e9).toString() }] }); p.mult += 0.10; await sb.from('pilots').update({ multiplier: p.mult }).eq('wallet_address', p.w); updateUI(); alert("Royal Access Granted!"); } catch(e) {} }
 
         function updateUI() {
             document.getElementById('tokenBal').innerText = p.tokens.toLocaleString();
@@ -303,9 +359,12 @@
             document.getElementById('uptime-bar').style.width = Math.min((p.loyalty/365)*100, 100) + "%";
             document.getElementById('test-p-txt').innerText = `${p.batches} / 5000`;
             document.getElementById('test-p-bar').style.width = Math.min((p.batches/5000)*100, 100) + "%";
-            document.getElementById('nft-stock').innerText = "0 / 100";
-            document.getElementById('nft-365-stock').innerText = "0 / 500";
-            document.getElementById('nft-730-stock').innerText = "0 / 300";
+            
+            // DYNAMIC STOCKS (Reset to 0 for tracking)
+            document.getElementById('nft-stock').innerText = Math.floor(p.mult > 1 ? (p.mult - 1) * 100 : 0) + " / 100";
+            document.getElementById('nft-365-stock').innerText = (p.loyalty >= 365 ? "1" : "0") + " / 500";
+            document.getElementById('nft-730-stock').innerText = (p.loyalty >= 730 ? "1" : "0") + " / 300";
+            document.getElementById('nft-test-stock').innerText = (p.batches >= 5000 ? "1" : "0") + " / 2000";
         }
 
         function switchTab(t, btn) {
@@ -317,20 +376,25 @@
 
         function rotateLogs() {
             const container = document.getElementById('terminal-logs');
-            const line = document.createElement('div'); line.className = "log-line opacity-80"; line.innerText = logMsg[Math.floor(Math.random()*logMsg.length)];
+            const line = document.createElement('div'); line.className = "log-line font-bold"; line.innerText = logMsg[Math.floor(Math.random()*logMsg.length)];
             container.appendChild(line); if(container.children.length > 3) container.removeChild(container.firstChild);
         }
 
         async function loadLB() {
-            const { data } = await sb.from('pilots').select('wallet_address, total_ni').order('total_ni', { ascending: false }).limit(100);
-            const list = document.getElementById('leaderboardList'); list.innerHTML = '';
-            data.forEach((u, i) => {
-                const me = u.wallet_address === p.w ? 'border-blue-400 bg-blue-50 shadow-md' : 'border-gray-100';
-                const trop = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : `#${i+1}`;
-                list.innerHTML += `<div class="flex justify-between items-center p-4 rounded-2xl border-2 mb-2 ${me}"><div class="flex items-center gap-3"><span class="mono font-black w-8">${trop}</span><span class="mono text-[11px] font-bold">PILOT-${u.wallet_address.slice(-4).toUpperCase()}</span></div><span class="font-black text-blue-600 text-xs">${u.total_ni.toFixed(2)} NXP</span></div>`;
-            });
+            const { data, error } = await sb.from('pilots').select('wallet_address, total_ni').order('total_ni', { ascending: false }).limit(100);
+            if(data) {
+                const list = document.getElementById('leaderboardList'); list.innerHTML = '';
+                data.forEach((u, i) => {
+                    const isMe = u.wallet_address === p.w ? 'border-blue-500 bg-blue-50 shadow-md' : 'border-gray-100 bg-white';
+                    const trop = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : `#${i+1}`;
+                    list.innerHTML += `<div class="flex justify-between items-center p-4 rounded-3xl border-2 mb-2 ${isMe}">
+                        <div class="flex items-center gap-4"><span class="mono font-black w-8 text-lg">${trop}</span><span class="mono text-[11px] font-bold">PILOT-${u.wallet_address.slice(-4).toUpperCase()}</span></div>
+                        <span class="font-black text-blue-600 text-xs">${u.total_ni.toFixed(2)} NXP</span>
+                    </div>`;
+                });
+            }
         }
-        function copyRef() { navigator.clipboard.writeText(document.getElementById('refLink').value); alert("Copied!"); }
+        function copyRef() { navigator.clipboard.writeText(document.getElementById('refLink').value); alert("Referral Link Copied!"); }
         function resetTraining() { document.getElementById('task-finish').classList.add('hidden'); document.getElementById('task-intro').classList.remove('hidden'); tStep = 1; bScore = 0; updateUI(); }
     </script>
 </body>

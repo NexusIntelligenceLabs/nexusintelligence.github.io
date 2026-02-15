@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Nexus Intel | V42 Alpha Official</title>
+    <title>Nexus Intelligence | V44 Rollback Official</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/@tonconnect/ui@latest/dist/tonconnect-ui.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -11,154 +11,180 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800;900&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
     
     <style>
-        :root { --bg: #f2f2f7; --accent: #007aff; }
+        :root { --bg: #f8f9fc; --accent: #007aff; }
         body { font-family: 'Inter', sans-serif; background: var(--bg); color: #1c1c1e; overflow-x: hidden; }
         .mono { font-family: 'JetBrains Mono', monospace; }
-        .glass { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.8); border-radius: 20px; box-shadow: 0 4px 24px rgba(0,0,0,0.04); }
+        .glass { background: rgba(255, 255, 255, 0.98); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.5); border-radius: 24px; box-shadow: 0 10px 30px rgba(0,0,0,0.03); }
         .tab-content { display: none; }
         .tab-content.active { display: block; animation: slideUp 0.3s ease-out; }
-        @keyframes slideUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-        #ton-connect-button { min-width: 130px; }
-        #ton-connect-button button { background: #000 !important; border-radius: 12px !important; height: 38px !important; width: 100% !important; }
-        .nav-btn { opacity: 0.3; transition: 0.3s; }
-        .nav-active { opacity: 1; color: var(--accent); transform: scale(1.1); }
-        #admin-tab-btn { display: none; }
-        #terminal-logs { height: 75px; display: flex; flex-direction: column; justify-content: flex-end; overflow: hidden; }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+        #ton-connect-button button { background: #000 !important; border-radius: 14px !important; }
+        .nav-btn { opacity: 0.3; transition: 0.3s; filter: grayscale(1); }
+        .nav-active { opacity: 1; filter: grayscale(0); transform: scale(1.15); }
+        .led-glow { box-shadow: 0 0 12px currentColor; }
+        #terminal-logs { height: 85px; display: flex; flex-direction: column; justify-content: flex-end; overflow: hidden; line-height: 1.6; }
+        .royal-card { background: linear-gradient(135deg, #fff9e6 0%, #fff 100%); border: 2px solid #fbbf24; }
     </style>
 </head>
 <body class="pb-32">
 
-    <nav class="fixed top-0 w-full z-50 glass px-4 py-3 flex justify-between items-center bg-white border-b">
+    <nav class="fixed top-0 w-full z-50 glass px-5 py-4 flex justify-between items-center rounded-none bg-white border-b border-gray-100">
         <div class="flex items-center gap-3">
-            <svg width="48" height="48" viewBox="0 0 100 100">
-                <rect width="100" height="100" rx="22" fill="#1c1c1e"/>
-                <circle cx="50" cy="50" r="38" stroke="#007aff" stroke-width="2" stroke-dasharray="6 4"/>
-                <text x="50%" y="54%" text-anchor="middle" fill="white" font-family="Inter" font-weight="900" font-size="32">NI</text>
-            </svg>
+            <div class="bg-black p-2 rounded-xl shadow-lg">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M12 2L2 7L12 12L22 7L12 2Z" fill="white"/>
+                    <path d="M2 17L12 22L22 17" stroke="white" stroke-width="2"/>
+                    <path d="M2 12L12 17L22 12" stroke="white" stroke-width="2"/>
+                </svg>
+            </div>
             <div class="leading-none">
                 <span class="text-xl font-black tracking-tighter uppercase">Nexus</span>
-                <span class="text-[10px] block font-bold text-blue-600 mono uppercase tracking-widest">Intel</span>
+                <span class="text-[10px] block font-bold text-blue-600 tracking-[0.2em] mono uppercase">Intelligence</span>
             </div>
         </div>
         <div class="flex items-center gap-2">
-            <div id="led-dot" class="w-2 h-2 rounded-full bg-red-500"></div>
+            <div class="flex items-center gap-1.5 bg-gray-50 px-3 py-2 rounded-full border border-gray-100">
+                <div id="led-dot" class="w-2 h-2 rounded-full bg-red-500 led-glow"></div>
+                <span id="led-text" class="text-[9px] font-black uppercase mono text-gray-400">Offline</span>
+            </div>
             <div id="ton-connect-button"></div>
         </div>
     </nav>
 
-    <main id="tab-pilot" class="tab-content active pt-24 px-5 max-w-md mx-auto">
-        <div class="flex justify-between items-center mb-4 px-1">
-            <span id="os-text" class="text-[9px] font-bold text-gray-400 mono italic">INITIALIZING...</span>
-            <span class="text-[9px] font-bold text-blue-500 mono uppercase tracking-tighter">Alpha v4.2</span>
+    <main id="tab-pilot" class="tab-content active pt-28 px-5 max-w-md mx-auto">
+        <div class="flex justify-between items-center mb-5 px-1">
+            <span id="os-text" class="text-[10px] font-extrabold text-gray-400 mono italic uppercase tracking-widest">Awaiting Node...</span>
+            <span class="text-[10px] font-black text-blue-500 mono uppercase bg-blue-50 px-2 py-0.5 rounded">Alpha v4.4</span>
         </div>
-        <div class="glass p-6 mb-5 bg-white">
-            <div class="border-b pb-4 mb-4">
-                <p class="text-[10px] font-bold text-blue-600 mb-1 uppercase tracking-widest">Pre-Sale Balance ($NI)</p>
-                <h2 class="text-4xl font-black tracking-tighter" id="tokenBal">0.00</h2>
+        
+        <div class="glass p-7 mb-6 bg-white border-b-4 border-blue-600">
+            <div class="border-b border-gray-100 pb-5 mb-5">
+                <p class="text-[10px] font-black text-blue-600 mb-1 uppercase tracking-[0.15em]">Pre-Sale Balance ($NI)</p>
+                <h2 class="text-5xl font-black tracking-tighter" id="tokenBal">0.00</h2>
             </div>
             <div>
-                <p class="text-[10px] font-bold text-gray-400 mb-1 uppercase tracking-widest">Neural Points (NXP)</p>
-                <h2 class="text-2xl font-bold text-gray-700 tracking-tight" id="pointBal">0.00</h2>
+                <p class="text-[10px] font-black text-gray-400 mb-1 uppercase tracking-[0.15em]">Neural Points (NXP)</p>
+                <h2 class="text-3xl font-bold text-gray-800 tracking-tight" id="pointBal">0.00</h2>
             </div>
         </div>
-        <div class="bg-blue-600/5 border border-blue-100 rounded-2xl p-4 mb-5 overflow-hidden">
-            <div id="terminal-logs" class="mono text-[10px] text-blue-800 font-medium italic"><div>> STANDBY MODE</div></div>
+
+        <div class="bg-gray-900 rounded-2xl p-5 mb-6 shadow-2xl overflow-hidden border-t-2 border-blue-500">
+            <div id="terminal-logs" class="mono text-[10px] text-blue-400 font-bold"><div>> SYSTEM STANDBY...</div></div>
         </div>
-        <div class="glass p-5 mb-5 bg-white">
-            <div class="flex justify-between items-end mb-2">
-                <span class="text-[10px] font-bold text-black uppercase">12H Neural Mining</span>
-                <span class="text-xs font-bold text-blue-600 mono" id="mineProgText">0 / 50 NXP</span>
+
+        <div class="glass p-6 mb-6 bg-white border border-gray-100">
+            <div class="flex justify-between items-end mb-3">
+                <span class="text-[10px] font-black text-black uppercase italic tracking-wider">12H Neural Node Mining</span>
+                <span class="text-xs font-black text-blue-600 mono" id="mineProgText">0 / 50 NXP</span>
             </div>
-            <div class="w-full bg-gray-100 h-3 rounded-full overflow-hidden mb-4 border shadow-inner">
+            <div class="w-full bg-gray-100 h-4 rounded-full overflow-hidden mb-5 border border-gray-200 shadow-inner">
                 <div id="mineBar" class="h-full bg-blue-600 w-0 transition-all duration-1000"></div>
             </div>
-            <button id="mineBtn" onclick="toggleMining()" class="w-full bg-[#1c1c1e] text-white py-4 rounded-xl font-bold text-xs uppercase shadow-md">START NODE SESSION</button>
-            <p id="timer-text" class="text-center mt-3 text-[10px] font-bold text-gray-400 mono uppercase">System Ready</p>
+            <button id="mineBtn" onclick="toggleMining()" class="w-full bg-[#1c1c1e] text-white py-5 rounded-2xl font-black text-xs uppercase shadow-xl hover:scale-[1.02] active:scale-95 transition-all">Start Neural Session</button>
+            <p id="timer-text" class="text-center mt-4 text-[10px] font-bold text-gray-400 mono uppercase tracking-widest">Awaiting Command</p>
         </div>
-        <div class="grid grid-cols-2 gap-3">
-            <div class="glass p-3 flex flex-col items-center"><p class="text-[9px] font-bold text-gray-400 uppercase">Test Success</p><p class="text-lg font-black text-blue-600" id="uiSuccess">0%</p></div>
-            <div class="glass p-3 flex flex-col items-center"><p class="text-[9px] font-bold text-gray-400 uppercase">Multiplier</p><p class="text-lg font-black text-green-600" id="uiMult">x1.00</p></div>
+
+        <div class="grid grid-cols-2 gap-4">
+            <div class="glass p-4 flex flex-col items-center bg-white"><p class="text-[9px] font-black text-gray-400 uppercase mb-1">Test Success</p><p class="text-xl font-black text-blue-600" id="uiSuccess">0%</p></div>
+            <div class="glass p-4 flex flex-col items-center bg-white"><p class="text-[9px] font-black text-gray-400 uppercase mb-1">Multiplier</p><p class="text-xl font-black text-green-600" id="uiMult">x1.00</p></div>
         </div>
     </main>
 
-    <main id="tab-tasks" class="tab-content pt-24 px-5 max-w-md mx-auto">
-        <div id="task-intro" class="glass p-10 text-center bg-white mb-5 border-2 border-blue-100">
-            <div class="text-4xl mb-4">🧠</div>
-            <h2 class="text-lg font-black mb-1 uppercase">Neural Training</h2>
-            <p class="text-[10px] text-gray-400 font-bold mb-8 italic uppercase">Process 10 Packets for Rewards</p>
-            <button onclick="startTraining()" class="w-full bg-black text-white py-4 rounded-xl font-bold uppercase text-xs">START BATCH</button>
+    <main id="tab-tasks" class="tab-content pt-28 px-5 max-w-md mx-auto">
+        <div id="task-intro" class="glass p-12 text-center bg-white mb-6 border-2 border-blue-100">
+            <div class="text-5xl mb-6">🧠</div>
+            <h2 class="text-xl font-black mb-2 uppercase tracking-tight">Neural Optimization</h2>
+            <p class="text-[10px] text-gray-400 font-black mb-10 italic uppercase tracking-tighter">Validate 10 Packets to Sync Rewards</p>
+            <button onclick="startTraining()" class="w-full bg-black text-white py-5 rounded-2xl font-black uppercase text-xs tracking-widest shadow-lg">Begin Batch</button>
         </div>
-        <div id="task-area" class="hidden mb-5">
-            <div class="flex justify-between items-center mb-3"><span class="text-[10px] font-bold text-blue-600 animate-pulse uppercase">● Processing...</span><span id="taskStep" class="mono text-[10px] font-bold bg-white border px-2 py-1 rounded">1 / 10</span></div>
-            <div class="glass p-3 relative bg-white border">
-                <div id="task-loader" class="hidden absolute inset-0 bg-white/95 z-20 flex items-center justify-center flex-col">
-                    <div class="mono text-[10px] font-black mb-3 italic">SYNCING WEIGHTS...</div>
-                    <div class="w-32 h-1.5 bg-gray-100 rounded-full overflow-hidden border"><div class="h-full bg-blue-600 animate-[width_3s_linear_infinite]"></div></div>
+
+        <div id="task-area" class="hidden mb-6">
+            <div class="flex justify-between items-center mb-4"><span class="text-[10px] font-black text-blue-600 animate-pulse uppercase tracking-widest">● Processing Node Data...</span><span id="taskStep" class="mono text-[10px] font-black bg-white border border-gray-200 px-3 py-1.5 rounded-lg shadow-sm">1 / 10</span></div>
+            <div class="glass p-4 relative bg-white border border-gray-100 shadow-xl">
+                <div id="task-loader" class="hidden absolute inset-0 bg-white/98 z-20 flex items-center justify-center flex-col">
+                    <div class="mono text-[11px] font-black mb-4 italic tracking-widest text-blue-600">SYNCING NEURAL WEIGHTS...</div>
+                    <div class="w-40 h-2 bg-gray-100 rounded-full overflow-hidden border border-gray-200 shadow-inner"><div class="h-full bg-blue-600 animate-[width_3s_linear_infinite]"></div></div>
                 </div>
-                <img id="qImg" src="" class="w-full h-52 object-cover rounded-xl mb-4 border">
-                <div class="grid grid-cols-2 gap-3">
-                    <button onclick="checkTask(true, this)" class="py-4 bg-gray-100 rounded-xl font-bold text-[10px] uppercase border">AI GEN</button>
-                    <button onclick="checkTask(false, this)" class="py-4 bg-gray-100 rounded-xl font-bold text-[10px] uppercase border">REAL</button>
+                <img id="qImg" src="" class="w-full h-56 object-cover rounded-2xl mb-5 border border-gray-100 shadow-inner">
+                <div class="grid grid-cols-2 gap-4">
+                    <button onclick="checkTask(true, this)" class="py-5 bg-gray-50 border-2 border-gray-100 rounded-2xl font-black text-[11px] uppercase hover:bg-white hover:border-blue-500 transition-all shadow-sm">AI Generated</button>
+                    <button onclick="checkTask(false, this)" class="py-5 bg-gray-50 border-2 border-gray-100 rounded-2xl font-black text-[11px] uppercase hover:bg-white hover:border-blue-500 transition-all shadow-sm">Real Image</button>
                 </div>
             </div>
         </div>
-        <div id="task-finish" class="hidden glass p-10 text-center bg-white mb-5">
-            <h2 class="text-xl font-bold mb-4 uppercase">Batch Sealed</h2>
-            <p class="text-3xl font-black text-blue-600 mb-8" id="batchReward">0.00 NXP</p>
-            <button onclick="resetTraining()" class="w-full bg-black text-white py-4 rounded-xl font-bold uppercase text-xs">SAVE TO NODE</button>
+
+        <div id="task-finish" class="hidden glass p-12 text-center bg-white mb-6 border-4 border-blue-500 shadow-2xl">
+            <div class="text-6xl mb-6">✨</div>
+            <h2 class="text-2xl font-black mb-3 uppercase tracking-tighter italic">Batch Sealed</h2>
+            <p class="text-[11px] text-gray-400 font-black mb-8 italic uppercase">Rewards Synced to Neural Cloud</p>
+            <p class="text-5xl font-black text-blue-600 mb-10 tracking-tight" id="batchReward">0.00 NXP</p>
+            <button onclick="resetTraining()" class="w-full bg-blue-600 text-white py-5 rounded-2xl font-black uppercase text-xs shadow-lg active:scale-95 transition-all">Restart Session</button>
         </div>
-        <div class="glass p-5 mb-5 bg-white">
-            <h3 class="text-[10px] font-bold uppercase mb-4 text-gray-400 italic">Referral Control</h3>
-            <div class="flex gap-2 mb-4">
-                <input id="refLink" readonly class="bg-gray-50 p-3 text-[10px] flex-1 rounded-xl mono border">
-                <button onclick="copyRef()" class="bg-black text-white px-5 rounded-xl font-bold text-[10px] uppercase">Copy</button>
-            </div>
-            <div class="border-t pt-4">
-                <p class="text-[9px] font-bold text-gray-400 uppercase mb-2 italic">Apply Referrer (+0.5x)</p>
+
+        <div class="glass p-6 mb-6 bg-white shadow-sm border border-gray-100">
+            <h3 class="text-[11px] font-black uppercase mb-5 text-gray-400 italic tracking-[0.2em]">Referral System</h3>
+            <div class="mb-5">
                 <div class="flex gap-2">
-                    <input id="applyRef" placeholder="Paste Code" class="bg-gray-50 p-3 text-[10px] flex-1 rounded-xl mono border">
-                    <button onclick="applyReferral()" class="bg-blue-600 text-white px-5 rounded-xl font-bold text-[10px] uppercase">Apply</button>
+                    <input id="refLink" readonly class="bg-gray-50 p-4 text-[10px] flex-1 rounded-xl mono font-bold border border-gray-200 outline-none">
+                    <button onclick="copyRef()" class="bg-black text-white px-6 rounded-xl font-black text-[11px] uppercase shadow-md">Copy</button>
+                </div>
+            </div>
+            <div class="border-t border-gray-100 pt-5">
+                <p class="text-[9px] font-black text-gray-400 uppercase mb-3 italic">Apply Invite Code (+0.5x Multiplier)</p>
+                <div class="flex gap-2">
+                    <input id="applyRef" placeholder="Paste Referrer Code" class="bg-gray-50 p-4 text-[10px] flex-1 rounded-xl mono font-bold border border-gray-200 outline-none">
+                    <button onclick="applyReferral()" class="bg-blue-600 text-white px-6 rounded-xl font-black text-[11px] uppercase shadow-md">Apply</button>
                 </div>
             </div>
         </div>
     </main>
 
-    <main id="tab-market" class="tab-content pt-24 px-5 max-w-md mx-auto">
-        <div class="glass p-6 mb-5 border-blue-200 bg-white">
-            <h3 class="text-xs font-bold text-blue-600 uppercase mb-4 italic italic">Pre-Sale (1 TON = 10k $NI)</h3>
-            <input type="number" id="buyAmt" placeholder="0.0 TON" class="w-full bg-gray-50 border p-4 rounded-xl font-bold mb-4 outline-none">
-            <div class="flex justify-between font-black mono bg-blue-50 p-4 rounded-xl mb-4 text-sm"><span class="text-[9px] text-blue-400 uppercase">Receive</span><span id="calcResult">0 $NI</span></div>
-            <button onclick="buyToken()" class="w-full bg-blue-600 text-white py-4 rounded-xl font-bold text-xs uppercase shadow-md">BUY $NI</button>
+    <main id="tab-market" class="tab-content pt-28 px-5 max-w-md mx-auto">
+        <div class="glass p-8 mb-6 border-blue-200 bg-white shadow-lg border-2">
+            <h3 class="text-xs font-black text-blue-600 uppercase mb-5 tracking-[0.2em] italic">Token Pre-Sale (1 TON = 10,000 $NI)</h3>
+            <input type="number" id="buyAmt" placeholder="0.0 TON" class="w-full bg-gray-50 border-2 border-gray-100 p-5 rounded-2xl font-black mb-5 outline-none focus:border-blue-500 transition-all text-lg">
+            <div class="flex justify-between items-center font-black mono bg-blue-50 p-5 rounded-2xl mb-6 border border-blue-100">
+                <span class="text-[10px] text-blue-400 uppercase tracking-widest">Receive $NI</span>
+                <span class="text-xl text-blue-700" id="calcResult">0</span>
+            </div>
+            <button onclick="buyToken()" class="w-full bg-blue-600 text-white py-5 rounded-2xl font-black text-xs uppercase shadow-xl hover:bg-blue-700 active:scale-95 transition-all">Swap TON for $NI</button>
         </div>
-        <div class="glass p-5 mb-4 border-amber-300 border-2 bg-amber-50/10">
-            <div class="flex justify-between mb-2"><h3 class="text-lg font-black text-amber-600 uppercase italic">Royal NFT</h3><span class="text-lg font-black tracking-tighter">100 TON</span></div>
-            <button onclick="buyNFT()" class="w-full bg-black text-white py-2.5 rounded-xl text-[10px] font-bold uppercase shadow-sm">MINT ROYAL</button>
+
+        <div class="glass p-7 mb-6 royal-card shadow-xl relative overflow-hidden">
+            <div class="absolute -right-4 -top-4 text-6xl opacity-10 grayscale">👑</div>
+            <div class="flex justify-between items-start mb-3">
+                <h3 class="text-2xl font-black text-amber-600 uppercase italic tracking-tighter">Royal NFT</h3>
+                <span class="text-xl font-black text-gray-900 tracking-tighter">100 TON</span>
+            </div>
+            <p class="text-[11px] text-amber-800 font-extrabold mb-6 uppercase tracking-tight">+10% NXP Boost / +5% Token Yield</p>
+            <button onclick="buyNFT()" class="w-full bg-black text-white py-3.5 rounded-xl text-[10px] font-black uppercase shadow-lg hover:shadow-amber-200 transition-all">Mint Royal Pass</button>
         </div>
-        <div class="grid grid-cols-2 gap-3 mb-5">
-            <div class="glass p-4 bg-white"><p class="text-[8px] font-black text-gray-400 uppercase mb-1">365 Day</p><p class="text-xs font-black">0 / 1000</p></div>
-            <div class="glass p-4 bg-white"><p class="text-[8px] font-black text-gray-400 uppercase mb-1">730 Day</p><p class="text-xs font-black">0 / 500</p></div>
-            <div class="glass p-4 col-span-2 bg-white"><p class="text-[8px] font-black text-gray-400 uppercase mb-1 text-center italic">5000 Test Master (0 / 2000)</p></div>
+
+        <div class="grid grid-cols-2 gap-4 mb-6">
+            <div class="glass p-5 bg-white border border-gray-100 shadow-sm"><p class="text-[9px] font-black text-gray-400 uppercase mb-1 tracking-widest">365 Day Pass</p><p class="text-sm font-black text-gray-800" id="stock365">0 / 1000</p></div>
+            <div class="glass p-5 bg-white border border-gray-100 shadow-sm"><p class="text-[9px] font-black text-gray-400 uppercase mb-1 tracking-widest">730 Day Pass</p><p class="text-sm font-black text-gray-800" id="stock730">0 / 500</p></div>
+            <div class="glass p-5 col-span-2 bg-white border border-gray-100 shadow-sm text-center"><p class="text-[9px] font-black text-gray-400 uppercase mb-1 tracking-widest italic">5000 Batch Master Challenge (0 / 2000)</p></div>
         </div>
     </main>
 
-    <main id="tab-leaderboard" class="tab-content pt-24 px-5 max-w-md mx-auto">
-        <h1 class="text-xl font-black mb-6 uppercase tracking-tight italic text-blue-600">Global Ranking 🏆</h1>
-        <div class="glass p-2 bg-white" id="leaderboardList">
-            <p class="text-center py-10 mono text-[10px] text-gray-400">LOADING RANKS...</p>
+    <main id="tab-leaderboard" class="tab-content pt-28 px-5 max-w-md mx-auto">
+        <h1 class="text-2xl font-black mb-8 uppercase tracking-tighter italic text-blue-600 flex items-center gap-3">Global Ranking 🏆</h1>
+        <div class="glass p-3 bg-white shadow-xl border border-gray-100" id="leaderboardList">
+            <p class="text-center py-16 mono text-[11px] text-gray-400 animate-pulse italic">SYNCING NODE RANKS...</p>
         </div>
     </main>
 
-    <main id="tab-admin" class="tab-content pt-24 px-5 max-w-md mx-auto">
-        <h1 class="text-xl font-black mb-6 uppercase flex items-center gap-2">Control Node ⚙️</h1>
-        <div id="admin-user-list" class="space-y-3"></div>
+    <main id="tab-admin" class="tab-content pt-28 px-5 max-w-md mx-auto">
+        <h1 class="text-2xl font-black mb-8 uppercase tracking-tighter italic flex items-center gap-3">Control Node ⚙️</h1>
+        <div id="admin-user-list" class="space-y-4"></div>
     </main>
 
-    <nav class="fixed bottom-0 w-full glass border-t py-4 flex justify-around bg-white/95 pb-8 shadow-2xl">
-        <button onclick="switchTab('pilot', this)" class="nav-btn nav-active">⚡</button>
-        <button onclick="switchTab('tasks', this)" class="nav-btn">🧠</button>
-        <button onclick="switchTab('market', this)" class="nav-btn">💎</button>
-        <button onclick="switchTab('leaderboard', this)" class="nav-btn">🏆</button>
-        <button onclick="switchTab('admin', this)" id="admin-tab-btn" class="nav-btn">⚙️</button>
+    <nav class="fixed bottom-0 w-full glass border-t border-gray-100 py-5 flex justify-around bg-white/95 pb-10 shadow-2xl">
+        <button onclick="switchTab('pilot', this)" class="nav-btn nav-active"><span class="text-3xl">⚡</span></button>
+        <button onclick="switchTab('tasks', this)" class="nav-btn"><span class="text-3xl">🧠</span></button>
+        <button onclick="switchTab('market', this)" class="nav-btn"><span class="text-3xl">💎</span></button>
+        <button onclick="switchTab('leaderboard', this)" class="nav-btn"><span class="text-3xl">🏆</span></button>
+        <button onclick="switchTab('admin', this)" id="admin-tab-btn" class="nav-btn"><span class="text-3xl">⚙️</span></button>
     </nav>
 
     <script>
@@ -168,7 +194,7 @@
         const MASTER = "UQA6kwFHkH3c9GcYxLsrL9aw_CfyLJkmU-nAatQk-IY5bC68";
 
         let p = { w: null, points: 0, tokens: 0, startTime: 0, mult: 1.0, batches: 0, loyalty: 0.0, isAdmin: false, correct: 0 };
-        const logs = ["> OPTIMIZING TENSORS...", "> GRADIENT DESCENT...", "> SYNCING LEDGER...", "> NEURAL SYNC COMPLETE..."];
+        const logs = ["> OPTIMIZING TENSORS...", "> GRADIENT DESCENT...", "> NEURAL SYNC COMPLETE...", "> WEIGHTS UPDATED..."];
 
         window.onload = () => { 
             const ua = navigator.userAgent;
@@ -182,7 +208,9 @@
         tonUI.onStatusChange(async w => {
             if (w) {
                 p.w = w.account.address;
-                document.getElementById('led-dot').className = "w-2 h-2 rounded-full bg-green-500 shadow-lg";
+                document.getElementById('led-dot').className = "w-2 h-2 rounded-full bg-green-500 led-glow";
+                document.getElementById('led-text').innerText = "Online";
+                document.getElementById('led-text').className = "text-[9px] font-black text-green-600 uppercase mono";
                 document.getElementById('refLink').value = window.location.origin + "?ref=" + p.w;
 
                 if(p.w.toLowerCase() === MASTER.toLowerCase() || p.w.includes("A6kwFHkH3")) p.isAdmin = true;
@@ -215,12 +243,12 @@
         async function loadLB() {
             const { data } = await sb.from('pilots').select('wallet_address, total_ni').order('total_ni', { ascending: false }).limit(100);
             const list = document.getElementById('leaderboardList');
-            if(!data) return; list.innerHTML = '';
+            if(!data || data.length === 0) return; list.innerHTML = '';
             data.forEach((u, i) => {
-                const isMe = u.wallet_address === p.w ? 'border-blue-500 bg-blue-50' : 'border-gray-100';
-                list.innerHTML += `<div class="flex justify-between items-center p-3 rounded-xl border-2 ${isMe} mb-1">
-                    <div class="flex items-center gap-2"><span class="mono font-bold text-[10px]">#${i+1}</span><span class="mono text-[10px] font-black">PILOT-${u.wallet_address.slice(-6).toUpperCase()}</span></div>
-                    <span class="font-black text-blue-600 text-[10px]">${u.total_ni.toFixed(2)} NXP</span>
+                const isMe = u.wallet_address === p.w ? 'royal-card shadow-md border-amber-300' : 'border-gray-50';
+                list.innerHTML += `<div class="flex justify-between items-center p-4 rounded-2xl border-2 ${isMe} mb-2">
+                    <div class="flex items-center gap-3"><span class="mono font-black text-blue-600 text-xs">#${i+1}</span><span class="mono text-[10px] font-black uppercase tracking-tighter">PILOT-${u.wallet_address.slice(-6).toUpperCase()}</span></div>
+                    <span class="font-black text-gray-900 text-xs">${u.total_ni.toFixed(2)} NXP</span>
                 </div>`;
             });
         }
@@ -230,11 +258,11 @@
             const list = document.getElementById('admin-user-list');
             if(!data) return; list.innerHTML = '';
             data.forEach(u => {
-                list.innerHTML += `<div class="glass p-3 bg-white border-l-4 border-red-500 mb-2">
-                    <p class="mono text-[8px] font-bold mb-2 truncate">${u.wallet_address}</p>
-                    <div class="flex gap-2">
-                        <button onclick="adminEdit('${u.wallet_address}', 'total_ni', ${u.total_ni + 50})" class="bg-blue-50 text-blue-600 px-3 py-1 rounded text-[9px] font-bold">+50 NXP</button>
-                        <button onclick="adminEdit('${u.wallet_address}', 'multiplier', ${u.multiplier + 0.5})" class="bg-green-50 text-green-600 px-3 py-1 rounded text-[9px] font-bold">+0.5x</button>
+                list.innerHTML += `<div class="glass p-4 bg-white border-l-8 border-red-500 shadow-md">
+                    <p class="mono text-[9px] font-black mb-3 truncate">${u.wallet_address}</p>
+                    <div class="flex gap-3">
+                        <button onclick="adminEdit('${u.wallet_address}', 'total_ni', ${u.total_ni + 50})" class="bg-blue-50 text-blue-600 px-4 py-2 rounded-xl text-[10px] font-black border-2 border-blue-100">+50 NXP</button>
+                        <button onclick="adminEdit('${u.wallet_address}', 'multiplier', ${u.multiplier + 0.5})" class="bg-green-50 text-green-600 px-4 py-2 rounded-xl text-[10px] font-black border-2 border-green-100">+0.5x</button>
                     </div>
                 </div>`;
             });
@@ -249,14 +277,14 @@
             document.getElementById('mineBar').style.width = prog + "%";
             document.getElementById('mineProgText').innerText = (50 * (prog / 100)).toFixed(2) + " / 50 NXP";
             if (elapsed >= limit) {
-                document.getElementById('mineBtn').innerText = "CLAIM REWARD";
-                document.getElementById('mineBtn').className = "w-full bg-green-600 text-white py-4 rounded-xl font-bold text-xs uppercase animate-pulse shadow-lg";
+                document.getElementById('mineBtn').innerText = "CLAIM NEURAL REWARD";
+                document.getElementById('mineBtn').className = "w-full bg-green-600 text-white py-5 rounded-2xl font-black text-xs uppercase animate-pulse shadow-xl";
             } else {
                 const rem = limit - elapsed;
                 const h = Math.floor(rem / 3600000), m = Math.floor((rem % 3600000) / 60000), s = Math.floor((rem % 60000) / 1000);
-                document.getElementById('timer-text').innerText = `${h}H ${m}M ${s}S LEFT`;
-                document.getElementById('mineBtn').innerText = "TRAINING...";
-                document.getElementById('mineBtn').className = "w-full bg-black opacity-30 text-white py-4 rounded-xl font-bold text-xs";
+                document.getElementById('timer-text').innerText = `${h}H ${m}M ${s}S REMAINING`;
+                document.getElementById('mineBtn').innerText = "PROCESSING NODE...";
+                document.getElementById('mineBtn').className = "w-full bg-black opacity-30 text-white py-5 rounded-2xl font-black text-xs";
             }
         }
 
@@ -265,7 +293,7 @@
             if (p.startTime === 0) { p.startTime = Date.now(); await syncDB(); }
             else if (Date.now() - p.startTime >= 12 * 60 * 60 * 1000) {
                 p.points += 50 * p.mult; p.startTime = 0; p.loyalty += 0.5;
-                await syncDB(); updateUI(); loadLB(); confetti();
+                await syncDB(); updateUI(); loadLB(); confetti({ particleCount: 200, spread: 80 });
             }
         }
 
@@ -275,7 +303,7 @@
             if (tStep > 10) { finishB(); return; }
             document.getElementById('taskStep').innerText = `${tStep} / 10`;
             document.getElementById('task-loader').classList.add('hidden');
-            document.getElementById('qImg').src = `https://picsum.photos/400/300?sig=${Math.random()}`;
+            document.getElementById('qImg').src = `https://picsum.photos/500/350?sig=${Math.random()}`;
         }
         function checkTask(val, btn) {
             if(Math.random() > 0.4) { bScore++; p.correct++; }
@@ -287,10 +315,13 @@
             p.points += rew; p.batches++; await syncDB();
             document.getElementById('task-area').classList.add('hidden'); document.getElementById('task-finish').classList.remove('hidden');
             document.getElementById('batchReward').innerText = rew.toFixed(2) + " NXP";
-            updateUI(); loadLB();
+            confetti({ particleCount: 250, spread: 90 }); updateUI(); loadLB();
         }
 
-        document.getElementById('buyAmt').oninput = (e) => { document.getElementById('calcResult').innerText = (parseFloat(e.target.value || 0) * 10000).toLocaleString() + " $NI"; };
+        document.getElementById('buyAmt').oninput = (e) => { 
+            const val = parseFloat(e.target.value || 0);
+            document.getElementById('calcResult').innerText = (val * 10000).toLocaleString(); 
+        };
 
         function updateUI() {
             document.getElementById('tokenBal').innerText = p.tokens.toLocaleString();
@@ -315,8 +346,8 @@
             document.getElementById('tab-' + t).classList.add('active');
             btn.classList.add('nav-active');
         }
-        function rotateLogs() { if (!p.w) return; const container = document.getElementById('terminal-logs'); const line = document.createElement('div'); line.innerText = logs[Math.floor(Math.random()*logs.length)]; container.appendChild(line); if(container.children.length > 3) container.removeChild(container.firstChild); }
-        function copyRef() { navigator.clipboard.writeText(document.getElementById('refLink').value); alert("Copied!"); }
+        function rotateLogs() { if (!p.w) return; const container = document.getElementById('terminal-logs'); const line = document.createElement('div'); line.innerText = logs[Math.floor(Math.random()*logs.length)]; container.appendChild(line); if(container.children.length > 4) container.removeChild(container.firstChild); }
+        function copyRef() { navigator.clipboard.writeText(document.getElementById('refLink').value); alert("Neural Code Copied!"); }
         function resetTraining() { document.getElementById('task-finish').classList.add('hidden'); document.getElementById('task-intro').classList.remove('hidden'); tStep = 1; bScore = 0; updateUI(); }
     </script>
 </body>

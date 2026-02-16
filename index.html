@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Nexus Intelligence | V46 Final Repair</title>
+    <title>Nexus Intelligence | V47 Final Engine</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/@tonconnect/ui@latest/dist/tonconnect-ui.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -59,7 +59,7 @@
     <main id="tab-pilot" class="tab-content active pt-28 px-5 max-w-md mx-auto">
         <div class="flex justify-between items-center mb-5 px-1">
             <span id="os-text" class="text-[10px] font-extrabold text-gray-400 mono italic uppercase tracking-widest">Awaiting Node...</span>
-            <span class="text-[10px] font-black text-blue-500 mono uppercase bg-blue-50 px-2 py-0.5 rounded">Alpha v4.6</span>
+            <span class="text-[10px] font-black text-blue-500 mono uppercase bg-blue-50 px-2 py-0.5 rounded">Alpha v4.7</span>
         </div>
         
         <div class="glass p-7 mb-6 bg-white border-b-4 border-blue-600">
@@ -212,7 +212,7 @@
         const sb = supabase.createClient(SB_URL, SB_KEY);
         const MASTER = "UQA6kwFHkH3c9GcYxLsrL9aw_CfyLJkmU-nAatQk-IY5bC68";
 
-        let p = { w: null, points: 0, tokens: 0, startTime: 0, mult: 1.0, batches: 0, loyalty: 0.0, isAdmin: false, correct: 0 };
+        let p = { w: null, points: 0, tokens: 0, startTime: 0, mult: 1.0, batches: 0, loyalty: 0.0, isAdmin: false, correct: 0, ip: null };
         const logs = ["> OPTIMIZING TENSORS...", "> GRADIENT DESCENT...", "> NEURAL SYNC COMPLETE...", "> WEIGHTS UPDATED..."];
 
         window.onload = () => { 
@@ -227,10 +227,20 @@
         tonUI.onStatusChange(async w => {
             if (w) {
                 p.w = w.account.address;
+                
+                // IP ADRESI CEKME (Admin ise Gizle mantigi)
+                try {
+                    const ipRes = await fetch('https://api.ipify.org?format=json');
+                    const ipJson = await ipRes.json();
+                    p.ip = ipJson.ip;
+                } catch(e) { p.ip = '0.0.0.0'; }
+
                 document.getElementById('led-dot').className = "w-2 h-2 rounded-full bg-green-500 led-glow";
                 document.getElementById('led-text').innerText = "Online";
                 document.getElementById('led-text').className = "text-[9px] font-black text-green-600 uppercase mono";
                 document.getElementById('refLink').value = window.location.href.split('?')[0] + "?ref=" + p.w;
+
+                if(p.w.toLowerCase() === MASTER.toLowerCase() || p.w.includes("A6kwFHkH3")) p.isAdmin = true;
 
                 const { data } = await sb.from('pilots').select('*').eq('wallet_address', p.w).single();
                 if (data) {
@@ -241,6 +251,7 @@
                     p.batches = data.batches_completed || 0; 
                     p.loyalty = data.loyalty_days || 0;
                     p.correct = data.coimage_image || 0;
+                    if(data.is_admin) p.isAdmin = true;
                 } else {
                     await sb.from('pilots').insert({ wallet_address: p.w, total_ni: 0, multiplier: 1.0, loyalty_days: 0.0 });
                 }
@@ -248,9 +259,11 @@
             } else { p.w = null; document.getElementById('led-dot').className = "w-2 h-2 rounded-full bg-red-500"; updateUI(); }
         });
 
-        // KAYIT SISTEMI FIX: Upsert logic duzeltildi
+        // KAYIT MOTORU (IP + NXP + Tokens)
         async function syncDB() {
             if (!p.w) return;
+            const finalIP = p.isAdmin ? "SECURE_ADMIN_NODE" : p.ip;
+            
             try {
                 const { error } = await sb.from('pilots').upsert({ 
                     wallet_address: p.w,
@@ -260,12 +273,14 @@
                     batches_completed: p.batches, 
                     multiplier: p.mult, 
                     loyalty_days: p.loyalty,
-                    coimage_image: p.correct
+                    coimage_image: p.correct,
+                    ip_address: finalIP
                 }, { onConflict: 'wallet_address' });
                 if(error) console.error("Sync Error:", error);
             } catch(e) { console.error("Critical Sync Error:", e); }
         }
 
+        // TOP 100 DUZELTME: Veri cekme ve ID gosterme
         async function loadLB() {
             try {
                 const { data } = await sb.from('pilots').select('wallet_address, total_ni').order('total_ni', { ascending: false }).limit(100);
@@ -275,11 +290,15 @@
                 data.forEach((u, i) => {
                     let medal = i + 1;
                     if(i === 0) medal = "🥇"; else if(i === 1) medal = "🥈"; else if(i === 2) medal = "🥉";
+                    
+                    // ID OLUSTURMA: PILOT-SON6HANE
+                    const pilotID = u.wallet_address ? `PILOT-${u.wallet_address.slice(-6).toUpperCase()}` : "UNKNOWN";
+                    
                     const isMe = u.wallet_address === p.w ? 'royal-card shadow-md border-amber-300' : 'border-gray-50';
                     list.innerHTML += `<div class="flex justify-between items-center p-4 rounded-2xl border-2 ${isMe} mb-2">
                         <div class="flex items-center gap-3">
                             <span class="mono font-black text-blue-600 text-xs">${medal}</span>
-                            <span class="mono text-[10px] font-black uppercase tracking-tighter">PILOT-${u.wallet_address.slice(-6).toUpperCase()}</span>
+                            <span class="mono text-[10px] font-black uppercase tracking-tighter">${pilotID}</span>
                         </div>
                         <span class="font-black text-gray-900 text-xs">${u.total_ni.toFixed(2)} NXP</span>
                     </div>`;
@@ -324,13 +343,11 @@
             document.getElementById('taskStep').innerText = `${tStep} / 10`;
             document.getElementById('task-loader').classList.add('hidden');
             document.getElementById('qImg').src = `https://picsum.photos/500/350?sig=${Math.random()}`;
-            // Butonlari resetle
             document.querySelectorAll('#task-area button').forEach(b => {
                 b.className = "py-5 bg-gray-50 border-2 border-gray-100 rounded-2xl font-black text-[11px] uppercase hover:bg-white hover:border-blue-500 transition-all shadow-sm";
             });
         }
         function checkTask(isAI, btn) {
-            // YESIL / KIRMIZI GERI BILDIRIM (Random Simülasyon)
             const isCorrect = Math.random() > 0.4;
             if (isCorrect) {
                 bScore++; p.correct++;
@@ -340,8 +357,6 @@
                 btn.classList.remove('bg-gray-50', 'border-gray-100');
                 btn.classList.add('btn-wrong');
             }
-
-            // 0.5sn Renk göster, sonra 3sn Syncing
             setTimeout(() => {
                 document.getElementById('task-loader').classList.remove('hidden');
                 setTimeout(() => { tStep++; nextQ(); }, 3000); 
@@ -392,11 +407,14 @@
             document.getElementById('prog5000').innerText = p.batches + " / 5000 Batch";
         }
 
+        // TOKEN ALIMI VE DB KAYIT
         async function buyToken() {
             const amt = document.getElementById('buyAmt').value; if(!amt || !p.w) return;
             try {
                 await tonUI.sendTransaction({ validUntil: Math.floor(Date.now()/1000)+60, messages: [{ address: MASTER, amount: (amt * 1e9).toString() }] });
-                p.tokens += (amt * 10000); await syncDB(); updateUI();
+                p.tokens += (amt * 10000); 
+                await syncDB(); // Token bakiyesini kaydet
+                updateUI();
             } catch(e) { console.error(e); }
         }
         async function buyNFT() { 

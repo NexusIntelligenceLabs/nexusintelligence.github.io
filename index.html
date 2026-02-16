@@ -222,7 +222,7 @@
             setInterval(rotateLogs, 2500); 
         };
 
-        const tonUI = new TON_CONNECT_UI.TonConnectUI({ manifestUrl: 'https://nexusintelligencelabs.github.io/nexusintelligence.github.io/tonconnect-manifest.json', buttonRootId: 'ton-connect-button' });
+        const tonUI = new TON_CONNECT_UI.TonConnectUI({ manifestUrl: 'https://nexusintelligencelabs.github.io/nexusintelligence.github.io/tonconnect-manifest.json', buttonRootId: 'ton-connect-button', network: 'testnet' });
 
         tonUI.onStatusChange(async w => {
             if (w) {

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Nexus Intelligence | V45 Final Fix</title>
+    <title>Nexus Intelligence | V46 Final Repair</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/@tonconnect/ui@latest/dist/tonconnect-ui.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -25,6 +25,10 @@
         #terminal-logs { height: 85px; display: flex; flex-direction: column; justify-content: flex-end; overflow: hidden; line-height: 1.6; }
         .royal-card { background: linear-gradient(135deg, #fff9e6 0%, #fff 100%); border: 2px solid #fbbf24; }
         .terminal-grey { background-color: #e5e7eb !important; border-top: 2px solid #3b82f6 !important; }
+        
+        /* Buton Durumları */
+        .btn-correct { background-color: #22c55e !important; color: white !important; border-color: #16a34a !important; }
+        .btn-wrong { background-color: #ef4444 !important; color: white !important; border-color: #dc2626 !important; }
     </style>
 </head>
 <body class="pb-32">
@@ -55,7 +59,7 @@
     <main id="tab-pilot" class="tab-content active pt-28 px-5 max-w-md mx-auto">
         <div class="flex justify-between items-center mb-5 px-1">
             <span id="os-text" class="text-[10px] font-extrabold text-gray-400 mono italic uppercase tracking-widest">Awaiting Node...</span>
-            <span class="text-[10px] font-black text-blue-500 mono uppercase bg-blue-50 px-2 py-0.5 rounded">Alpha v4.5</span>
+            <span class="text-[10px] font-black text-blue-500 mono uppercase bg-blue-50 px-2 py-0.5 rounded">Alpha v4.6</span>
         </div>
         
         <div class="glass p-7 mb-6 bg-white border-b-4 border-blue-600">
@@ -206,7 +210,7 @@
         const SB_URL = "https://gdpiehrnpeiauhmaoumi.supabase.co";
         const SB_KEY = "EyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdkcGllaHJucGVpYXVobWFvdW1pIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEwMDk4MjcsImV4cCI6MjA4NjU4NTgyN30.iJHq9gnoPtBLaRuByLOV8VjesBL9qp1rQs1d4_fYJXM";
         const sb = supabase.createClient(SB_URL, SB_KEY);
-        const MASTER = "UQA6kwFHkH3c9GcYxLsrL9aw_CfyLJkmU-nAatQk-IY5bC68"; // Cüzdan ödemeleri buraya gider
+        const MASTER = "UQA6kwFHkH3c9GcYxLsrL9aw_CfyLJkmU-nAatQk-IY5bC68";
 
         let p = { w: null, points: 0, tokens: 0, startTime: 0, mult: 1.0, batches: 0, loyalty: 0.0, isAdmin: false, correct: 0 };
         const logs = ["> OPTIMIZING TENSORS...", "> GRADIENT DESCENT...", "> NEURAL SYNC COMPLETE...", "> WEIGHTS UPDATED..."];
@@ -226,7 +230,6 @@
                 document.getElementById('led-dot').className = "w-2 h-2 rounded-full bg-green-500 led-glow";
                 document.getElementById('led-text').innerText = "Online";
                 document.getElementById('led-text').className = "text-[9px] font-black text-green-600 uppercase mono";
-                // LINK DUZELTME:
                 document.getElementById('refLink').value = window.location.href.split('?')[0] + "?ref=" + p.w;
 
                 const { data } = await sb.from('pilots').select('*').eq('wallet_address', p.w).single();
@@ -245,36 +248,43 @@
             } else { p.w = null; document.getElementById('led-dot').className = "w-2 h-2 rounded-full bg-red-500"; updateUI(); }
         });
 
+        // KAYIT SISTEMI FIX: Upsert logic duzeltildi
         async function syncDB() {
             if (!p.w) return;
-            await sb.from('pilots').upsert({ 
-                wallet_address: p.w,
-                total_ni: p.points, 
-                balance_ni: p.tokens,
-                last_mine_time: p.startTime.toString(), 
-                batches_completed: p.batches, 
-                multiplier: p.mult, 
-                loyalty_days: p.loyalty,
-                coimage_image: p.correct
-            }, { onConflict: 'wallet_address' });
+            try {
+                const { error } = await sb.from('pilots').upsert({ 
+                    wallet_address: p.w,
+                    total_ni: p.points, 
+                    balance_ni: p.tokens,
+                    last_mine_time: p.startTime.toString(), 
+                    batches_completed: p.batches, 
+                    multiplier: p.mult, 
+                    loyalty_days: p.loyalty,
+                    coimage_image: p.correct
+                }, { onConflict: 'wallet_address' });
+                if(error) console.error("Sync Error:", error);
+            } catch(e) { console.error("Critical Sync Error:", e); }
         }
 
         async function loadLB() {
-            const { data } = await sb.from('pilots').select('wallet_address, total_ni').order('total_ni', { ascending: false }).limit(100);
-            const list = document.getElementById('leaderboardList');
-            if(!data || data.length === 0) return; list.innerHTML = '';
-            data.forEach((u, i) => {
-                let medal = i + 1;
-                if(i === 0) medal = "🥇"; else if(i === 1) medal = "🥈"; else if(i === 2) medal = "🥉";
-                const isMe = u.wallet_address === p.w ? 'royal-card shadow-md border-amber-300' : 'border-gray-50';
-                list.innerHTML += `<div class="flex justify-between items-center p-4 rounded-2xl border-2 ${isMe} mb-2">
-                    <div class="flex items-center gap-3">
-                        <span class="mono font-black text-blue-600 text-xs">${medal}</span>
-                        <span class="mono text-[10px] font-black uppercase tracking-tighter">PILOT-${u.wallet_address.slice(-6).toUpperCase()}</span>
-                    </div>
-                    <span class="font-black text-gray-900 text-xs">${u.total_ni.toFixed(2)} NXP</span>
-                </div>`;
-            });
+            try {
+                const { data } = await sb.from('pilots').select('wallet_address, total_ni').order('total_ni', { ascending: false }).limit(100);
+                const list = document.getElementById('leaderboardList');
+                if(!data || data.length === 0) { list.innerHTML = '<p class="text-center py-16 mono text-[11px] text-gray-400">NO PILOTS FOUND</p>'; return; }
+                list.innerHTML = '';
+                data.forEach((u, i) => {
+                    let medal = i + 1;
+                    if(i === 0) medal = "🥇"; else if(i === 1) medal = "🥈"; else if(i === 2) medal = "🥉";
+                    const isMe = u.wallet_address === p.w ? 'royal-card shadow-md border-amber-300' : 'border-gray-50';
+                    list.innerHTML += `<div class="flex justify-between items-center p-4 rounded-2xl border-2 ${isMe} mb-2">
+                        <div class="flex items-center gap-3">
+                            <span class="mono font-black text-blue-600 text-xs">${medal}</span>
+                            <span class="mono text-[10px] font-black uppercase tracking-tighter">PILOT-${u.wallet_address.slice(-6).toUpperCase()}</span>
+                        </div>
+                        <span class="font-black text-gray-900 text-xs">${u.total_ni.toFixed(2)} NXP</span>
+                    </div>`;
+                });
+            } catch(e) { console.error("Leaderboard Error:", e); }
         }
 
         function updateMineUI() {
@@ -302,7 +312,7 @@
             else if (Date.now() - p.startTime >= 12 * 60 * 60 * 1000) {
                 p.points += 50 * p.mult; 
                 p.startTime = 0; 
-                p.loyalty += 0.5; // DÜZELTME: 12H = 0.5 Gün
+                p.loyalty += 0.5;
                 await syncDB(); updateUI(); loadLB(); confetti({ particleCount: 200, spread: 80 });
             }
         }
@@ -314,16 +324,34 @@
             document.getElementById('taskStep').innerText = `${tStep} / 10`;
             document.getElementById('task-loader').classList.add('hidden');
             document.getElementById('qImg').src = `https://picsum.photos/500/350?sig=${Math.random()}`;
+            // Butonlari resetle
+            document.querySelectorAll('#task-area button').forEach(b => {
+                b.className = "py-5 bg-gray-50 border-2 border-gray-100 rounded-2xl font-black text-[11px] uppercase hover:bg-white hover:border-blue-500 transition-all shadow-sm";
+            });
         }
-        function checkTask(val, btn) {
-            if(Math.random() > 0.4) { bScore++; p.correct++; }
-            document.getElementById('task-loader').classList.remove('hidden');
-            setTimeout(() => { tStep++; nextQ(); }, 3000); // 3 SANİYE BEKLEME
+        function checkTask(isAI, btn) {
+            // YESIL / KIRMIZI GERI BILDIRIM (Random Simülasyon)
+            const isCorrect = Math.random() > 0.4;
+            if (isCorrect) {
+                bScore++; p.correct++;
+                btn.classList.remove('bg-gray-50', 'border-gray-100');
+                btn.classList.add('btn-correct');
+            } else {
+                btn.classList.remove('bg-gray-50', 'border-gray-100');
+                btn.classList.add('btn-wrong');
+            }
+
+            // 0.5sn Renk göster, sonra 3sn Syncing
+            setTimeout(() => {
+                document.getElementById('task-loader').classList.remove('hidden');
+                setTimeout(() => { tStep++; nextQ(); }, 3000); 
+            }, 500);
         }
+        
         async function finishB() {
             const rew = (bScore * 0.5) * p.mult;
             p.points += rew; 
-            p.batches++; // DÜZELTME: Her batch +1 ekler
+            p.batches++; 
             await syncDB(); 
             document.getElementById('task-area').classList.add('hidden'); 
             document.getElementById('task-finish').classList.remove('hidden');
@@ -331,13 +359,11 @@
             confetti({ particleCount: 250, spread: 90 }); updateUI(); loadLB();
         }
 
-        // HESAPLAYICI EKLENDI
         document.getElementById('buyAmt').oninput = function() {
             const val = parseFloat(this.value);
             document.getElementById('calcResult').innerText = val ? (val * 10000).toLocaleString() : "0";
         };
 
-        // REFERANS UYGULA
         async function applyReferral() {
             const code = document.getElementById('applyRef').value;
             if(!p.w || !code || code === p.w) return;
@@ -353,7 +379,6 @@
             const rate = p.batches > 0 ? (p.correct / (p.batches * 10) * 100).toFixed(0) : 0;
             document.getElementById('uiSuccess').innerText = rate + "%";
 
-            // Barlar Guncelleme
             const day365 = Math.min((p.loyalty / 365) * 100, 100);
             document.getElementById('bar365').style.width = day365 + "%";
             document.getElementById('prog365').innerText = p.loyalty.toFixed(1) + " / 365 Days";
@@ -370,7 +395,6 @@
         async function buyToken() {
             const amt = document.getElementById('buyAmt').value; if(!amt || !p.w) return;
             try {
-                // CUZDAN TETIKLEME DÜZELTİLDİ
                 await tonUI.sendTransaction({ validUntil: Math.floor(Date.now()/1000)+60, messages: [{ address: MASTER, amount: (amt * 1e9).toString() }] });
                 p.tokens += (amt * 10000); await syncDB(); updateUI();
             } catch(e) { console.error(e); }

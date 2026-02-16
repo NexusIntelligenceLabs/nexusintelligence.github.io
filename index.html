@@ -330,7 +330,7 @@
             const limit = 12 * 60 * 60 * 1000;
             const prog = Math.min((elapsed / limit) * 100, 100);
             document.getElementById('mineBar').style.width = prog + "%";
-            document.getElementById('mineProgText').innerText = (50 * (prog / 100)).toFixed(2) + " / 50 NXP";
+            document.getElementById('mineProgText').innerText = (50 * p.mult * (prog / 100)).toFixed(2) + " / " + (50 * p.mult).toFixed(0) + " NXP";
             if (elapsed >= limit) {
                 document.getElementById('mineBtn').innerText = "CLAIM NEURAL REWARD";
                 document.getElementById('mineBtn').className = "w-full bg-green-600 text-white py-5 rounded-2xl font-black text-xs uppercase animate-pulse shadow-xl";

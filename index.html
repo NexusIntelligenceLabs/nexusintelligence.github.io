@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Nexus Intelligence | V47 Final Engine</title>
+    <title>Nexus Intelligence | V48 Final Persistence</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/@tonconnect/ui@latest/dist/tonconnect-ui.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -25,8 +25,6 @@
         #terminal-logs { height: 85px; display: flex; flex-direction: column; justify-content: flex-end; overflow: hidden; line-height: 1.6; }
         .royal-card { background: linear-gradient(135deg, #fff9e6 0%, #fff 100%); border: 2px solid #fbbf24; }
         .terminal-grey { background-color: #e5e7eb !important; border-top: 2px solid #3b82f6 !important; }
-        
-        /* Buton Durumları */
         .btn-correct { background-color: #22c55e !important; color: white !important; border-color: #16a34a !important; }
         .btn-wrong { background-color: #ef4444 !important; color: white !important; border-color: #dc2626 !important; }
     </style>
@@ -59,7 +57,7 @@
     <main id="tab-pilot" class="tab-content active pt-28 px-5 max-w-md mx-auto">
         <div class="flex justify-between items-center mb-5 px-1">
             <span id="os-text" class="text-[10px] font-extrabold text-gray-400 mono italic uppercase tracking-widest">Awaiting Node...</span>
-            <span class="text-[10px] font-black text-blue-500 mono uppercase bg-blue-50 px-2 py-0.5 rounded">Alpha v4.7</span>
+            <span class="text-[10px] font-black text-blue-500 mono uppercase bg-blue-50 px-2 py-0.5 rounded">Alpha v4.8</span>
         </div>
         
         <div class="glass p-7 mb-6 bg-white border-b-4 border-blue-600">
@@ -212,7 +210,8 @@
         const sb = supabase.createClient(SB_URL, SB_KEY);
         const MASTER = "UQA6kwFHkH3c9GcYxLsrL9aw_CfyLJkmU-nAatQk-IY5bC68";
 
-        let p = { w: null, points: 0, tokens: 0, startTime: 0, mult: 1.0, batches: 0, loyalty: 0.0, isAdmin: false, correct: 0, ip: null };
+        // Global Degiskenler
+        let p = { w: null, points: 0, tokens: 0, startTime: 0, mult: 1.0, batches: 0, loyalty: 0.0, isAdmin: false, correct: 0, ip: "0.0.0.0" };
         const logs = ["> OPTIMIZING TENSORS...", "> GRADIENT DESCENT...", "> NEURAL SYNC COMPLETE...", "> WEIGHTS UPDATED..."];
 
         window.onload = () => { 
@@ -228,12 +227,12 @@
             if (w) {
                 p.w = w.account.address;
                 
-                // IP ADRESI CEKME (Admin ise Gizle mantigi)
+                // IP ADRESI CEK (Hata olursa devam et)
                 try {
                     const ipRes = await fetch('https://api.ipify.org?format=json');
                     const ipJson = await ipRes.json();
-                    p.ip = ipJson.ip;
-                } catch(e) { p.ip = '0.0.0.0'; }
+                    p.ip = ipJson.ip || "0.0.0.0";
+                } catch(e) { console.log("IP Fetch Error (Ignored)"); }
 
                 document.getElementById('led-dot').className = "w-2 h-2 rounded-full bg-green-500 led-glow";
                 document.getElementById('led-text').innerText = "Online";
@@ -242,10 +241,12 @@
 
                 if(p.w.toLowerCase() === MASTER.toLowerCase() || p.w.includes("A6kwFHkH3")) p.isAdmin = true;
 
+                // VERILERI CEK
                 const { data } = await sb.from('pilots').select('*').eq('wallet_address', p.w).single();
                 if (data) {
                     p.points = data.total_ni || 0; 
                     p.tokens = data.balance_ni || 0;
+                    // KRITIK: Zaman verisini sayiya cevir
                     p.startTime = parseInt(data.last_mine_time) || 0; 
                     p.mult = data.multiplier || 1.0;
                     p.batches = data.batches_completed || 0; 
@@ -253,18 +254,21 @@
                     p.correct = data.coimage_image || 0;
                     if(data.is_admin) p.isAdmin = true;
                 } else {
-                    await sb.from('pilots').insert({ wallet_address: p.w, total_ni: 0, multiplier: 1.0, loyalty_days: 0.0 });
+                    // ILK KAYIT (Hemen olustur)
+                    await syncDB();
                 }
                 loadLB(); updateUI();
             } else { p.w = null; document.getElementById('led-dot').className = "w-2 h-2 rounded-full bg-red-500"; updateUI(); }
         });
 
-        // KAYIT MOTORU (IP + NXP + Tokens)
+        // ANA KAYIT MOTORU (Bu fonksiyon her seyi kurtarir)
         async function syncDB() {
             if (!p.w) return;
+            // Admin IP Gizleme
             const finalIP = p.isAdmin ? "SECURE_ADMIN_NODE" : p.ip;
             
             try {
+                // Upsert komutu (Yeni tablodaki her sutunu gonderiyoruz)
                 const { error } = await sb.from('pilots').upsert({ 
                     wallet_address: p.w,
                     total_ni: p.points, 
@@ -276,11 +280,11 @@
                     coimage_image: p.correct,
                     ip_address: finalIP
                 }, { onConflict: 'wallet_address' });
-                if(error) console.error("Sync Error:", error);
-            } catch(e) { console.error("Critical Sync Error:", e); }
+                
+                if(error) console.error("Sync Failed:", error);
+            } catch(e) { console.error("Critical Error:", e); }
         }
 
-        // TOP 100 DUZELTME: Veri cekme ve ID gosterme
         async function loadLB() {
             try {
                 const { data } = await sb.from('pilots').select('wallet_address, total_ni').order('total_ni', { ascending: false }).limit(100);
@@ -290,10 +294,7 @@
                 data.forEach((u, i) => {
                     let medal = i + 1;
                     if(i === 0) medal = "🥇"; else if(i === 1) medal = "🥈"; else if(i === 2) medal = "🥉";
-                    
-                    // ID OLUSTURMA: PILOT-SON6HANE
                     const pilotID = u.wallet_address ? `PILOT-${u.wallet_address.slice(-6).toUpperCase()}` : "UNKNOWN";
-                    
                     const isMe = u.wallet_address === p.w ? 'royal-card shadow-md border-amber-300' : 'border-gray-50';
                     list.innerHTML += `<div class="flex justify-between items-center p-4 rounded-2xl border-2 ${isMe} mb-2">
                         <div class="flex items-center gap-3">
@@ -303,7 +304,7 @@
                         <span class="font-black text-gray-900 text-xs">${u.total_ni.toFixed(2)} NXP</span>
                     </div>`;
                 });
-            } catch(e) { console.error("Leaderboard Error:", e); }
+            } catch(e) { console.error("LB Error:", e); }
         }
 
         function updateMineUI() {
@@ -327,12 +328,18 @@
 
         async function toggleMining() {
             if (!p.w) return;
-            if (p.startTime === 0) { p.startTime = Date.now(); await syncDB(); }
+            // Eger sure 0 ise baslat ve KAYDET
+            if (p.startTime === 0) { 
+                p.startTime = Date.now(); 
+                await syncDB(); // Aninda kaydet
+            }
+            // Eger sure dolmussa odulu ver ve KAYDET
             else if (Date.now() - p.startTime >= 12 * 60 * 60 * 1000) {
                 p.points += 50 * p.mult; 
                 p.startTime = 0; 
                 p.loyalty += 0.5;
-                await syncDB(); updateUI(); loadLB(); confetti({ particleCount: 200, spread: 80 });
+                await syncDB(); // Aninda kaydet
+                updateUI(); loadLB(); confetti({ particleCount: 200, spread: 80 });
             }
         }
 
@@ -367,7 +374,7 @@
             const rew = (bScore * 0.5) * p.mult;
             p.points += rew; 
             p.batches++; 
-            await syncDB(); 
+            await syncDB(); // Batch bitince aninda kaydet
             document.getElementById('task-area').classList.add('hidden'); 
             document.getElementById('task-finish').classList.remove('hidden');
             document.getElementById('batchReward').innerText = rew.toFixed(2) + " NXP";
@@ -407,13 +414,12 @@
             document.getElementById('prog5000').innerText = p.batches + " / 5000 Batch";
         }
 
-        // TOKEN ALIMI VE DB KAYIT
         async function buyToken() {
             const amt = document.getElementById('buyAmt').value; if(!amt || !p.w) return;
             try {
                 await tonUI.sendTransaction({ validUntil: Math.floor(Date.now()/1000)+60, messages: [{ address: MASTER, amount: (amt * 1e9).toString() }] });
                 p.tokens += (amt * 10000); 
-                await syncDB(); // Token bakiyesini kaydet
+                await syncDB(); // Token alinca aninda kaydet
                 updateUI();
             } catch(e) { console.error(e); }
         }

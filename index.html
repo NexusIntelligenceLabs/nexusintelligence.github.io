@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Nexus Intelligence | V51 UI Polish</title>
+    <title>Nexus Intelligence | V50 Hybrid Final</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/@tonconnect/ui@latest/dist/tonconnect-ui.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -18,21 +18,7 @@
         .tab-content { display: none; }
         .tab-content.active { display: block; animation: slideUp 0.3s ease-out; }
         @keyframes slideUp { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
-        
-        /* CÜZDAN BUTONU FIX */
-        #ton-connect-button button { 
-            background: #000 !important; 
-            border-radius: 14px !important; 
-            color: #fff !important; /* Adres yazısı beyaz olsun */
-            font-family: 'JetBrains Mono', monospace !important;
-            font-size: 11px !important; /* Mobilde sığması için font */
-            padding: 8px 12px !important;
-        }
-        /* Butonun içindeki icon ve yazı hizası */
-        #ton-connect-button button div { 
-            display: flex; align-items: center; gap: 5px; 
-        }
-
+        #ton-connect-button button { background: #000 !important; border-radius: 14px !important; }
         .nav-btn { opacity: 0.3; transition: 0.3s; filter: grayscale(1); }
         .nav-active { opacity: 1; filter: grayscale(0); transform: scale(1.15); }
         .led-glow { box-shadow: 0 0 12px currentColor; }
@@ -45,31 +31,30 @@
 </head>
 <body class="pb-32">
 
-    <nav class="fixed top-0 w-full z-50 glass px-4 py-3 flex justify-between items-center rounded-none bg-white border-b border-gray-100">
-        <div class="flex items-center gap-2">
-            <div class="bg-black p-1.5 rounded-lg shadow-lg shrink-0">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <nav class="fixed top-0 w-full z-50 glass px-5 py-4 flex justify-between items-center rounded-none bg-white border-b border-gray-100">
+        <div class="flex items-center gap-3">
+            <div class="bg-black p-2 rounded-xl shadow-lg">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                     <path d="M12 2L2 7L12 12L22 7L12 2Z" fill="white"/>
                     <path d="M2 17L12 22L22 17" stroke="white" stroke-width="2"/>
                     <path d="M2 12L12 17L22 12" stroke="white" stroke-width="2"/>
                 </svg>
             </div>
             <div class="leading-none">
-                <span class="text-sm sm:text-xl font-black tracking-tighter uppercase">Nexus</span>
-                <span class="hidden sm:block text-[10px] font-bold text-blue-600 tracking-[0.2em] mono uppercase">Intelligence</span>
+                <span class="text-xl font-black tracking-tighter uppercase">Nexus</span>
+                <span class="text-[10px] block font-bold text-blue-600 tracking-[0.2em] mono uppercase">Intelligence</span>
             </div>
         </div>
-        
         <div class="flex items-center gap-2">
-            <div class="hidden sm:flex items-center gap-1.5 bg-gray-50 px-3 py-2 rounded-full border border-gray-100">
+            <div class="flex items-center gap-1.5 bg-gray-50 px-3 py-2 rounded-full border border-gray-100">
                 <div id="led-dot" class="w-2 h-2 rounded-full bg-red-500 led-glow"></div>
                 <span id="led-text" class="text-[9px] font-black uppercase mono text-gray-400">Offline</span>
             </div>
-            <div id="ton-connect-button" class="shrink-0"></div>
+            <div id="ton-connect-button"></div>
         </div>
     </nav>
 
-    <main id="tab-pilot" class="tab-content active pt-24 px-5 max-w-md mx-auto">
+    <main id="tab-pilot" class="tab-content active pt-28 px-5 max-w-md mx-auto">
         <div class="flex justify-between items-center mb-5 px-1">
             <span id="os-text" class="text-[10px] font-extrabold text-gray-400 mono italic uppercase tracking-widest">Awaiting Node...</span>
             <span class="text-[10px] font-black text-blue-500 mono uppercase bg-blue-50 px-2 py-0.5 rounded">Alpha v5.0</span>
@@ -108,7 +93,7 @@
         </div>
     </main>
 
-    <main id="tab-tasks" class="tab-content pt-24 px-5 max-w-md mx-auto">
+    <main id="tab-tasks" class="tab-content pt-28 px-5 max-w-md mx-auto">
         <div id="task-intro" class="glass p-12 text-center bg-white mb-6 border-2 border-blue-100">
             <div class="text-5xl mb-6">🧠</div>
             <h2 class="text-xl font-black mb-2 uppercase tracking-tight">Neural Optimization</h2>
@@ -168,7 +153,7 @@
         </div>
     </main>
 
-    <main id="tab-market" class="tab-content pt-24 px-5 max-w-md mx-auto">
+    <main id="tab-market" class="tab-content pt-28 px-5 max-w-md mx-auto">
         <div class="glass p-8 mb-6 border-blue-200 bg-white shadow-lg border-2">
             <h3 class="text-xs font-black text-blue-600 uppercase mb-5 tracking-[0.2em] italic">Token Pre-Sale (1 TON = 10,000 $NI)</h3>
             <input type="number" id="buyAmt" placeholder="0.0 TON" class="w-full bg-gray-50 border-2 border-gray-100 p-5 rounded-2xl font-black mb-5 outline-none focus:border-blue-500 transition-all text-lg">
@@ -205,7 +190,7 @@
         </div>
     </main>
 
-    <main id="tab-leaderboard" class="tab-content pt-24 px-5 max-w-md mx-auto">
+    <main id="tab-leaderboard" class="tab-content pt-28 px-5 max-w-md mx-auto">
         <h1 class="text-2xl font-black mb-8 uppercase tracking-tighter italic text-blue-600 flex items-center gap-3">Global Ranking 🏆</h1>
         <div class="glass p-3 bg-white shadow-xl border border-gray-100" id="leaderboardList">
             <p class="text-center py-16 mono text-[11px] text-gray-400 animate-pulse italic">SYNCING NODE RANKS...</p>
@@ -250,6 +235,7 @@
                     p.ip = ipJson.ip || "0.0.0.0";
                 } catch(e) {}
 
+                document.getElementById('led-dot').className = "w-2 h-2 rounded-full bg-green-500 led-glow";
                 document.getElementById('led-text').innerText = "Online";
                 document.getElementById('led-text').className = "text-[9px] font-black text-green-600 uppercase mono";
                 document.getElementById('refLink').value = window.location.href.split('?')[0] + "?ref=" + p.w;
@@ -284,7 +270,7 @@
                 await saveExtra();
                 
                 loadLB(); updateUI();
-            } else { p.w = null; updateUI(); }
+            } else { p.w = null; document.getElementById('led-dot').className = "w-2 h-2 rounded-full bg-red-500"; updateUI(); }
         });
 
         // ANA KAYIT FONKSIYONU (V44 MOTORU - UPDATE KULLANIR)

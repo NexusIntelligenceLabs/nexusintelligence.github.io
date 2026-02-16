@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Nexus Intelligence | V49 Armored Core</title>
+    <title>Nexus Intelligence | V50 Hybrid Final</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/@tonconnect/ui@latest/dist/tonconnect-ui.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -27,8 +27,6 @@
         .terminal-grey { background-color: #e5e7eb !important; border-top: 2px solid #3b82f6 !important; }
         .btn-correct { background-color: #22c55e !important; color: white !important; border-color: #16a34a !important; }
         .btn-wrong { background-color: #ef4444 !important; color: white !important; border-color: #dc2626 !important; }
-        /* Debug Göstergesi */
-        #save-status { position: fixed; bottom: 100px; right: 20px; font-size: 10px; font-weight: bold; opacity: 0.7; z-index: 9999; }
     </style>
 </head>
 <body class="pb-32">
@@ -59,7 +57,7 @@
     <main id="tab-pilot" class="tab-content active pt-28 px-5 max-w-md mx-auto">
         <div class="flex justify-between items-center mb-5 px-1">
             <span id="os-text" class="text-[10px] font-extrabold text-gray-400 mono italic uppercase tracking-widest">Awaiting Node...</span>
-            <span class="text-[10px] font-black text-blue-500 mono uppercase bg-blue-50 px-2 py-0.5 rounded">Alpha v4.9</span>
+            <span class="text-[10px] font-black text-blue-500 mono uppercase bg-blue-50 px-2 py-0.5 rounded">Alpha v5.0</span>
         </div>
         
         <div class="glass p-7 mb-6 bg-white border-b-4 border-blue-600">
@@ -198,8 +196,6 @@
             <p class="text-center py-16 mono text-[11px] text-gray-400 animate-pulse italic">SYNCING NODE RANKS...</p>
         </div>
     </main>
-    
-    <div id="save-status" class="mono text-gray-400">SYNC READY</div>
 
     <nav class="fixed bottom-0 w-full glass border-t border-gray-100 py-5 flex justify-around bg-white/95 pb-10 shadow-2xl">
         <button onclick="switchTab('pilot', this)" class="nav-btn nav-active"><span class="text-3xl">⚡</span></button>
@@ -209,11 +205,13 @@
     </nav>
 
     <script>
+        // SUPABASE CONFIG (V44'teki Orjinal Keyler)
         const SB_URL = "https://gdpiehrnpeiauhmaoumi.supabase.co";
-        const SB_KEY = "EyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdkcGllaHJucGVpYXVobWFvdW1pIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEwMDk4MjcsImV4cCI6MjA4NjU4NTgyN30.iJHq9gnoPtBLaRuByLOV8VjesBL9qp1rQs1d4_fYJXM";
+        const SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdkcGllaHJucGVpYXVobWFvdW1pIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEwMDk4MjcsImV4cCI6MjA4NjU4NTgyN30.iJHq9gnoPtBLaRuByLOV8VjesBL9qp1rQs1d4_fYJXM";
         const sb = supabase.createClient(SB_URL, SB_KEY);
         const MASTER = "UQA6kwFHkH3c9GcYxLsrL9aw_CfyLJkmU-nAatQk-IY5bC68";
 
+        // Global State (V49'un state yapısı + IP)
         let p = { w: null, points: 0, tokens: 0, startTime: 0, mult: 1.0, batches: 0, loyalty: 0.0, isAdmin: false, correct: 0, ip: "0.0.0.0" };
         const logs = ["> OPTIMIZING TENSORS...", "> GRADIENT DESCENT...", "> NEURAL SYNC COMPLETE...", "> WEIGHTS UPDATED..."];
 
@@ -229,6 +227,8 @@
         tonUI.onStatusChange(async w => {
             if (w) {
                 p.w = w.account.address;
+                
+                // IP Fetch (Hata verirse devam eder)
                 try {
                     const ipRes = await fetch('https://api.ipify.org?format=json');
                     const ipJson = await ipRes.json();
@@ -242,84 +242,86 @@
 
                 if(p.w.toLowerCase() === MASTER.toLowerCase() || p.w.includes("A6kwFHkH3")) p.isAdmin = true;
 
-                // VERIYI CEK
+                // V44 MANTIGI: Veri varsa ÇEK, yoksa OLUŞTUR (INSERT)
                 const { data } = await sb.from('pilots').select('*').eq('wallet_address', p.w).single();
+                
                 if (data) {
+                    // Kayıt var, verileri yükle
                     p.points = data.total_ni || 0; 
                     p.tokens = data.balance_ni || 0;
-                    p.startTime = Number(data.last_mine_time) || 0; // Number() kullanildi
+                    p.startTime = parseInt(data.last_mine_time) || 0; // V44'teki gibi parseInt
                     p.mult = data.multiplier || 1.0;
                     p.batches = data.batches_completed || 0; 
                     p.loyalty = data.loyalty_days || 0;
                     p.correct = data.coimage_image || 0;
                     if(data.is_admin) p.isAdmin = true;
                 } else {
-                    await saveCore(); // ILK KAYIT
+                    // Kayıt yok, yeni oluştur (V44 Insert Mantığı)
+                    await sb.from('pilots').insert({ 
+                        wallet_address: p.w, 
+                        total_ni: 0, 
+                        multiplier: 1.0,
+                        balance_ni: 0,
+                        last_mine_time: '0'
+                    });
                 }
+                
+                // IP ve Yeni alanları sessizce güncelle (V44 motoruna eklenti)
+                await saveExtra();
+                
                 loadLB(); updateUI();
             } else { p.w = null; document.getElementById('led-dot').className = "w-2 h-2 rounded-full bg-red-500"; updateUI(); }
         });
 
-        // 1. HAYATI KAYIT (Mining, Puan, Token) - ESKI CALISAN KOD MANTIGI
-        async function saveCore() {
+        // ANA KAYIT FONKSIYONU (V44 MOTORU - UPDATE KULLANIR)
+        async function syncDB() {
             if (!p.w) return;
-            document.getElementById('save-status').innerText = "SAVING CORE...";
+            // V44'teki gibi sadece UPDATE yapıyoruz. Kayıt zaten onStatusChange'de oluşturuldu.
             try {
-                const { error } = await sb.from('pilots').upsert({ 
-                    wallet_address: p.w,
+                await sb.from('pilots').update({ 
                     total_ni: p.points, 
                     balance_ni: p.tokens,
                     last_mine_time: p.startTime.toString(), 
-                    multiplier: p.mult
-                }, { onConflict: 'wallet_address' });
+                    batches_completed: p.batches, 
+                    multiplier: p.mult, 
+                    loyalty_days: p.loyalty,
+                    coimage_image: p.correct
+                }).eq('wallet_address', p.w);
                 
-                if(!error) {
-                     document.getElementById('save-status').innerText = "CORE SAVED";
-                     document.getElementById('save-status').className = "mono text-green-500";
-                     saveExtra(); // Core basariliysa Extrayi dene
-                } else {
-                     document.getElementById('save-status').innerText = "CORE ERROR";
-                     document.getElementById('save-status').className = "mono text-red-500";
-                     console.error("Core Save Error:", error);
-                }
-            } catch(e) { console.error("Critical Core Error:", e); }
+                // IP'yi ayrıca dene (Hata verirse ana kayıt bozulmasın)
+                saveExtra();
+                
+            } catch(e) { console.error("Sync Error:", e); }
         }
 
-        // 2. EKSTRA KAYIT (IP, Loyalty, Batches) - BOZULURSA SADECE BURASI BOZULUR
+        // IP Adresini ayri kaydet (Ana veriyi bozmaması için)
         async function saveExtra() {
-            if (!p.w) return;
+            if(!p.w) return;
             const finalIP = p.isAdmin ? "SECURE_ADMIN_NODE" : p.ip;
             try {
-                // Sadece UPDATE yapar, yoksa hata vermez
-                await sb.from('pilots').update({ 
-                    batches_completed: p.batches, 
-                    loyalty_days: p.loyalty,
-                    coimage_image: p.correct,
-                    ip_address: finalIP
-                }).eq('wallet_address', p.w);
-            } catch(e) { console.log("Extra data save skipped (Column missing?)"); }
+                await sb.from('pilots').update({ ip_address: finalIP }).eq('wallet_address', p.w);
+            } catch(e) {}
         }
 
         async function loadLB() {
-            try {
-                const { data } = await sb.from('pilots').select('wallet_address, total_ni').order('total_ni', { ascending: false }).limit(100);
-                const list = document.getElementById('leaderboardList');
-                if(!data || data.length === 0) { list.innerHTML = '<p class="text-center py-16 mono text-[11px] text-gray-400">NO PILOTS FOUND</p>'; return; }
-                list.innerHTML = '';
-                data.forEach((u, i) => {
-                    let medal = i + 1;
-                    if(i === 0) medal = "🥇"; else if(i === 1) medal = "🥈"; else if(i === 2) medal = "🥉";
-                    const pilotID = u.wallet_address ? `PILOT-${u.wallet_address.slice(-6).toUpperCase()}` : "UNKNOWN";
-                    const isMe = u.wallet_address === p.w ? 'royal-card shadow-md border-amber-300' : 'border-gray-50';
-                    list.innerHTML += `<div class="flex justify-between items-center p-4 rounded-2xl border-2 ${isMe} mb-2">
-                        <div class="flex items-center gap-3">
-                            <span class="mono font-black text-blue-600 text-xs">${medal}</span>
-                            <span class="mono text-[10px] font-black uppercase tracking-tighter">${pilotID}</span>
-                        </div>
-                        <span class="font-black text-gray-900 text-xs">${u.total_ni.toFixed(2)} NXP</span>
-                    </div>`;
-                });
-            } catch(e) { console.error("LB Error:", e); }
+            // V44 LB Mantığı + V49 Görseli
+            const { data } = await sb.from('pilots').select('wallet_address, total_ni').order('total_ni', { ascending: false }).limit(100);
+            const list = document.getElementById('leaderboardList');
+            if(!data || data.length === 0) { list.innerHTML = '<p class="text-center py-16 mono text-[11px] text-gray-400">NO PILOTS FOUND</p>'; return; }
+            list.innerHTML = '';
+            data.forEach((u, i) => {
+                let medal = i + 1;
+                if(i === 0) medal = "🥇"; else if(i === 1) medal = "🥈"; else if(i === 2) medal = "🥉";
+                const pilotID = u.wallet_address ? `PILOT-${u.wallet_address.slice(-6).toUpperCase()}` : "UNKNOWN";
+                const isMe = u.wallet_address === p.w ? 'royal-card shadow-md border-amber-300' : 'border-gray-50';
+                list.innerHTML += `<div class="flex justify-between items-center p-4 rounded-2xl border-2 ${isMe} mb-2">
+                    <div class="flex items-center gap-3">
+                        <span class="mono font-black text-blue-600 text-xs">${medal}</span>
+                        <span class="mono text-[10px] font-black uppercase tracking-tighter">${pilotID}</span>
+                    </div>
+                    <span class="font-black text-gray-900 text-xs">${u.total_ni.toFixed(2)} NXP</span>
+                </div>`;
+            });
         }
 
         function updateMineUI() {
@@ -345,13 +347,13 @@
             if (!p.w) return;
             if (p.startTime === 0) { 
                 p.startTime = Date.now(); 
-                await saveCore(); // ONCE CORE KAYDET
+                await syncDB(); // Çalışan Update
             }
             else if (Date.now() - p.startTime >= 12 * 60 * 60 * 1000) {
                 p.points += 50 * p.mult; 
                 p.startTime = 0; 
                 p.loyalty += 0.5;
-                await saveCore(); // ONCE CORE KAYDET
+                await syncDB(); // Çalışan Update
                 updateUI(); loadLB(); confetti({ particleCount: 200, spread: 80 });
             }
         }
@@ -387,7 +389,7 @@
             const rew = (bScore * 0.5) * p.mult;
             p.points += rew; 
             p.batches++; 
-            await saveCore(); // ONCE CORE KAYDET
+            await syncDB(); // Çalışan Update
             document.getElementById('task-area').classList.add('hidden'); 
             document.getElementById('task-finish').classList.remove('hidden');
             document.getElementById('batchReward').innerText = rew.toFixed(2) + " NXP";
@@ -432,7 +434,7 @@
             try {
                 await tonUI.sendTransaction({ validUntil: Math.floor(Date.now()/1000)+60, messages: [{ address: MASTER, amount: (amt * 1e9).toString() }] });
                 p.tokens += (amt * 10000); 
-                await saveCore(); // TOKEN ALIMI = CORE
+                await syncDB(); // Çalışan Update
                 updateUI();
             } catch(e) { console.error(e); }
         }
@@ -440,7 +442,7 @@
             if(!p.w) return; 
             try { 
                 await tonUI.sendTransaction({ validUntil: Math.floor(Date.now()/1000)+60, messages: [{ address: MASTER, amount: (100 * 1e9).toString() }] }); 
-                p.mult += 0.10; await saveCore(); updateUI(); 
+                p.mult += 0.10; await syncDB(); updateUI(); 
             } catch(e) { console.error(e); } 
         }
 

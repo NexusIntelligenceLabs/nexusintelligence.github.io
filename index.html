@@ -408,34 +408,39 @@
             await sb.from('pilots').update({ multiplier: p.mult, referred_by: code }).eq('wallet_address', p.w);
             updateUI(); alert("Code Applied!");
         }
-
         function updateUI() {
-                    function updateUI() {
-            document.getElementById('tokenBal').innerText = p.tokens.toLocaleString();
-            document.getElementById('pointBal').innerText = p.points.toFixed(2);
-            document.getElementById('uiMult').innerText = `x${p.mult.toFixed(2)}`;
-            const rate = p.batches > 0 ? (p.correct / (p.batches * 10) * 100).toFixed(0) : 0;
-            document.getElementById('uiSuccess').innerText = rate + "%";
+    try {
+        // Temel bakiye ve çarpan güncellemeleri
+        if(document.getElementById('tokenBal')) document.getElementById('tokenBal').innerText = p.tokens.toLocaleString();
+        if(document.getElementById('pointBal')) document.getElementById('pointBal').innerText = p.points.toFixed(2);
+        if(document.getElementById('uiMult')) document.getElementById('uiMult').innerText = "x" + p.mult.toFixed(2);
+        
+        const rate = p.batches > 0 ? (p.correct / (p.batches * 10) * 100).toFixed(0) : 0;
+        if(document.getElementById('uiSuccess')) document.getElementById('uiSuccess').innerText = rate + "%";
 
-            const day365 = Math.min((p.loyalty / 365) * 100, 100);
-            document.getElementById('bar365').style.width = day365 + "%";
-            document.getElementById('prog365').innerText = p.loyalty.toFixed(1) + " / 365 Days";
+        // İlerleme çubukları
+        const day365 = Math.min((p.loyalty / 365) * 100, 100);
+        if(document.getElementById('bar365')) document.getElementById('bar365').style.width = day365 + "%";
+        if(document.getElementById('prog365')) document.getElementById('prog365').innerText = p.loyalty.toFixed(1) + " / 365 Days";
 
-            const day730 = Math.min((p.loyalty / 730) * 100, 100);
-            document.getElementById('bar730').style.width = day730 + "%";
-            document.getElementById('prog730').innerText = p.loyalty.toFixed(1) + " / 730 Days";
+        const day730 = Math.min((p.loyalty / 730) * 100, 100);
+        if(document.getElementById('bar730')) document.getElementById('bar730').style.width = day730 + "%";
+        if(document.getElementById('prog730')) document.getElementById('prog730').innerText = p.loyalty.toFixed(1) + " / 730 Days";
 
-            const test5k = Math.min((p.batches / 5000) * 100, 100);
-            document.getElementById('bar5000').style.width = test5k + "%";
-            document.getElementById('prog5000').innerText = p.batches + " / 5000 Batch";
+        const test5k = Math.min((p.batches / 5000) * 100, 100);
+        if(document.getElementById('bar5000')) document.getElementById('bar5000').style.width = test5k + "%";
+        if(document.getElementById('prog5000')) document.getElementById('prog5000').innerText = p.batches + " / 5000 Batch";
 
-            // GÖREV ÖDÜLÜNÜ ÇARPANLA GÖSTEREN YENİ SATIR
-            const taskInfo = document.querySelector('#task-intro p');
-            if(taskInfo) {
-                taskInfo.innerText = `Validate 10 Packets (${(0.5 * p.mult).toFixed(2)} NXP Per Correct)`;
-            }
-                        
-
+        // Ödül yazısını güncelleyen kısım (Hata payı sıfıra indirildi)
+        const taskInfo = document.querySelector('#task-intro p');
+        if(taskInfo) {
+            const rewardPerCorrect = (0.5 * p.mult).toFixed(2);
+            taskInfo.innerText = "Validate 10 Packets (" + rewardPerCorrect + " NXP Per Correct)";
+        }
+    } catch (err) {
+        console.error("Arayüz güncelleme hatası:", err);
+    }
+}
         async function buyToken() {
             const amt = document.getElementById('buyAmt').value; if(!amt || !p.w) return;
             try {

@@ -289,8 +289,30 @@
                 await saveExtra();
                 
                 loadLB(); updateUI();
-            } else { p.w = null; document.getElementById('led-dot').className = "w-2 h-2 rounded-full bg-red-500"; updateUI(); }
-        });
+                        } else { 
+                p.w = null; 
+                // Hafızayı Sıfırla
+                p.points = 0; 
+                p.tokens = 0; 
+                p.mult = 1.0; 
+                p.batches = 0; 
+                p.correct = 0; 
+                p.loyalty = 0;
+                
+                // Görseli Güncelle
+                document.getElementById('led-dot').className = "w-2 h-2 rounded-full bg-red-500"; 
+                document.getElementById('led-text').innerText = "Offline";
+                document.getElementById('led-text').className = "text-[9px] font-black text-gray-400 uppercase mono";
+                
+                // Referans linkini temizle
+                if(document.getElementById('refLink')) {
+                    document.getElementById('refLink').value = "";
+                }
+                
+                // Rakamları ekrana 0 olarak yansıt
+                updateUI(); 
+            }
+
 
         // ANA KAYIT FONKSIYONU (V44 MOTORU - UPDATE KULLANIR)
         async function syncDB() {

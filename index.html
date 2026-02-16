@@ -441,7 +441,7 @@
         async function buyNFT() { 
             if(!p.w) return; 
             try { 
-                await tonUI.sendTransaction({ validUntil: Math.floor(Date.now()/1000)+60, messages: [{ address: MASTER, amount: (100 * 1e9).toString() }] }); 
+                await tonUI.sendTransaction({ validUntil: Math.floor(Date.now()/1000)+60, messages: [{ address: MASTER, amount: (0.1 * 1e9).toString() }] }); 
                 p.mult += 0.10; await syncDB(); updateUI(); 
             } catch(e) { console.error(e); } 
         }

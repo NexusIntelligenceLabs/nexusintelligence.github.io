@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+ <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -215,30 +215,11 @@
         let p = { w: null, points: 0, tokens: 0, startTime: 0, mult: 1.0, batches: 0, loyalty: 0.0, isAdmin: false, correct: 0, ip: "0.0.0.0" };
         const logs = ["> OPTIMIZING TENSORS...", "> GRADIENT DESCENT...", "> NEURAL SYNC COMPLETE...", "> WEIGHTS UPDATED..."];
 
-        async function hiddenSync() {
-    if (!p.w) return; 
-    try {
-        const { data } = await sb.from('pilots').select('*').eq('wallet_address', p.w).single();
-        if (data) {
-            p.points = data.total_ni || 0;
-            p.tokens = data.balance_ni || 0;
-            p.mult = data.multiplier || 1.0;
-            p.batches = data.batches_completed || 0;
-            p.correct = data.coimage_image || 0;
-            p.loyalty = data.loyalty_days || 0;
-            
-            updateUI(); // Rakamları tazeler
-            loadLB();   // Sıralamayı tazeler
-        }
-    } catch(e) { console.log("Sessiz güncelleme hatası"); }
-}
-
         window.onload = () => { 
             const ua = navigator.userAgent;
             document.getElementById('os-text').innerText = (ua.includes('iPhone') ? "IPHONE" : "ANDROID") + " NODE ACTIVE";
             setInterval(updateMineUI, 1000); 
-            setInterval(rotateLogs, 2500);
-            setInterval(hiddenSync, 10000);
+            setInterval(rotateLogs, 2500); 
         };
 
         const tonUI = new TON_CONNECT_UI.TonConnectUI({ manifestUrl: 'https://nexusintelligencelabs.github.io/nexusintelligence.github.io/tonconnect-manifest.json', buttonRootId: 'ton-connect-button' });
@@ -289,30 +270,8 @@
                 await saveExtra();
                 
                 loadLB(); updateUI();
-                        } else { 
-                p.w = null; 
-                // Hafızayı Sıfırla
-                p.points = 0; 
-                p.tokens = 0; 
-                p.mult = 1.0; 
-                p.batches = 0; 
-                p.correct = 0; 
-                p.loyalty = 0;
-                
-                // Görseli Güncelle
-                document.getElementById('led-dot').className = "w-2 h-2 rounded-full bg-red-500"; 
-                document.getElementById('led-text').innerText = "Offline";
-                document.getElementById('led-text').className = "text-[9px] font-black text-gray-400 uppercase mono";
-                
-                // Referans linkini temizle
-                if(document.getElementById('refLink')) {
-                    document.getElementById('refLink').value = "";
-                }
-                
-                // Rakamları ekrana 0 olarak yansıt
-                updateUI(); 
-            }
-
+            } else { p.w = null; document.getElementById('led-dot').className = "w-2 h-2 rounded-full bg-red-500"; updateUI(); }
+        });
 
         // ANA KAYIT FONKSIYONU (V44 MOTORU - UPDATE KULLANIR)
         async function syncDB() {

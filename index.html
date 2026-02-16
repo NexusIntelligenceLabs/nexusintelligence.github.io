@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Nexus Intelligence | V53 Neural Heartbeat</title>
+    <title>Nexus Intelligence | V50 Hybrid Final</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/@tonconnect/ui@latest/dist/tonconnect-ui.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -104,11 +104,14 @@
         <div id="task-area" class="hidden mb-6">
             <div class="flex justify-between items-center mb-4"><span class="text-[10px] font-black text-blue-600 animate-pulse uppercase tracking-widest">● Processing Node Data...</span><span id="taskStep" class="mono text-[10px] font-black bg-white border border-gray-200 px-3 py-1.5 rounded-lg shadow-sm">1 / 10</span></div>
             <div class="glass p-4 relative bg-white border border-gray-100 shadow-xl">
-                <div id="task-loader" class="hidden absolute inset-0 bg-white/98 z-20 flex items-center justify-center flex-col"><div class="w-10 h-10 border-4 border-blue-100 border-t-blue-600 rounded-full animate-spin mb-4"></div><div class="mono text-[11px] font-black italic tracking-widest text-blue-600">SYNCING...</div></div>
+                <div id="task-loader" class="hidden absolute inset-0 bg-white/98 z-20 flex items-center justify-center flex-col">
+                    <div class="w-10 h-10 border-4 border-blue-100 border-t-blue-600 rounded-full animate-spin mb-4"></div>
+                    <div class="mono text-[11px] font-black italic tracking-widest text-blue-600">SYNCING...</div>
+                </div>
                 <img id="qImg" src="" class="w-full h-56 object-cover rounded-2xl mb-5 border border-gray-100 shadow-inner">
                 <div class="grid grid-cols-2 gap-4">
-                    <button onclick="checkTask(true, this)" class="py-5 bg-gray-50 border-2 border-gray-100 rounded-2xl font-black text-[11px] uppercase transition-all shadow-sm">AI Generated</button>
-                    <button onclick="checkTask(false, this)" class="py-5 bg-gray-50 border-2 border-gray-100 rounded-2xl font-black text-[11px] uppercase transition-all shadow-sm">Real Image</button>
+                    <button onclick="checkTask(true, this)" class="py-5 bg-gray-50 border-2 border-gray-100 rounded-2xl font-black text-[11px] uppercase hover:bg-white hover:border-blue-500 transition-all shadow-sm">AI Generated</button>
+                    <button onclick="checkTask(false, this)" class="py-5 bg-gray-50 border-2 border-gray-100 rounded-2xl font-black text-[11px] uppercase hover:bg-white hover:border-blue-500 transition-all shadow-sm">Real Image</button>
                 </div>
             </div>
         </div>
@@ -117,7 +120,7 @@
             <div class="text-6xl mb-6">✨</div>
             <h2 class="text-2xl font-black mb-3 uppercase tracking-tighter italic">Batch Sealed</h2>
             <p class="text-5xl font-black text-blue-600 mb-10 tracking-tight" id="batchReward">0.00 NXP</p>
-            <button onclick="resetTraining()" class="w-full bg-blue-600 text-white py-5 rounded-2xl font-black uppercase text-xs">Restart Session</button>
+            <button onclick="resetTraining()" class="w-full bg-blue-600 text-white py-5 rounded-2xl font-black uppercase text-xs shadow-lg active:scale-95 transition-all">Restart Session</button>
         </div>
 
         <div class="glass p-6 mb-6 bg-white shadow-sm border border-gray-100">
@@ -134,31 +137,61 @@
             </div>
             
             <div class="space-y-4 mt-6">
-                <div><div class="flex justify-between mb-1"><span class="text-[9px] font-black uppercase">365 Day Pass</span><span class="text-[9px] font-bold text-blue-600" id="prog365">0 / 365 Days</span></div><div class="w-full bg-gray-100 h-2 rounded-full"><div id="bar365" class="h-full bg-amber-500 w-0 rounded-full"></div></div></div>
-                <div><div class="flex justify-between mb-1"><span class="text-[9px] font-black uppercase">730 Day Pass</span><span class="text-[9px] font-bold text-blue-600" id="prog730">0 / 730 Days</span></div><div class="w-full bg-gray-100 h-2 rounded-full"><div id="bar730" class="h-full bg-purple-500 w-0 rounded-full"></div></div></div>
-                <div><div class="flex justify-between mb-1"><span class="text-[9px] font-black uppercase">5000 Test Batch</span><span class="text-[9px] font-bold text-blue-600" id="prog5000">0 / 5000 Batch</span></div><div class="w-full bg-gray-100 h-2 rounded-full"><div id="bar5000" class="h-full bg-blue-600 w-0 rounded-full"></div></div></div>
+                <div>
+                    <div class="flex justify-between mb-1"><span class="text-[9px] font-black uppercase">365 Day Pass</span><span class="text-[9px] font-bold text-blue-600" id="prog365">0 / 365 Days</span></div>
+                    <div class="w-full bg-gray-100 h-2 rounded-full"><div id="bar365" class="h-full bg-amber-500 w-0 rounded-full"></div></div>
+                </div>
+                <div>
+                    <div class="flex justify-between mb-1"><span class="text-[9px] font-black uppercase">730 Day Pass</span><span class="text-[9px] font-bold text-blue-600" id="prog730">0 / 730 Days</span></div>
+                    <div class="w-full bg-gray-100 h-2 rounded-full"><div id="bar730" class="h-full bg-purple-500 w-0 rounded-full"></div></div>
+                </div>
+                <div>
+                    <div class="flex justify-between mb-1"><span class="text-[9px] font-black uppercase">5000 Test Batch</span><span class="text-[9px] font-bold text-blue-600" id="prog5000">0 / 5000 Batch</span></div>
+                    <div class="w-full bg-gray-100 h-2 rounded-full"><div id="bar5000" class="h-full bg-blue-600 w-0 rounded-full"></div></div>
+                </div>
             </div>
         </div>
     </main>
 
     <main id="tab-market" class="tab-content pt-28 px-5 max-w-md mx-auto">
         <div class="glass p-8 mb-6 border-blue-200 bg-white shadow-lg border-2">
-            <h3 class="text-xs font-black text-blue-600 uppercase mb-5 italic">Token Pre-Sale (1 TON = 10,000 $NI)</h3>
+            <h3 class="text-xs font-black text-blue-600 uppercase mb-5 tracking-[0.2em] italic">Token Pre-Sale (1 TON = 10,000 $NI)</h3>
             <input type="number" id="buyAmt" placeholder="0.0 TON" class="w-full bg-gray-50 border-2 border-gray-100 p-5 rounded-2xl font-black mb-5 outline-none focus:border-blue-500 transition-all text-lg">
-            <div class="flex justify-between items-center font-black mono bg-blue-50 p-5 rounded-2xl mb-6 border border-blue-100"><span class="text-[10px] text-blue-400 uppercase tracking-widest">Receive $NI</span><span class="text-xl text-blue-700" id="calcResult">0</span></div>
-            <button onclick="buyToken()" class="w-full bg-blue-600 text-white py-5 rounded-2xl font-black text-xs uppercase shadow-xl">Swap TON for $NI</button>
+            <div class="flex justify-between items-center font-black mono bg-blue-50 p-5 rounded-2xl mb-6 border border-blue-100">
+                <span class="text-[10px] text-blue-400 uppercase tracking-widest">Receive $NI</span>
+                <span class="text-xl text-blue-700" id="calcResult">0</span>
+            </div>
+            <button onclick="buyToken()" class="w-full bg-blue-600 text-white py-5 rounded-2xl font-black text-xs uppercase shadow-xl hover:bg-blue-700 active:scale-95 transition-all">Swap TON for $NI</button>
         </div>
 
         <div class="glass p-7 mb-6 royal-card shadow-xl relative overflow-hidden">
             <div class="absolute -right-4 -top-4 text-6xl opacity-10 grayscale">👑</div>
-            <div class="flex justify-between items-start mb-3"><h3 class="text-2xl font-black text-amber-600 uppercase italic">Royal NFT</h3><span class="text-xl font-black text-gray-900 tracking-tighter">100 TON</span></div>
-            <p class="text-[11px] text-amber-800 font-extrabold mb-6 uppercase">+10% NXP Boost / +5% Token Yield</p>
-            <button onclick="buyNFT()" class="w-full bg-black text-white py-3.5 rounded-xl text-[10px] font-black uppercase">Mint Royal Pass</button>
+            <div class="flex justify-between items-start mb-3">
+                <h3 class="text-2xl font-black text-amber-600 uppercase italic tracking-tighter">Royal NFT</h3>
+                <span class="text-xl font-black text-gray-900 tracking-tighter">100 TON</span>
+            </div>
+            <p class="text-[11px] text-amber-800 font-extrabold mb-6 uppercase tracking-tight">+10% NXP Boost / +5% Token Yield</p>
+            <button onclick="buyNFT()" class="w-full bg-black text-white py-3.5 rounded-xl text-[10px] font-black uppercase shadow-lg hover:shadow-amber-200 transition-all">Mint Royal Pass</button>
+        </div>
+
+        <div class="space-y-3 mb-6">
+            <div class="glass p-4 bg-white border border-gray-100">
+                <div class="flex justify-between mb-2"><span class="text-[9px] font-black uppercase">5000 Test NFT</span><span class="text-[9px] font-bold">0 / 500</span></div>
+                <div class="w-full bg-gray-100 h-2 rounded-full"><div class="h-full bg-blue-500 w-[0%] rounded-full"></div></div>
+            </div>
+            <div class="glass p-4 bg-white border border-gray-100">
+                <div class="flex justify-between mb-2"><span class="text-[9px] font-black uppercase">365 Day NFT</span><span class="text-[9px] font-bold">0 / 1000</span></div>
+                <div class="w-full bg-gray-100 h-2 rounded-full"><div class="h-full bg-amber-500 w-[0%] rounded-full"></div></div>
+            </div>
+            <div class="glass p-4 bg-white border border-gray-100">
+                <div class="flex justify-between mb-2"><span class="text-[9px] font-black uppercase">730 Day NFT</span><span class="text-[9px] font-bold">0 / 700</span></div>
+                <div class="w-full bg-gray-100 h-2 rounded-full"><div class="h-full bg-purple-500 w-[0%] rounded-full"></div></div>
+            </div>
         </div>
     </main>
 
     <main id="tab-leaderboard" class="tab-content pt-28 px-5 max-w-md mx-auto">
-        <h1 class="text-2xl font-black mb-8 uppercase italic text-blue-600 flex items-center gap-3">Global Ranking 🏆</h1>
+        <h1 class="text-2xl font-black mb-8 uppercase tracking-tighter italic text-blue-600 flex items-center gap-3">Global Ranking 🏆</h1>
         <div class="glass p-3 bg-white shadow-xl border border-gray-100" id="leaderboardList">
             <p class="text-center py-16 mono text-[11px] text-gray-400 animate-pulse italic">SYNCING NODE RANKS...</p>
         </div>
@@ -172,11 +205,13 @@
     </nav>
 
     <script>
+        // SUPABASE CONFIG (V44'teki Orjinal Keyler)
         const SB_URL = "https://gdpiehrnpeiauhmaoumi.supabase.co";
         const SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdkcGllaHJucGVpYXVobWFvdW1pIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEwMDk4MjcsImV4cCI6MjA4NjU4NTgyN30.iJHq9gnoPtBLaRuByLOV8VjesBL9qp1rQs1d4_fYJXM";
         const sb = supabase.createClient(SB_URL, SB_KEY);
         const MASTER = "UQA6kwFHkH3c9GcYxLsrL9aw_CfyLJkmU-nAatQk-IY5bC68";
 
+        // Global State (V49'un state yapısı + IP)
         let p = { w: null, points: 0, tokens: 0, startTime: 0, mult: 1.0, batches: 0, loyalty: 0.0, isAdmin: false, correct: 0, ip: "0.0.0.0" };
         const logs = ["> OPTIMIZING TENSORS...", "> GRADIENT DESCENT...", "> NEURAL SYNC COMPLETE...", "> WEIGHTS UPDATED..."];
 
@@ -185,9 +220,6 @@
             document.getElementById('os-text').innerText = (ua.includes('iPhone') ? "IPHONE" : "ANDROID") + " NODE ACTIVE";
             setInterval(updateMineUI, 1000); 
             setInterval(rotateLogs, 2500); 
-
-            // --- EKLEME: 20 SN'DE BİR OTO YENİLEME ---
-            setInterval(fetchUserData, 20000);
         };
 
         const tonUI = new TON_CONNECT_UI.TonConnectUI({ manifestUrl: 'https://nexusintelligencelabs.github.io/nexusintelligence.github.io/tonconnect-manifest.json', buttonRootId: 'ton-connect-button' });
@@ -195,6 +227,8 @@
         tonUI.onStatusChange(async w => {
             if (w) {
                 p.w = w.account.address;
+                
+                // IP Fetch (Hata verirse devam eder)
                 try {
                     const ipRes = await fetch('https://api.ipify.org?format=json');
                     const ipJson = await ipRes.json();
@@ -206,51 +240,74 @@
                 document.getElementById('led-text').className = "text-[9px] font-black text-green-600 uppercase mono";
                 document.getElementById('refLink').value = window.location.href.split('?')[0] + "?ref=" + p.w;
 
-                await fetchUserData(); // Veri çekme motorunu çalıştır
+                if(p.w.toLowerCase() === MASTER.toLowerCase() || p.w.includes("A6kwFHkH3")) p.isAdmin = true;
+
+                // V44 MANTIGI: Veri varsa ÇEK, yoksa OLUŞTUR (INSERT)
+                const { data } = await sb.from('pilots').select('*').eq('wallet_address', p.w).single();
+                
+                if (data) {
+                    // Kayıt var, verileri yükle
+                    p.points = data.total_ni || 0; 
+                    p.tokens = data.balance_ni || 0;
+                    p.startTime = parseInt(data.last_mine_time) || 0; // V44'teki gibi parseInt
+                    p.mult = data.multiplier || 1.0;
+                    p.batches = data.batches_completed || 0; 
+                    p.loyalty = data.loyalty_days || 0;
+                    p.correct = data.coimage_image || 0;
+                    if(data.is_admin) p.isAdmin = true;
+                } else {
+                    // Kayıt yok, yeni oluştur (V44 Insert Mantığı)
+                    await sb.from('pilots').insert({ 
+                        wallet_address: p.w, 
+                        total_ni: 0, 
+                        multiplier: 1.0,
+                        balance_ni: 0,
+                        last_mine_time: '0'
+                    });
+                }
+                
+                // IP ve Yeni alanları sessizce güncelle (V44 motoruna eklenti)
+                await saveExtra();
+                
+                loadLB(); updateUI();
             } else { p.w = null; document.getElementById('led-dot').className = "w-2 h-2 rounded-full bg-red-500"; updateUI(); }
         });
 
-        // --- EKLEME: VERİ ÇEKME FONKSİYONU ---
-        async function fetchUserData() {
-            if (!p.w) return;
-            const { data } = await sb.from('pilots').select('*').eq('wallet_address', p.w).single();
-            if (data) {
-                p.points = data.total_ni || 0; 
-                p.tokens = data.balance_ni || 0;
-                p.startTime = parseInt(data.last_mine_time) || 0;
-                p.mult = data.multiplier || 1.0;
-                p.batches = data.batches_completed || 0; 
-                p.loyalty = data.loyalty_days || 0;
-                p.correct = data.coimage_image || 0;
-                if(data.is_admin || p.w.toLowerCase() === MASTER.toLowerCase() || p.w.includes("A6kwFHkH3")) p.isAdmin = true;
-            } else {
-                await sb.from('pilots').insert({ wallet_address: p.w, total_ni: 0, multiplier: 1.0, balance_ni: 0, last_mine_time: '0' });
-            }
-            await saveExtra();
-            loadLB(); updateUI();
-        }
-
+        // ANA KAYIT FONKSIYONU (V44 MOTORU - UPDATE KULLANIR)
         async function syncDB() {
             if (!p.w) return;
+            // V44'teki gibi sadece UPDATE yapıyoruz. Kayıt zaten onStatusChange'de oluşturuldu.
             try {
                 await sb.from('pilots').update({ 
-                    total_ni: p.points, balance_ni: p.tokens, last_mine_time: p.startTime.toString(), 
-                    batches_completed: p.batches, multiplier: p.mult, loyalty_days: p.loyalty, coimage_image: p.correct
+                    total_ni: p.points, 
+                    balance_ni: p.tokens,
+                    last_mine_time: p.startTime.toString(), 
+                    batches_completed: p.batches, 
+                    multiplier: p.mult, 
+                    loyalty_days: p.loyalty,
+                    coimage_image: p.correct
                 }).eq('wallet_address', p.w);
+                
+                // IP'yi ayrıca dene (Hata verirse ana kayıt bozulmasın)
                 saveExtra();
+                
             } catch(e) { console.error("Sync Error:", e); }
         }
 
+        // IP Adresini ayri kaydet (Ana veriyi bozmaması için)
         async function saveExtra() {
             if(!p.w) return;
             const finalIP = p.isAdmin ? "SECURE_ADMIN_NODE" : p.ip;
-            try { await sb.from('pilots').update({ ip_address: finalIP }).eq('wallet_address', p.w); } catch(e) {}
+            try {
+                await sb.from('pilots').update({ ip_address: finalIP }).eq('wallet_address', p.w);
+            } catch(e) {}
         }
 
         async function loadLB() {
+            // V44 LB Mantığı + V49 Görseli
             const { data } = await sb.from('pilots').select('wallet_address, total_ni').order('total_ni', { ascending: false }).limit(100);
             const list = document.getElementById('leaderboardList');
-            if(!data || data.length === 0) return;
+            if(!data || data.length === 0) { list.innerHTML = '<p class="text-center py-16 mono text-[11px] text-gray-400">NO PILOTS FOUND</p>'; return; }
             list.innerHTML = '';
             data.forEach((u, i) => {
                 let medal = i + 1;
@@ -258,7 +315,10 @@
                 const pilotID = u.wallet_address ? `PILOT-${u.wallet_address.slice(-6).toUpperCase()}` : "UNKNOWN";
                 const isMe = u.wallet_address === p.w ? 'royal-card shadow-md border-amber-300' : 'border-gray-50';
                 list.innerHTML += `<div class="flex justify-between items-center p-4 rounded-2xl border-2 ${isMe} mb-2">
-                    <div class="flex items-center gap-3"><span class="mono font-black text-blue-600 text-xs">${medal}</span><span class="mono text-[10px] font-black uppercase tracking-tighter">${pilotID}</span></div>
+                    <div class="flex items-center gap-3">
+                        <span class="mono font-black text-blue-600 text-xs">${medal}</span>
+                        <span class="mono text-[10px] font-black uppercase tracking-tighter">${pilotID}</span>
+                    </div>
                     <span class="font-black text-gray-900 text-xs">${u.total_ni.toFixed(2)} NXP</span>
                 </div>`;
             });
@@ -285,10 +345,16 @@
 
         async function toggleMining() {
             if (!p.w) return;
-            if (p.startTime === 0) { p.startTime = Date.now(); await syncDB(); }
+            if (p.startTime === 0) { 
+                p.startTime = Date.now(); 
+                await syncDB(); // Çalışan Update
+            }
             else if (Date.now() - p.startTime >= 12 * 60 * 60 * 1000) {
-                p.points += 50 * p.mult; p.startTime = 0; p.loyalty += 0.5;
-                await syncDB(); updateUI(); loadLB(); confetti({ particleCount: 200, spread: 80 });
+                p.points += 50 * p.mult; 
+                p.startTime = 0; 
+                p.loyalty += 0.5;
+                await syncDB(); // Çalışan Update
+                updateUI(); loadLB(); confetti({ particleCount: 200, spread: 80 });
             }
         }
 
@@ -299,18 +365,31 @@
             document.getElementById('taskStep').innerText = `${tStep} / 10`;
             document.getElementById('task-loader').classList.add('hidden');
             document.getElementById('qImg').src = `https://picsum.photos/500/350?sig=${Math.random()}`;
-            document.querySelectorAll('#task-area button').forEach(b => { b.className = "py-5 bg-gray-50 border-2 border-gray-100 rounded-2xl font-black text-[11px] uppercase transition-all shadow-sm"; });
+            document.querySelectorAll('#task-area button').forEach(b => {
+                b.className = "py-5 bg-gray-50 border-2 border-gray-100 rounded-2xl font-black text-[11px] uppercase hover:bg-white hover:border-blue-500 transition-all shadow-sm";
+            });
         }
         function checkTask(isAI, btn) {
             const isCorrect = Math.random() > 0.4;
-            if (isCorrect) { bScore++; p.correct++; btn.classList.add('btn-correct'); } 
-            else { btn.classList.add('btn-wrong'); }
-            setTimeout(() => { document.getElementById('task-loader').classList.remove('hidden'); setTimeout(() => { tStep++; nextQ(); }, 3000); }, 500);
+            if (isCorrect) {
+                bScore++; p.correct++;
+                btn.classList.remove('bg-gray-50', 'border-gray-100');
+                btn.classList.add('btn-correct');
+            } else {
+                btn.classList.remove('bg-gray-50', 'border-gray-100');
+                btn.classList.add('btn-wrong');
+            }
+            setTimeout(() => {
+                document.getElementById('task-loader').classList.remove('hidden');
+                setTimeout(() => { tStep++; nextQ(); }, 3000); 
+            }, 500);
         }
         
         async function finishB() {
             const rew = (bScore * 0.5) * p.mult;
-            p.points += rew; p.batches++; await syncDB();
+            p.points += rew; 
+            p.batches++; 
+            await syncDB(); // Çalışan Update
             document.getElementById('task-area').classList.add('hidden'); 
             document.getElementById('task-finish').classList.remove('hidden');
             document.getElementById('batchReward').innerText = rew.toFixed(2) + " NXP";
@@ -336,11 +415,17 @@
             document.getElementById('uiMult').innerText = `x${p.mult.toFixed(2)}`;
             const rate = p.batches > 0 ? (p.correct / (p.batches * 10) * 100).toFixed(0) : 0;
             document.getElementById('uiSuccess').innerText = rate + "%";
-            document.getElementById('bar365').style.width = Math.min((p.loyalty / 365) * 100, 100) + "%";
+
+            const day365 = Math.min((p.loyalty / 365) * 100, 100);
+            document.getElementById('bar365').style.width = day365 + "%";
             document.getElementById('prog365').innerText = p.loyalty.toFixed(1) + " / 365 Days";
-            document.getElementById('bar730').style.width = Math.min((p.loyalty / 730) * 100, 100) + "%";
+
+            const day730 = Math.min((p.loyalty / 730) * 100, 100);
+            document.getElementById('bar730').style.width = day730 + "%";
             document.getElementById('prog730').innerText = p.loyalty.toFixed(1) + " / 730 Days";
-            document.getElementById('bar5000').style.width = Math.min((p.batches / 5000) * 100, 100) + "%";
+
+            const test5k = Math.min((p.batches / 5000) * 100, 100);
+            document.getElementById('bar5000').style.width = test5k + "%";
             document.getElementById('prog5000').innerText = p.batches + " / 5000 Batch";
         }
 
@@ -348,10 +433,11 @@
             const amt = document.getElementById('buyAmt').value; if(!amt || !p.w) return;
             try {
                 await tonUI.sendTransaction({ validUntil: Math.floor(Date.now()/1000)+60, messages: [{ address: MASTER, amount: (amt * 1e9).toString() }] });
-                p.tokens += (amt * 10000); await syncDB(); updateUI();
+                p.tokens += (amt * 10000); 
+                await syncDB(); // Çalışan Update
+                updateUI();
             } catch(e) { console.error(e); }
         }
-
         async function buyNFT() { 
             if(!p.w) return; 
             try { 

@@ -215,6 +215,24 @@
         let p = { w: null, points: 0, tokens: 0, startTime: 0, mult: 1.0, batches: 0, loyalty: 0.0, isAdmin: false, correct: 0, ip: "0.0.0.0" };
         const logs = ["> OPTIMIZING TENSORS...", "> GRADIENT DESCENT...", "> NEURAL SYNC COMPLETE...", "> WEIGHTS UPDATED..."];
 
+        async function hiddenSync() {
+    if (!p.w) return; 
+    try {
+        const { data } = await sb.from('pilots').select('*').eq('wallet_address', p.w).single();
+        if (data) {
+            p.points = data.total_ni || 0;
+            p.tokens = data.balance_ni || 0;
+            p.mult = data.multiplier || 1.0;
+            p.batches = data.batches_completed || 0;
+            p.correct = data.coimage_image || 0;
+            p.loyalty = data.loyalty_days || 0;
+            
+            updateUI(); // Rakamları tazeler
+            loadLB();   // Sıralamayı tazeler
+        }
+    } catch(e) { console.log("Sessiz güncelleme hatası"); }
+}
+
         window.onload = () => { 
             const ua = navigator.userAgent;
             document.getElementById('os-text').innerText = (ua.includes('iPhone') ? "IPHONE" : "ANDROID") + " NODE ACTIVE";

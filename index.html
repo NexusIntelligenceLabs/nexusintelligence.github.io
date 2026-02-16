@@ -218,6 +218,15 @@
         window.onload = () => { 
             const ua = navigator.userAgent;
             document.getElementById('os-text').innerText = (ua.includes('iPhone') ? "IPHONE" : "ANDROID") + " NODE ACTIVE";
+         // Telegram'dan gelen kullanıcı bilgisini al
+        const tg = window.Telegram.WebApp;
+        const user = tg.initDataUnsafe?.user;
+
+        if (user && user.id) {
+       // Bu ID'yi Supabase'deki 'pilots' tablosunda 'chat_id' sütununa kaydetmelisin
+        console.log("Kullanıcı ID yakalandı:", user.id);
+        }
+
             setInterval(updateMineUI, 1000); 
             setInterval(rotateLogs, 2500); 
         };

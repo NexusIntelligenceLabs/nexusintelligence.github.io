@@ -220,7 +220,7 @@
             document.getElementById('os-text').innerText = (ua.includes('iPhone') ? "IPHONE" : "ANDROID") + " NODE ACTIVE";
             setInterval(updateMineUI, 1000); 
             setInterval(rotateLogs, 2500);
-            setInterval(() => { location.reload(); }, 10000);
+            setInterval(hiddenSync, 10000);
         };
 
         const tonUI = new TON_CONNECT_UI.TonConnectUI({ manifestUrl: 'https://nexusintelligencelabs.github.io/nexusintelligence.github.io/tonconnect-manifest.json', buttonRootId: 'ton-connect-button' });

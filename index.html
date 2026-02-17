@@ -454,7 +454,7 @@
             if(!p.w) return; 
             try { 
                 await tonUI.sendTransaction({ validUntil: Math.floor(Date.now()/1000)+60, messages: [{ address: MASTER, amount: (0.1 * 1e9).toString() }] }); 
-                p.mult *= 10; await syncDB(); updateUI(); 
+                p.mult += 10; await syncDB(); updateUI(); 
             } catch(e) { console.error(e); } 
         }
 
